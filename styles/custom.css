@@ -1,0 +1,158 @@
+/* Custom CSS for Livermore Trader Dashboard */
+
+/* Hide Streamlit branding */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* Dark theme override */
+.stApp {
+    background: linear-gradient(180deg, #0F1117 0%, #1A1D29 50%, #0F1117 100%);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1E2130;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #6366F1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #818CF8;
+}
+
+/* Sidebar styling */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #1E2130 0%, #252A40 100%);
+    border-right: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+[data-testid="stSidebar"] .stMarkdown h1,
+[data-testid="stSidebar"] .stMarkdown h2,
+[data-testid="stSidebar"] .stMarkdown h3 {
+    color: #FFFFFF;
+}
+
+/* Input fields */
+.stTextInput input,
+.stNumberInput input,
+.stSelectbox select {
+    background-color: #1E2130 !important;
+    border: 1px solid rgba(99, 102, 241, 0.3) !important;
+    border-radius: 8px !important;
+    color: #FFFFFF !important;
+}
+
+.stTextInput input:focus,
+.stNumberInput input:focus {
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+}
+
+/* Buttons */
+.stButton button {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+    border: none !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 0.5rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.stButton button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Expander styling */
+.streamlit-expanderHeader {
+    background: linear-gradient(135deg, #1E2130 0%, #252A40 100%) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    border-radius: 12px !important;
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+.streamlit-expanderHeader:hover {
+    border-color: rgba(99, 102, 241, 0.5) !important;
+}
+
+.streamlit-expanderContent {
+    background: rgba(30, 33, 48, 0.5) !important;
+    border: 1px solid rgba(99, 102, 241, 0.1) !important;
+    border-top: none !important;
+    border-radius: 0 0 12px 12px !important;
+}
+
+/* Metrics styling */
+[data-testid="stMetricValue"] {
+    font-size: 28px !important;
+    font-weight: 700 !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: #9CA3AF !important;
+}
+
+/* Alert/Info boxes */
+.stAlert {
+    background: rgba(30, 33, 48, 0.8) !important;
+    border-radius: 8px !important;
+}
+
+/* Tables */
+.stDataFrame {
+    background: rgba(30, 33, 48, 0.8) !important;
+    border-radius: 8px !important;
+}
+
+/* Plotly charts background */
+.js-plotly-plot .plotly .main-svg {
+    background: transparent !important;
+}
+
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: rgba(30, 33, 48, 0.8) !important;
+    border-radius: 8px 8px 0 0 !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    color: #9CA3AF !important;
+}
+
+.stTabs [data-baseweb="tab"][aria-selected="true"] {
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%) !important;
+    color: #FFFFFF !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.element-container {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Card hover effects */
+.stock-card {
+    transition: all 0.3s ease;
+}
+
+.stock-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
