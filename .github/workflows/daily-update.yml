@@ -9,6 +9,8 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # 必須加入這行才有權限 push 到 repo
     
     steps:
       - name: Checkout repository

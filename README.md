@@ -2,7 +2,7 @@
 
 🎯 基於 Jesse Livermore 交易哲學設計的台股觀察清單與分析工具
 
-![UI Preview](/Users/lin/.gemini/antigravity/brain/7a0baf77-a5d6-478e-ad38-5057c52b7f16/uploaded_image_1767511840110.png)
+![UI Preview](frontend/public/screenshot.png)
 
 ## ✨ 功能特色
 
@@ -21,16 +21,32 @@
 
 ## 🚀 快速開始
 
-### 安裝依賴
+### 1. 安裝依賴
 ```bash
+# 前端
 cd frontend
 npm install
+
+# 後端 (Python API)
+pip install flask flask-cors yfinance pandas numpy
 ```
 
-### 啟動應用
+### 2. 啟動開發環境
+請開啟 **兩個** 終端機視窗分別執行：
+
+**Terminal 1 (前端 React):**
 ```bash
+cd frontend
 npm run dev
 ```
+
+**Terminal 2 (後端 Python server):**
+```bash
+# 在專案根目錄執行
+python backend/server.py
+```
+
+前端會自動透過 Proxy 連線至後端，無需安裝 Vercel CLI。
 
 瀏覽器開啟：**http://localhost:5174**
 
