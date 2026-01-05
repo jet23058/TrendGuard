@@ -42,9 +42,16 @@ TEST_STOCKS = [
     # 金融股
     '2884', '2885', '2887', '2880', '2883',
     # 其他熱門
-    '2002', '1301', '1303', '2912', '9910', '2377', '3017', '2327', '6446', '3533'
+    '2002', '1301', '1303', '2912', '9910', '2377', '3017', '2327', '6446', '3533',
+    # 01/02 使用者提供清單 (用於確保連續性/剔除判定準確)
+    '3455', '3516', '8064', '3481', '3289', '3402', '3580', '5452', '8431', '5351', 
+    '2330', '2337', '2449', '2454', '3006', '3711', '4967', '6531', '8110', '5263', 
+    '1460', '8423', '8438', '5704', '3163', '2025', '3360', '6265', '3624', '3689', 
+    '2460', '2467', '3092', '3308', '4912', '5288', '5289', '2399'
 ]
 
+
+from typing import Optional
 
 def get_stock_name(code: str) -> tuple:
     """取得股票中文名稱與產業別"""
@@ -68,8 +75,10 @@ def get_stock_name(code: str) -> tuple:
 def get_all_tw_targets() -> list:
     """取得要掃描的股票清單"""
     if TEST_MODE:
-        print(f"[測試模式] 僅掃描 {len(TEST_STOCKS)} 檔測試股票...")
-        return TEST_STOCKS
+        # 去除重複的股票代碼
+        unique_stocks = sorted(list(set(TEST_STOCKS)))
+        print(f"[測試模式] 僅掃描 {len(unique_stocks)} 檔測試股票...")
+        return unique_stocks
     
     # 完整掃描模式
     if not HAS_TWSTOCK:
@@ -86,7 +95,7 @@ def get_all_tw_targets() -> list:
     return targets
 
 
-def check_livermore_criteria(code: str) -> dict | None:
+def check_livermore_criteria(code: str) -> Optional[dict]:
     """
     檢查是否符合利弗摩爾突破條件
     
@@ -227,6 +236,43 @@ def check_livermore_criteria(code: str) -> dict | None:
         return None
 
 
+def calculate_changes(previous_data: Optional[dict], current_stocks: list) -> dict:
+    """
+    計算與前一日的差異 (新進、續漲、剔除)
+    """
+    if not previous_data or 'stocks' not in previous_data:
+        return {
+            "new": current_stocks,
+            "continued": [],
+            "removed": []
+        }
+
+    prev_map = {s['ticker']: s for s in previous_data['stocks']}
+    curr_map = {s['ticker']: s for s in current_stocks}
+    
+    prev_tickers = set(prev_map.keys())
+    curr_tickers = set(curr_map.keys())
+    
+    # 新進: 今有昨無
+    new_tickers = curr_tickers - prev_tickers
+    new_list = [curr_map[t] for t in new_tickers]
+    
+    # 續漲: 今有昨有
+    continued_tickers = curr_tickers & prev_tickers
+    continued_list = [curr_map[t] for t in continued_tickers]
+    
+    # 剔除: 今無昨有
+    removed_tickers = prev_tickers - curr_tickers
+    removed_list = [prev_map[t] for t in removed_tickers]
+    
+    return {
+        "new": sorted(new_list, key=lambda x: x['ticker']),
+        "continued": sorted(continued_list, key=lambda x: x['ticker']),
+        "removed": sorted(removed_list, key=lambda x: x['ticker'])
+    }
+
+
+
 def main():
     """主程式"""
     print(f"\n=== 利弗摩爾強勢突破掃描 ===")
@@ -235,7 +281,17 @@ def main():
     
     # 確保目錄存在
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    output_file = OUTPUT_DIR / "daily_recommendations.json"
     
+    # 讀取舊資料 (用於計算差異)
+    previous_data = None
+    if output_file.exists():
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                previous_data = json.load(f)
+        except Exception as e:
+            print(f"無法讀取舊資料: {e}")
+
     # 取得股票清單
     target_list = get_all_tw_targets()
     
@@ -256,14 +312,22 @@ def main():
     # 按連紅天數排序 (越多越強)
     results.sort(key=lambda x: x['recommendation']['priority'], reverse=True)
     
+    # 計算差異
+    changes = calculate_changes(previous_data, results)
+
     # 輸出結果
     if results:
         print("=" * 60)
-        print(f"{'代號':<8} {'名稱':<10} {'現價':>8} {'連紅':>4} {'停損':>8}")
+        print(f"{'代號':<8} {'名稱':<10} {'現價':>8} {'連紅':>4} {'狀態':<6}")
         print("=" * 60)
+        
+        # 建立快速查找 map
+        new_tickers = {s['ticker'] for s in changes['new']}
+        
         for r in results:
-            print(f"{r['ticker']:<8} {r['name']:<10} {r['currentPrice']:>8.2f} {r['consecutiveRed']:>4} {r['stopLoss']:>8.2f}")
-    
+            status = "✨新進" if r['ticker'] in new_tickers else "⟳續漲"
+            print(f"{r['ticker']:<8} {r['name']:<10} {r['currentPrice']:>8.2f} {r['consecutiveRed']:>4} {status:<6}")
+
     # 準備 JSON 輸出
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
@@ -276,8 +340,14 @@ def main():
         "stocks": results,
         "summary": {
             "total": len(results),
-            "buySignals": len(results)
-        }
+            "buySignals": len(results),
+            "counts": {
+                "new": len(changes['new']),
+                "continued": len(changes['continued']),
+                "removed": len(changes['removed'])
+            }
+        },
+        "changes": changes
     }
     
     # 寫入 JSON

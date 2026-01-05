@@ -22,12 +22,14 @@ import {
   FileText,
   LogOut,
   User as UserIcon,
-  RefreshCw
+  RefreshCw,
+  Sparkles,
+  MinusCircle
 } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { auth, db, googleProvider } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, onSnapshot } from 'firebase/firestore';
 import {
   ComposedChart,
   Line,
@@ -196,6 +198,37 @@ const CandleStickShape = (props) => {
   );
 };
 
+const CustomCursor = (props) => {
+  const { x, y, width, height, points } = props;
+
+  // 處理不同類型的游標屬性
+  let centerX;
+  let startY = y || 0;
+  let endY = (y || 0) + (height || 200);
+
+  if (points && points.length > 0) {
+    // 線圖模式：使用 points 的 x
+    centerX = points[0].x;
+  } else if (x !== undefined) {
+    // Bar 圖模式：加上固定偏移量來對齊 K 棒中心
+    centerX = x + 15;
+  } else {
+    return null;
+  }
+
+  return (
+    <line
+      x1={centerX}
+      y1={startY}
+      x2={centerX}
+      y2={endY}
+      stroke="#ffffff"
+      strokeWidth={1.5}
+      strokeOpacity={0.8}
+    />
+  );
+};
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -306,8 +339,11 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
     setImportList(importList.filter((_, i) => i !== index));
   };
 
+  // 新增覆蓋選項
+  const [shouldOverwrite, setShouldOverwrite] = useState(false);
+
   const handleConfirm = () => {
-    onImport(importList);
+    onImport(importList, shouldOverwrite);
     onClose();
   };
 
@@ -400,6 +436,67 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+  // CSV 文字貼上處理
+  const [csvText, setCsvText] = useState('');
+
+  const handleCsvParse = () => {
+    if (!csvText.trim()) return;
+
+    try {
+      const rows = csvText.split('\n').filter(r => r.trim());
+      const parsedItems = [];
+
+      rows.forEach(row => {
+        // 簡單的 CSV 解析，處理引號內的逗號
+        // Regex: 匹配 (引號包圍的內容) 或 (非逗號內容)
+        const regex = /"([^"]+)"|([^,]+)/g;
+        let matches = [];
+        let match;
+        while ((match = regex.exec(row)) !== null) {
+          matches.push(match[1] || match[2]); // match[1] 是引號內容，match[2] 是非引號內容
+        }
+
+        // 確保欄位足夠 (至少 4 欄: 代號, 名稱, 成本, 股數)
+        if (matches.length >= 4) {
+          let ticker = matches[0].trim();
+          // 跳過標題列
+          if (ticker === '股號' || ticker === '股票代號' || ticker === '代號') return;
+
+          let name = matches[1].trim();
+          let costStr = matches[2].trim().replace(/,/g, '');
+          let sharesStr = matches[3].trim().replace(/,/g, '');
+
+          let cost = parseFloat(costStr);
+          let shares = parseInt(sharesStr);
+
+          if (ticker && !isNaN(cost) && !isNaN(shares)) {
+            // 檢查是否已存在
+            parsedItems.push({ ticker, name, cost, shares });
+          }
+        }
+      });
+
+      if (parsedItems.length > 0) {
+        // 如果是 CSV 匯入，預設建議覆蓋
+        setShouldOverwrite(true);
+
+        setImportList(prev => {
+          const existingTickers = new Set(prev.map(p => p.ticker));
+          const newItems = parsedItems.filter(p => !existingTickers.has(p.ticker));
+          return [...prev, ...newItems];
+        });
+        setCsvText('');
+        alert(`成功解析 ${parsedItems.length} 筆資料！\n\n注意：已自動勾選「覆蓋現有庫存」選項。`);
+      } else {
+        alert('解析失敗：未找到有效資料，請檢查格式。');
+      }
+
+    } catch (e) {
+      console.error("CSV Parse Error", e);
+      alert('解析發生錯誤，請檢查文字格式。');
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -451,6 +548,33 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
                 </>
               )}
             </label>
+          </div>
+
+          {/* CSV 匯入區塊 */}
+          <div className="mb-6 p-4 bg-blue-900/20 border border-blue-800/50 rounded-lg">
+            <div className="flex items-center gap-2 mb-3">
+              <FileText className="w-5 h-5 text-blue-400" />
+              <h4 className="text-sm font-bold text-blue-300">CSV / 文字貼上</h4>
+            </div>
+            <p className="text-xs text-gray-400 mb-3">支援格式：股號,名稱,成本,股數 (Excel 複製亦可)</p>
+
+            <textarea
+              value={csvText}
+              onChange={(e) => setCsvText(e.target.value)}
+              placeholder={`範例：\n2330,台積電,500,1000\n0050,元大台灣50,120,500`}
+              className="w-full h-24 bg-gray-900 border border-gray-700 rounded-lg p-3 text-sm text-gray-300 placeholder-gray-600 focus:outline-none focus:border-blue-500 mb-3 font-mono"
+            />
+
+            <button
+              onClick={handleCsvParse}
+              disabled={!csvText.trim()}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${!csvText.trim()
+                ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+            >
+              解析內容
+            </button>
           </div>
 
           {/* 手動輸入區塊標題 */}
@@ -523,11 +647,23 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-xl flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-white">取消</button>
-          <button onClick={handleConfirm} disabled={importList.length === 0} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-2 rounded-md text-sm font-bold flex items-center gap-2">
-            <Check size={16} /> 確認匯入
-          </button>
+        <div className="p-4 border-t border-gray-700 bg-gray-800 rounded-b-xl flex justify-between items-center gap-3">
+          <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer select-none hover:text-white transition-colors">
+            <input
+              type="checkbox"
+              checked={shouldOverwrite}
+              onChange={(e) => setShouldOverwrite(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-600 text-blue-600 focus:ring-blue-500 bg-gray-700"
+            />
+            <span className={shouldOverwrite ? "text-red-400 font-bold" : ""}>覆蓋現有庫存 (將刪除舊資料！)</span>
+          </label>
+
+          <div className="flex gap-3">
+            <button onClick={onClose} className="px-4 py-2 text-sm text-gray-400 hover:text-white">取消</button>
+            <button onClick={handleConfirm} disabled={importList.length === 0} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-700 disabled:text-gray-500 text-white px-6 py-2 rounded-md text-sm font-bold flex items-center gap-2">
+              <Check size={16} /> 確認匯入
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -562,7 +698,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
   }, [currentPrice, portfolioItem]);
 
   return (
-    <div className={`bg-gray-800 rounded-xl border overflow-hidden shadow-lg flex-shrink-0 w-80 ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
+    <div className={`bg-gray-800 rounded-xl border overflow-hidden shadow-lg flex-shrink-0 w-80 h-[450px] flex flex-col ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
       <div className="p-3 border-b border-gray-700 bg-gray-900/50">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
@@ -585,7 +721,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
         {portfolioItem && (
           <div className="flex justify-between items-center text-[10px] bg-gray-800/50 rounded px-2 py-1 mt-1 border border-gray-700/50">
             <div className="text-gray-400 flex gap-2">
-              <span>{portfolioItem.shares} 股</span>
+              <span>{portfolioItem.shares.toLocaleString()} 股</span>
               <span>均價 {portfolioItem.cost}</span>
             </div>
             {unrealizedPL && (
@@ -619,7 +755,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
       </div>
 
       {chartData.length > 0 && (
-        <div className="h-56 w-full px-2 pb-2">
+        <div className="flex-1 w-full px-2 pb-2 min-h-0 relative">
           <ResponsiveContainer width="100%" height="100%">
             <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
               <CartesianGrid stroke="#374151" strokeDasharray="3 3" vertical={false} />
@@ -627,7 +763,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
               <YAxis yAxisId="price" orientation="right" domain={['auto', 'auto']} tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={35} />
               <YAxis yAxisId="volume" orientation="left" domain={[0, maxVolume * 3]} hide />
               {chartMode === 'kd' && <YAxis yAxisId="kd" orientation="left" domain={[0, 100]} hide />}
-              <Tooltip content={<CustomTooltip />} />
+              <Tooltip content={<CustomTooltip />} cursor={<CustomCursor />} />
 
               {/* 成交量柱狀圖 (底層) */}
               <Bar
@@ -739,56 +875,302 @@ const IndustryGroup = ({ sector, stocks, portfolioTickers, portfolio }) => {
   );
 };
 
-// --- 6. 不在推薦但在庫存的股票 ---
-const UnlistedPortfolioSection = ({ portfolio, recommendedTickers }) => {
+// --- 5.1 每日異動摘要組件 ---
+const DailyChangesSection = ({ changes, portfolio }) => {
+  if (!changes) return null;
+
+  // 建立持有股票集合 (Set 查詢較快)
+  const heldTickers = new Set(portfolio.map(p => p.ticker));
+
+  const ChangeCard = ({ title, icon: Icon, colorClass, items, bgColor, badgeColor }) => {
+    // 計算此分類中的庫存數量
+    const heldCount = items.filter(i => heldTickers.has(i.ticker)).length;
+
+    return (
+      <div className={`rounded-xl border border-gray-800 ${bgColor} p-4 flex-1`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Icon className={`w-5 h-5 ${colorClass}`} />
+            <h3 className="text-white font-bold">{title}</h3>
+            {heldCount > 0 && (
+              <span className="text-yellow-400 text-xs font-bold bg-yellow-900/30 px-1.5 py-0.5 rounded border border-yellow-700/30">
+                持有: {heldCount}
+              </span>
+            )}
+          </div>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${badgeColor} text-white font-mono`}>
+            {items.length}
+          </span>
+        </div>
+        <div className="space-y-2 max-h-60 overflow-y-auto custom-scrollbar">
+          {items.length > 0 ? (
+            items.map(item => {
+              const isHeld = heldTickers.has(item.ticker);
+              return (
+                <div key={item.ticker} className={`flex justify-between items-center text-sm p-2 rounded transition-colors ${isHeld ? 'bg-orange-900/40 border border-orange-700/50' : 'bg-gray-900/50 hover:bg-gray-800'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`font-mono font-bold ${colorClass}`}>{item.ticker}</span>
+                    <span className="text-gray-300 truncate max-w-[80px]">{item.name}</span>
+                    {isHeld && (
+                      <span className="px-1.5 py-0.5 bg-orange-600 text-white text-[10px] rounded font-bold">
+                        持
+                      </span>
+                    )}
+                  </div>
+                  <div className="font-mono text-gray-400">
+                    {item.currentPrice || item.close || '-'}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-gray-500 text-xs text-center py-4">無資料</div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <ChangeCard
+        title="✨ 新進榜"
+        icon={Sparkles}
+        colorClass="text-green-400"
+        items={changes.new}
+        bgColor="bg-green-900/20"
+        badgeColor="bg-green-600"
+      />
+      <ChangeCard
+        title="🔥 續漲榜"
+        icon={TrendingUp}
+        colorClass="text-blue-400"
+        items={changes.continued}
+        bgColor="bg-blue-900/20"
+        badgeColor="bg-blue-600"
+      />
+      <ChangeCard
+        title="📉 被剔除"
+        icon={MinusCircle}
+        colorClass="text-gray-400"
+        items={changes.removed}
+        bgColor="bg-gray-900"
+        badgeColor="bg-gray-600"
+      />
+    </div>
+  );
+};
+
+// --- 6. 不在推薦但在庫存的股票 (簡化版：不使用即時 API) ---
+// --- 6. 不在推薦但在庫存的股票 (手動同步 + Firestore 持久化) ---
+const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
+  const [syncedData, setSyncedData] = useState({});
+  const [loading, setLoading] = useState(false);
   const unlistedStocks = portfolio.filter(p => !recommendedTickers.includes(p.ticker));
+
+  // 監聽 Firestore 資料
+  useEffect(() => {
+    if (!user) return;
+
+    // 訂閱 users/{uid}/portfolioAnalysis 集合
+    const unsubscribe = onSnapshot(collection(db, "users", user.uid, "portfolioAnalysis"), (snapshot) => {
+      const data = {};
+      snapshot.forEach(doc => {
+        data[doc.id] = doc.data().data; // 結構: { data: fullJsonData, lastUpdated: ... }
+      });
+      setSyncedData(data);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  const handleSync = async () => {
+    if (!user) {
+      alert("請先登入以使用同步功能");
+      return;
+    }
+    setLoading(true);
+
+    setLoading(true);
+
+    // 改為序列執行 (Sequential) 以避免觸發 API Rate Limit (403 Forbidden)
+    for (const stock of unlistedStocks) {
+      try {
+        const res = await fetch(`/api/stock?ticker=${stock.ticker}`);
+        const text = await res.text(); // 先讀取文字，避免 JSON 解析錯誤
+
+        try {
+          if (!res.ok) {
+            console.error(`API Error Status: ${res.status} ${res.statusText}`);
+            try {
+              const errorJson = JSON.parse(text);
+              throw new Error(errorJson.error || 'API Error');
+            } catch (e) {
+              // If text is not JSON (e.g. empty or HTML), throw original text or status
+              throw new Error(`API Error: ${res.status} ${res.statusText}`);
+            }
+          }
+          const apiData = JSON.parse(text);
+
+          // 寫入 Firestore
+          await setDoc(doc(db, "users", user.uid, "portfolioAnalysis", stock.ticker), {
+            ticker: stock.ticker,
+            data: apiData,
+            lastUpdated: new Date().toISOString()
+          });
+
+          // 成功後稍微暫停，避免太快
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
+        } catch (jsonError) {
+          console.error(`Sync failed for ${stock.ticker}: Not valid JSON`, text.substring(0, 100)); // 只顯示前100字
+          // 如果是 HTML (通常是 404/500), 提示可能是環境問題
+          if (text.trim().startsWith('<')) {
+            throw new Error("API 回傳異常 (HTML)。請確認 Python Server (backend/server.py) 是否已啟動。");
+          }
+          throw jsonError;
+        }
+      } catch (err) {
+        console.error(`Sync failed for ${stock.ticker}`, err);
+        // 累積錯誤最後顯示，或顯示在 console
+        if (err.code === 'permission-denied') {
+          alert("權限不足：請檢查 Firebase Firestore Rules 設定。");
+        }
+        // 若遇到 403，顯示提示並中斷後續
+        if (err.message.includes('403') || err.message.includes('Forbidden')) {
+          alert(`同步失敗 (${stock.ticker})：請求過於頻繁被拒 (403)。請稍後再試。`);
+          break;
+        }
+      }
+    }
+
+    setLoading(false);
+  };
 
   if (unlistedStocks.length === 0) return null;
 
   return (
-    <div className="bg-gray-900/50 border border-gray-700 rounded-xl p-4 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Briefcase className="w-5 h-5 text-yellow-500" />
-        <h3 className="text-lg font-bold text-white">
-          庫存中未符合條件 <span className="text-yellow-400 ml-2">({unlistedStocks.length})</span>
-        </h3>
+    <div className="mb-12">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <Factory className="w-5 h-5 text-gray-400" />
+          <h2 className="text-xl font-bold text-gray-300">庫存追蹤 (未入選)</h2>
+          <span className="bg-gray-800 text-gray-400 px-2 py-0.5 rounded-full text-sm">
+            {unlistedStocks.length}
+          </span>
+        </div>
+        <button
+          onClick={handleSync}
+          disabled={loading || !user}
+          className="flex items-center gap-2 bg-blue-900/40 hover:bg-blue-800 text-blue-300 px-3 py-1.5 rounded-lg text-sm transition-colors disabled:opacity-50 border border-blue-700/50"
+          title={!user ? "請先登入" : "同步最新股價"}
+        >
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+          {loading ? '同步中...' : '同步圖表'}
+        </button>
       </div>
-      <p className="text-sm text-gray-400 mb-4">以下股票在您的庫存中，但不在今日 Breakout 篩選清單內 (因此無技術指標與圖表數據)：</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {unlistedStocks.map(stock => (
-          <div key={stock.ticker} className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden shadow-lg p-3">
-            <div className="flex justify-between items-center mb-2">
-              <div className="flex items-center gap-2">
-                <a
-                  href={`https://tw.stock.yahoo.com/quote/${stock.ticker}.TW/technical-analysis`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-gray-700 hover:bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded transition-colors"
-                >
-                  {stock.ticker} ↗
-                </a>
-                <h3 className="text-sm font-bold text-white truncate">{stock.name}</h3>
-              </div>
-              <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>
-            </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {unlistedStocks.map(stock => {
+          const apiData = syncedData[stock.ticker];
 
-            <div className="bg-gray-900/50 rounded-lg p-2 border border-gray-700/50">
-              <div className="flex justify-between items-center text-xs mb-1">
-                <span className="text-gray-400">成本</span>
-                <span className="font-mono text-white">{stock.cost}</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span className="text-gray-400">股數</span>
-                <span className="font-mono text-white">{stock.shares}</span>
-              </div>
-            </div>
+          // 如果已同步資料，使用完整 StockCardMini 顯示
+          if (apiData) {
+            // 簡易策略建議 logic
+            let advice = "資料已同步，請自行判斷。";
+            let adviceType = "hold";
 
-            <div className="mt-2 text-[10px] text-gray-500 text-center">
-              無今日即時資料
+            const currentPrice = apiData.currentPrice;
+            const cost = stock.cost || 0;
+
+            if (cost > 0) {
+              if (currentPrice < cost * 0.9) {
+                advice = "⚠️ 觸發 10% 停損警告！離場觀望。";
+                adviceType = "sell";
+              } else if (currentPrice > cost * 1.2) {
+                advice = "🚀 獲利 > 20%，可考慮加碼。";
+                adviceType = "buy";
+              } else if (apiData.ma20 && currentPrice < apiData.ma20) {
+                advice = "跌破月線，請留意風險。";
+                adviceType = "neutral";
+              } else if (apiData.ma5 && currentPrice > apiData.ma5 && currentPrice > apiData.ma20) {
+                advice = "均線之上，續抱觀察。";
+                adviceType = "hold";
+              }
+            }
+
+            // 構造相容的物件
+            const fullData = {
+              ...apiData,
+              ticker: stock.ticker,
+              recommendation: {
+                text: advice,
+                type: adviceType
+              }
+            };
+
+            return (
+              <StockCardMini
+                key={stock.ticker}
+                stock={fullData}
+                portfolioItem={stock}
+                isInPortfolio={true}
+              />
+            );
+          }
+
+          // 未同步前顯示簡易卡片
+          return (
+            <div key={stock.ticker} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 flex flex-col justify-between">
+              <div>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <a
+                      href={`https://tw.stock.yahoo.com/quote/${stock.ticker}.TW/technical-analysis`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xl font-bold font-mono text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      {stock.ticker} ↗
+                    </a>
+                    <div className="text-gray-500 text-sm mt-1">{stock.name}</div>
+                  </div>
+                  <span className="bg-yellow-900/30 text-yellow-400 text-xs px-2 py-1 rounded border border-yellow-700/50">
+                    持有中
+                  </span>
+                </div>
+
+                {(stock.cost > 0 && stock.shares > 0) && (
+                  <div className="mt-4 bg-gray-900/50 rounded-lg p-3 space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">成本</span>
+                      <span className="text-gray-300 font-mono">${stock.cost.toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">庫存</span>
+                      <span className="text-gray-300 font-mono">{stock.shares.toLocaleString()}股</span>
+                    </div>
+                    <div className="flex justify-between text-sm pt-1 border-t border-gray-800">
+                      <span className="text-gray-500">市值</span>
+                      <span className="text-gray-400 font-mono">
+                        {(stock.cost * stock.shares).toLocaleString()} (預估)
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
+      </div>
+
+      {/* 提示訊息 */}
+      <div className="mt-4 p-3 bg-blue-900/10 border border-blue-900/30 rounded-lg text-xs text-gray-400 flex items-start gap-2">
+        <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
+        <div className="space-y-1">
+          <p>「同步圖表」使用即時 API 並將資料儲存至雲端，之後重新整理即可直接讀取。</p>
+          <p className="opacity-80">注意：若在本地開發環境 (localhost) 且未啟動 API，同步可能會失敗。</p>
+        </div>
       </div>
     </div>
   );
@@ -933,7 +1315,13 @@ export default function App() {
 
   useEffect(() => { fetchData(); }, []);
 
-  const handleImport = (list) => {
+  const handleImport = (list, shouldOverwrite = false) => {
+    // 如果是覆蓋模式，直接取代
+    if (shouldOverwrite) {
+      setPortfolio(list);
+      return;
+    }
+
     // 合併新匯入的股票，避免重複
     setPortfolio(prev => {
       const existingTickers = new Set(prev.map(p => p.ticker));
@@ -1108,8 +1496,11 @@ export default function App() {
           <p className="text-blue-200 text-sm">📊 <strong>篩選條件：</strong>{data?.criteria?.description}</p>
         </div>
 
+        {/* Daily Changes Summary */}
+        <DailyChangesSection changes={data?.changes} portfolio={portfolio} />
+
         {/* 不在推薦但在庫存的股票 */}
-        <UnlistedPortfolioSection portfolio={portfolio} recommendedTickers={recommendedTickers} />
+        <UnlistedPortfolioSection portfolio={portfolio} recommendedTickers={recommendedTickers} user={user} />
 
         <div className="border-t border-gray-800 my-4"></div>
 
