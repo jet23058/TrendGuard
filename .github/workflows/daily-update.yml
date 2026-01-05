@@ -26,13 +26,17 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install yfinance pandas pytest twstock
+          pip install yfinance pandas pytest twstock lxml requests
       
       - name: Run tests first
         run: |
+          # 測試環境下仍使用 TEST_MODE
+          export TEST_MODE=true
           python -m pytest tests/test_update_daily.py -v
       
-      - name: Run daily update script
+      - name: Run daily update script (Full Scan)
+        env:
+          TEST_MODE: 'false'  # 啟用完整掃描
         run: |
           python scripts/update_daily.py
       

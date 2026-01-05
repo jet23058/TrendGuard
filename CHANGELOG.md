@@ -38,6 +38,8 @@ All notable changes to this project will be documented in this file.
 - [UI] Daily Summary: Added portfolio hold counts to "New", "Continued", and "Removed" sections (frontend/src/App.jsx)
 - [UI] Chart: Improved tooltip alignment with dashed cursor line (frontend/src/App.jsx)
 - [UI] Unlisted Portfolio: Ticker symbols are now clickable links to Yahoo Finance (frontend/src/App.jsx)
+- [Feat] Unified Workflow: Added `npm run dev:all` to start both frontend and backend concurrently (frontend/package.json)
+- [Fix] API 403 Forbidden: Added User-Agent headers to request session in both local and production APIs (backend/server.py, api/stock.py)
 - [Feat] Local Python Server: Added Flask backend for local API development without Vercel CLI (backend/server.py)
 - [Refactor] Unlisted Portfolio: Implemented manual sync with Firestore persistence for on-demand stock data (frontend/src/App.jsx)
 - [Feat] OCR Image upload for auto-filling portfolio from screenshots (frontend/src/App.jsx)

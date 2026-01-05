@@ -3,9 +3,19 @@ from flask_cors import CORS
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import requests
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
+
+def get_stock_history(ticker):
+    """Helper to fetch stock history with User-Agent to avoid 403"""
+    session = requests.Session()
+    # Mimic a real browser to avoid being blocked
+    session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    
+    stock = yf.Ticker(ticker, session=session)
+    return stock, stock.history(period="6mo")
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
@@ -23,14 +33,12 @@ def get_stock():
         else:
             ticker_tw = ticker
 
-        stock = yf.Ticker(ticker_tw)
-        df = stock.history(period="6mo")
+        stock, df = get_stock_history(ticker_tw)
         
         # If .TW empty, try .TWO
         if df.empty and not ticker.endswith('.TWO'):
             ticker_two = ticker.replace('.TW', '') + ".TWO"
-            stock = yf.Ticker(ticker_two)
-            df = stock.history(period="6mo")
+            stock, df = get_stock_history(ticker_two)
             if not df.empty:
                 ticker_tw = ticker_two
         
