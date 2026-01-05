@@ -4,15 +4,30 @@ import json
 import yfinance as yf
 import pandas as pd
 import numpy as np
-import requests
+
+# Try to import twstock for Chinese names
+try:
+    import twstock
+    HAS_TWSTOCK = True
+except ImportError:
+    HAS_TWSTOCK = False
+
+def get_stock_name(ticker_code):
+    """Get Chinese name using twstock if available"""
+    if HAS_TWSTOCK and ticker_code in twstock.codes:
+        return twstock.codes[ticker_code].name
+    
+    # Fallback to yfinance or just return ticker
+    try:
+        t = yf.Ticker(f"{ticker_code}.TW")
+        info = t.info
+        return info.get('longName', info.get('shortName', ticker_code))
+    except:
+        return ticker_code
 
 def get_stock_history(ticker):
-    """Helper to fetch stock history with User-Agent to avoid 403"""
-    session = requests.Session()
-    # Mimic a real browser to avoid being blocked
-    session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-    
-    stock = yf.Ticker(ticker, session=session)
+    """Helper to fetch stock history"""
+    stock = yf.Ticker(ticker)
     return stock, stock.history(period="6mo")
 
 class handler(BaseHTTPRequestHandler):
@@ -27,22 +42,19 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            # Handle .TW suffix
-            if not ticker.endswith('.TW') and not ticker.endswith('.TWO'):
-                # Try finding listing (TW vs TWO) - yfinance usually needs exact suffix
-                # We assume .TW for simplicity if not provided, or search?
-                # For safety, frontend should pass full ticker, or we default to .TW
-                ticker = f"{ticker}.TW"
-            else:
-                ticker = ticker
-
-            stock, df = get_stock_history(ticker)
+            # 1. Determine Suffix (.TW or .TWO)
+            ticker_code = ticker.replace('.TW', '').replace('.TWO', '')
             
+            # Default logic
+            ticker_tw = f"{ticker_code}.TW"
+            stock, df = get_stock_history(ticker_tw)
+            
+            # If empty, try .TWO
             if df.empty:
-                # Try .TWO
-                ticker = ticker.replace('.TW', '.TWO')
-                stock, df = get_stock_history(ticker)
-                # If still empty, logic below will handle it
+                ticker_two = f"{ticker_code}.TWO"
+                stock, df = get_stock_history(ticker_two)
+                if not df.empty:
+                    ticker_tw = ticker_two # Confirm it's .TWO
 
             if df.empty:
                 self.send_response(404)
@@ -50,7 +62,7 @@ class handler(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"error": "Stock not found"}).encode())
                 return
 
-            # Calculate Indicators
+            # 2. Calculate Indicators
             # MA
             df['MA5'] = df['Close'].rolling(window=5).mean()
             df['MA10'] = df['Close'].rolling(window=10).mean()
@@ -66,8 +78,29 @@ class handler(BaseHTTPRequestHandler):
             df['K'] = df['RSV'].ewm(span=3, adjust=False).mean()
             df['D'] = df['K'].ewm(span=3, adjust=False).mean()
 
-            # Prepare OHLC Data for Frontend
-            recent_df = df.tail(60) # Last 60 days
+            # 3. Calculate Livermore Specifics (Stop Loss, Consecutive Red)
+            latest = df.iloc[-1]
+            current_price = float(latest['Close'])
+            
+            # Consecutive Red Calculation
+            consecutive_red = 0
+            for i in range(len(df)-1, -1, -1):
+                c = float(df['Close'].iloc[i])
+                o = float(df['Open'].iloc[i])
+                if c > o:
+                    consecutive_red += 1
+                else:
+                    break
+            
+            # Stop Loss Calculation
+            # Tech stop = Low of breakout day (assumed today for simplicity or recent low)
+            # Money stop = 10%
+            tech_stop = float(latest['Low'])
+            money_stop = current_price * 0.90
+            stop_loss = max(tech_stop, money_stop)
+
+            # 4. Prepare OHLC Data (Recent 60 days)
+            recent_df = df.tail(60)
             ohlc_data = []
             for idx, row in recent_df.iterrows():
                 ohlc_data.append({
@@ -81,26 +114,20 @@ class handler(BaseHTTPRequestHandler):
                     "d": round(float(row['D']), 1) if not pd.isna(row['D']) else 50,
                     "ma5": round(float(row['MA5']), 2) if not pd.isna(row['MA5']) else None,
                     "ma10": round(float(row['MA10']), 2) if not pd.isna(row['MA10']) else None,
-                    "ma20": round(float(row['MA20']), 2) if not pd.isna(row['MA20']) else None
+                    "ma20": round(float(row['MA20']), 2) if not pd.isna(row['MA20']) else None,
+                    "ma60": round(float(row['MA60']), 2) if not pd.isna(row['MA60']) else None
                 })
             
             # Latest Values
-            latest = df.iloc[-1]
             prev = df.iloc[-2]
-            
-            current_price = float(latest['Close'])
             change_pct = ((current_price - float(prev['Close'])) / float(prev['Close'])) * 100
             
-            # Basic Info
-            try:
-                info = stock.info
-                name = info.get('longName', info.get('shortName', ticker))
-            except:
-                name = ticker
+            # 5. Get Name
+            name = get_stock_name(ticker_code)
 
-            # Response
+            # 6. Response
             data = {
-                "ticker": ticker.replace('.TW', '').replace('.TWO', ''), # Strip suffix for display
+                "ticker": ticker_code,
                 "name": name,
                 "currentPrice": round(current_price, 2),
                 "changePct": round(change_pct, 2),
@@ -111,7 +138,9 @@ class handler(BaseHTTPRequestHandler):
                 "ma10": round(float(latest['MA10']), 2) if not pd.isna(latest['MA10']) else None,
                 "ma20": round(float(latest['MA20']), 2) if not pd.isna(latest['MA20']) else None,
                 "ma60": round(float(latest['MA60']), 2) if not pd.isna(latest['MA60']) else None,
-                "volume": int(latest['Volume'])
+                "volume": int(latest['Volume']),
+                "consecutiveRed": consecutive_red,
+                "stopLoss": round(stop_loss, 2)
             }
 
             self.send_response(200)
