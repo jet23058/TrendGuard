@@ -16,9 +16,10 @@ from pathlib import Path
 import yfinance as yf
 import pandas as pd
 
-# 嘗試導入 twstock 取得中文名稱
 try:
     import twstock
+    # 強制更新股票代碼表，確保擁有最新上市櫃清單
+    # twstock.__update_codes() # 注意: 這可能需要下載，若 CI 環境受限可能失敗，視情況啟用
     HAS_TWSTOCK = True
 except ImportError:
     HAS_TWSTOCK = False

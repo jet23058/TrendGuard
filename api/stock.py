@@ -4,6 +4,16 @@ import json
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import requests
+
+def get_stock_history(ticker):
+    """Helper to fetch stock history with User-Agent to avoid 403"""
+    session = requests.Session()
+    # Mimic a real browser to avoid being blocked
+    session.headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    
+    stock = yf.Ticker(ticker, session=session)
+    return stock, stock.history(period="6mo")
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -23,15 +33,16 @@ class handler(BaseHTTPRequestHandler):
                 # We assume .TW for simplicity if not provided, or search?
                 # For safety, frontend should pass full ticker, or we default to .TW
                 ticker = f"{ticker}.TW"
+            else:
+                ticker = ticker
 
-            stock = yf.Ticker(ticker)
-            df = stock.history(period="6mo")
+            stock, df = get_stock_history(ticker)
             
             if df.empty:
                 # Try .TWO
                 ticker = ticker.replace('.TW', '.TWO')
-                stock = yf.Ticker(ticker)
-                df = stock.history(period="6mo")
+                stock, df = get_stock_history(ticker)
+                # If still empty, logic below will handle it
 
             if df.empty:
                 self.send_response(404)
