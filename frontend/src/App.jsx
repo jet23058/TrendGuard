@@ -698,7 +698,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
   }, [currentPrice, portfolioItem]);
 
   return (
-    <div className={`bg-gray-800 rounded-xl border overflow-hidden shadow-lg flex-shrink-0 w-80 h-[450px] flex flex-col ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
+    <div className={`bg-gray-800 rounded-xl border overflow-hidden shadow-lg flex-shrink-0 w-72 h-[450px] flex flex-col ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
       <div className="p-3 border-b border-gray-700 bg-gray-900/50">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
@@ -857,7 +857,7 @@ const IndustryGroup = ({ sector, stocks, portfolioTickers, portfolio }) => {
         <ChevronRight className="w-5 h-5 text-gray-500" />
       </div>
       <div className="overflow-x-auto pb-4 -mx-4 px-4">
-        <div className="flex gap-4" style={{ minWidth: 'max-content' }}>
+        <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
           {sortedStocks.map(stock => {
             const portfolioItem = portfolio.find(p => p.ticker === stock.ticker);
             return (
@@ -1070,98 +1070,103 @@ const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {unlistedStocks.map(stock => {
-          const apiData = syncedData[stock.ticker];
+      <div className="overflow-x-auto pb-4 -mx-4 px-4">
+        <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
+          {unlistedStocks.map(stock => {
+            const apiData = syncedData[stock.ticker];
 
-          // 如果已同步資料，使用完整 StockCardMini 顯示
-          if (apiData) {
-            // 簡易策略建議 logic
-            let advice = "資料已同步，請自行判斷。";
-            let adviceType = "hold";
+            // 如果已同步資料，使用完整 StockCardMini 顯示
+            if (apiData) {
+              // 簡易策略建議 logic
+              let advice = "資料已同步，請自行判斷。";
+              let adviceType = "hold";
 
-            const currentPrice = apiData.currentPrice;
-            const cost = stock.cost || 0;
+              const currentPrice = apiData.currentPrice;
+              const cost = stock.cost || 0;
 
-            if (cost > 0) {
-              if (currentPrice < cost * 0.9) {
-                advice = "⚠️ 觸發 10% 停損警告！離場觀望。";
-                adviceType = "sell";
-              } else if (currentPrice > cost * 1.2) {
-                advice = "🚀 獲利 > 20%，可考慮加碼。";
-                adviceType = "buy";
-              } else if (apiData.ma20 && currentPrice < apiData.ma20) {
-                advice = "跌破月線，請留意風險。";
-                adviceType = "neutral";
-              } else if (apiData.ma5 && currentPrice > apiData.ma5 && currentPrice > apiData.ma20) {
-                advice = "均線之上，續抱觀察。";
-                adviceType = "hold";
+              if (cost > 0) {
+                if (currentPrice < cost * 0.9) {
+                  advice = "⚠️ 觸發 10% 停損警告！離場觀望。";
+                  adviceType = "sell";
+                } else if (currentPrice > cost * 1.2) {
+                  advice = "🚀 獲利 > 20%，可考慮加碼。";
+                  adviceType = "buy";
+                } else if (apiData.ma20 && currentPrice < apiData.ma20) {
+                  advice = "跌破月線，請留意風險。";
+                  adviceType = "neutral";
+                } else if (apiData.ma5 && currentPrice > apiData.ma5 && currentPrice > apiData.ma20) {
+                  advice = "均線之上，續抱觀察。";
+                  adviceType = "hold";
+                }
               }
+
+              // 構造相容的物件
+              const fullData = {
+                ...apiData,
+                ticker: stock.ticker,
+                recommendation: {
+                  text: advice,
+                  type: adviceType
+                }
+              };
+
+              return (
+                <StockCardMini
+                  key={stock.ticker}
+                  stock={fullData}
+                  portfolioItem={stock}
+                  isInPortfolio={true}
+                />
+              );
             }
 
-            // 構造相容的物件
-            const fullData = {
-              ...apiData,
-              ticker: stock.ticker,
-              recommendation: {
-                text: advice,
-                type: adviceType
-              }
-            };
-
+            // 未同步前顯示簡易卡片
             return (
-              <StockCardMini
-                key={stock.ticker}
-                stock={fullData}
-                portfolioItem={stock}
-                isInPortfolio={true}
-              />
-            );
-          }
-
-          // 未同步前顯示簡易卡片
-          return (
-            <div key={stock.ticker} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <a
-                      href={`https://tw.stock.yahoo.com/quote/${stock.ticker}.TW/technical-analysis`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xl font-bold font-mono text-blue-400 hover:text-blue-300 transition-colors"
-                    >
-                      {stock.ticker} ↗
-                    </a>
-                    <div className="text-gray-500 text-sm mt-1">{stock.name}</div>
+              <div key={stock.ticker} className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 flex flex-col justify-between w-72 h-[450px] flex-shrink-0">
+                <div>
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <a
+                        href={`https://tw.stock.yahoo.com/quote/${stock.ticker}.TW/technical-analysis`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xl font-bold font-mono text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        {stock.ticker} ↗
+                      </a>
+                      <div className="text-gray-500 text-sm mt-1">{stock.name}</div>
+                    </div>
+                    <span className="bg-yellow-900/30 text-yellow-400 text-xs px-2 py-1 rounded border border-yellow-700/50">
+                      持有中
+                    </span>
                   </div>
-                  <span className="bg-yellow-900/30 text-yellow-400 text-xs px-2 py-1 rounded border border-yellow-700/50">
-                    持有中
-                  </span>
+
+                  {(stock.cost > 0 && stock.shares > 0) && (
+                    <div className="mt-4 bg-gray-900/50 rounded-lg p-3 space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">成本</span>
+                        <span className="text-gray-300 font-mono">${stock.cost.toLocaleString()}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-500">庫存</span>
+                        <span className="text-gray-300 font-mono">{stock.shares.toLocaleString()}股</span>
+                      </div>
+                      <div className="flex justify-between text-sm pt-1 border-t border-gray-800">
+                        <span className="text-gray-500">市值</span>
+                        <span className="text-gray-400 font-mono">
+                          {(stock.cost * stock.shares).toLocaleString()} (預估)
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                {(stock.cost > 0 && stock.shares > 0) && (
-                  <div className="mt-4 bg-gray-900/50 rounded-lg p-3 space-y-1">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">成本</span>
-                      <span className="text-gray-300 font-mono">${stock.cost.toLocaleString()}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-500">庫存</span>
-                      <span className="text-gray-300 font-mono">{stock.shares.toLocaleString()}股</span>
-                    </div>
-                    <div className="flex justify-between text-sm pt-1 border-t border-gray-800">
-                      <span className="text-gray-500">市值</span>
-                      <span className="text-gray-400 font-mono">
-                        {(stock.cost * stock.shares).toLocaleString()} (預估)
-                      </span>
-                    </div>
-                  </div>
-                )}
+                <div className="text-center text-gray-500 text-xs mt-auto">
+                  尚未同步資料
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* 提示訊息 */}
