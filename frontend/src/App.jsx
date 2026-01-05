@@ -996,7 +996,8 @@ const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
     // 改為序列執行 (Sequential) 以避免觸發 API Rate Limit (403 Forbidden)
     for (const stock of unlistedStocks) {
       try {
-        const res = await fetch(`/api/stock?ticker=${stock.ticker}`);
+        // Add cache-busting timestamp
+        const res = await fetch(`/api/stock?ticker=${stock.ticker}&t=${new Date().getTime()}`);
         const text = await res.text(); // 先讀取文字，避免 JSON 解析錯誤
 
         try {
