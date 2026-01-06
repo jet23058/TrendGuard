@@ -162,7 +162,7 @@ def check_livermore_criteria(code: str) -> Optional[dict]:
         if not (is_breakout and is_above_all_ma and is_two_red_k):
             return None
         
-        # 計算停損點
+        # 計算支撐點
         tech_stop = float(today['Low'])
         money_stop = current_price * 0.90
         stop_loss = max(tech_stop, money_stop)

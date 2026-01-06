@@ -21,7 +21,7 @@
       "volume": 83472316,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.0",
+        "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 60.0",
         "priority": 98
       },
       "ohlc": [
@@ -461,7 +461,7 @@
       "volume": 48547197,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1645.0",
+        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1645.0",
         "priority": 97
       },
       "ohlc": [
@@ -901,7 +901,7 @@
       "volume": 1041613259,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 20.1",
+        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 20.1",
         "priority": 97
       },
       "ohlc": [
@@ -1341,7 +1341,7 @@
       "volume": 322323673,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 14.3",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 14.3",
         "priority": 96
       },
       "ohlc": [
@@ -1781,7 +1781,7 @@
       "volume": 28521975,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 15.9",
         "priority": 96
       },
       "ohlc": [
@@ -2221,7 +2221,7 @@
       "volume": 41188156,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.4",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 9.4",
         "priority": 96
       },
       "ohlc": [
@@ -2661,7 +2661,7 @@
       "volume": 2805667,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 32.7",
+        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 32.7",
         "priority": 95
       },
       "ohlc": [
@@ -3101,7 +3101,7 @@
       "volume": 139209943,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.0",
+        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 67.0",
         "priority": 95
       },
       "ohlc": [
@@ -3541,7 +3541,7 @@
       "volume": 1143214,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.1",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 26.1",
         "priority": 94
       },
       "ohlc": [
@@ -3981,7 +3981,7 @@
       "volume": 335556,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.3",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 26.3",
         "priority": 94
       },
       "ohlc": [
@@ -4421,7 +4421,7 @@
       "volume": 25135676,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 58.5",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 58.5",
         "priority": 94
       },
       "ohlc": [
@@ -4861,7 +4861,7 @@
       "volume": 490410,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 70.2",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 70.2",
         "priority": 94
       },
       "ohlc": [
@@ -5301,7 +5301,7 @@
       "volume": 5368468,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 974.0",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 974.0",
         "priority": 94
       },
       "ohlc": [
@@ -5741,7 +5741,7 @@
       "volume": 5010359,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2340.0",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 2340.0",
         "priority": 94
       },
       "ohlc": [
@@ -6181,7 +6181,7 @@
       "volume": 515252,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 16.5",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 16.5",
         "priority": 93
       },
       "ohlc": [
@@ -6621,7 +6621,7 @@
       "volume": 9520887,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 404.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 404.0",
         "priority": 93
       },
       "ohlc": [
@@ -7061,7 +7061,7 @@
       "volume": 8465697,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 52.8",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 52.8",
         "priority": 93
       },
       "ohlc": [
@@ -7501,7 +7501,7 @@
       "volume": 9182258,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 38.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 38.0",
         "priority": 93
       },
       "ohlc": [
@@ -7941,7 +7941,7 @@
       "volume": 4403604,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 417.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 417.0",
         "priority": 93
       },
       "ohlc": [
@@ -8381,7 +8381,7 @@
       "volume": 216740886,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 34.2",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 34.2",
         "priority": 93
       },
       "ohlc": [
@@ -8821,7 +8821,7 @@
       "volume": 83724366,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.5",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 46.5",
         "priority": 93
       },
       "ohlc": [
@@ -9261,7 +9261,7 @@
       "volume": 1670938,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.7",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 29.7",
         "priority": 93
       },
       "ohlc": [
@@ -9701,7 +9701,7 @@
       "volume": 3024527,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 152.5",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 152.5",
         "priority": 93
       },
       "ohlc": [
@@ -10141,7 +10141,7 @@
       "volume": 402987766,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 95.0",
         "priority": 93
       },
       "ohlc": [
@@ -10581,7 +10581,7 @@
       "volume": 4653622,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 819.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 819.0",
         "priority": 93
       },
       "ohlc": [
@@ -11021,7 +11021,7 @@
       "volume": 15947032,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.1",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 67.1",
         "priority": 93
       },
       "ohlc": [
@@ -11461,7 +11461,7 @@
       "volume": 15171646,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 40.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 40.0",
         "priority": 93
       },
       "ohlc": [
@@ -11901,7 +11901,7 @@
       "volume": 8447248,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 104.0",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 104.0",
         "priority": 93
       },
       "ohlc": [
@@ -12341,7 +12341,7 @@
       "volume": 38438238,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 197.5",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 197.5",
         "priority": 93
       },
       "ohlc": [
@@ -12781,7 +12781,7 @@
       "volume": 1881412,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 65.2",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 65.2",
         "priority": 93
       },
       "ohlc": [
@@ -13221,7 +13221,7 @@
       "volume": 7565293,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.0",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 28.0",
         "priority": 92
       },
       "ohlc": [
@@ -13661,7 +13661,7 @@
       "volume": 990402,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.1",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 22.1",
         "priority": 92
       },
       "ohlc": [
@@ -14101,7 +14101,7 @@
       "volume": 1066807,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 18.0",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 18.0",
         "priority": 92
       },
       "ohlc": [
@@ -14541,7 +14541,7 @@
       "volume": 1435368,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 15.9",
         "priority": 92
       },
       "ohlc": [
@@ -14981,7 +14981,7 @@
       "volume": 14704548,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 422.5",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 422.5",
         "priority": 92
       },
       "ohlc": [
@@ -15421,7 +15421,7 @@
       "volume": 59708,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.7",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 9.7",
         "priority": 92
       },
       "ohlc": [
@@ -15861,7 +15861,7 @@
       "volume": 1055300,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 385.0",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 385.0",
         "priority": 92
       },
       "ohlc": [
@@ -16301,7 +16301,7 @@
       "volume": 6789117,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1185.0",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1185.0",
         "priority": 92
       },
       "ohlc": [
@@ -16741,7 +16741,7 @@
       "volume": 2965487,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 349.0",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 349.0",
         "priority": 92
       },
       "ohlc": [
@@ -17181,7 +17181,7 @@
       "volume": 22071,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 31.2",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 31.2",
         "priority": 92
       },
       "ohlc": [
@@ -17621,7 +17621,7 @@
       "volume": 7054508,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 283.5",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 283.5",
         "priority": 92
       },
       "ohlc": [
@@ -18061,7 +18061,7 @@
       "volume": 12793629,
       "signal": {
         "type": "breakout",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 12.6",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 12.6",
         "priority": 92
       },
       "ohlc": [
@@ -18513,7 +18513,7 @@
         "volume": 216740886,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 34.2",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 34.2",
           "priority": 93
         },
         "ohlc": [
@@ -18953,7 +18953,7 @@
         "volume": 6789117,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1185.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1185.0",
           "priority": 92
         },
         "ohlc": [
@@ -19393,7 +19393,7 @@
         "volume": 4653622,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 819.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 819.0",
           "priority": 93
         },
         "ohlc": [
@@ -19833,7 +19833,7 @@
         "volume": 5368468,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 974.0",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 974.0",
           "priority": 94
         },
         "ohlc": [
@@ -20273,7 +20273,7 @@
         "volume": 15171646,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 40.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 40.0",
           "priority": 93
         },
         "ohlc": [
@@ -20713,7 +20713,7 @@
         "volume": 5010359,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2340.0",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 2340.0",
           "priority": 94
         },
         "ohlc": [
@@ -21153,7 +21153,7 @@
         "volume": 8447248,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 104.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 104.0",
           "priority": 93
         },
         "ohlc": [
@@ -21593,7 +21593,7 @@
         "volume": 2965487,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 349.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 349.0",
           "priority": 92
         },
         "ohlc": [
@@ -22033,7 +22033,7 @@
         "volume": 7565293,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 28.0",
           "priority": 92
         },
         "ohlc": [
@@ -22473,7 +22473,7 @@
         "volume": 990402,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.1",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 22.1",
           "priority": 92
         },
         "ohlc": [
@@ -22913,7 +22913,7 @@
         "volume": 1066807,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 18.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 18.0",
           "priority": 92
         },
         "ohlc": [
@@ -23353,7 +23353,7 @@
         "volume": 22071,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 31.2",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 31.2",
           "priority": 92
         },
         "ohlc": [
@@ -23793,7 +23793,7 @@
         "volume": 1435368,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 15.9",
           "priority": 92
         },
         "ohlc": [
@@ -24233,7 +24233,7 @@
         "volume": 7054508,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 283.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 283.5",
           "priority": 92
         },
         "ohlc": [
@@ -24673,7 +24673,7 @@
         "volume": 14704548,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 422.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 422.5",
           "priority": 92
         },
         "ohlc": [
@@ -25113,7 +25113,7 @@
         "volume": 59708,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.7",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 9.7",
           "priority": 92
         },
         "ohlc": [
@@ -25553,7 +25553,7 @@
         "volume": 1055300,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 385.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 385.0",
           "priority": 92
         },
         "ohlc": [
@@ -25993,7 +25993,7 @@
         "volume": 25135676,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 58.5",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 58.5",
           "priority": 94
         },
         "ohlc": [
@@ -26433,7 +26433,7 @@
         "volume": 12793629,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 12.6",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 12.6",
           "priority": 92
         },
         "ohlc": [
@@ -26873,7 +26873,7 @@
         "volume": 9182258,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 38.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 38.0",
           "priority": 93
         },
         "ohlc": [
@@ -27313,7 +27313,7 @@
         "volume": 490410,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 70.2",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 70.2",
           "priority": 94
         },
         "ohlc": [
@@ -27755,7 +27755,7 @@
         "volume": 4403604,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 417.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 417.0",
           "priority": 93
         },
         "ohlc": [
@@ -28195,7 +28195,7 @@
         "volume": 83724366,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 46.5",
           "priority": 93
         },
         "ohlc": [
@@ -28635,7 +28635,7 @@
         "volume": 1670938,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.7",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 29.7",
           "priority": 93
         },
         "ohlc": [
@@ -29075,7 +29075,7 @@
         "volume": 515252,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 16.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 16.5",
           "priority": 93
         },
         "ohlc": [
@@ -29515,7 +29515,7 @@
         "volume": 3024527,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 152.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 152.5",
           "priority": 93
         },
         "ohlc": [
@@ -29955,7 +29955,7 @@
         "volume": 48547197,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1645.0",
+          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1645.0",
           "priority": 97
         },
         "ohlc": [
@@ -30395,7 +30395,7 @@
         "volume": 402987766,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 95.0",
           "priority": 93
         },
         "ohlc": [
@@ -30835,7 +30835,7 @@
         "volume": 322323673,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 14.3",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 14.3",
           "priority": 96
         },
         "ohlc": [
@@ -31275,7 +31275,7 @@
         "volume": 15947032,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.1",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 67.1",
           "priority": 93
         },
         "ohlc": [
@@ -31715,7 +31715,7 @@
         "volume": 28521975,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 15.9",
           "priority": 96
         },
         "ohlc": [
@@ -32155,7 +32155,7 @@
         "volume": 1041613259,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 20.1",
+          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 20.1",
           "priority": 97
         },
         "ohlc": [
@@ -32595,7 +32595,7 @@
         "volume": 9520887,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 404.0",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 404.0",
           "priority": 93
         },
         "ohlc": [
@@ -33035,7 +33035,7 @@
         "volume": 1143214,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.1",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 26.1",
           "priority": 94
         },
         "ohlc": [
@@ -33475,7 +33475,7 @@
         "volume": 2805667,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 32.7",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 32.7",
           "priority": 95
         },
         "ohlc": [
@@ -33915,7 +33915,7 @@
         "volume": 83472316,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.0",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 60.0",
           "priority": 98
         },
         "ohlc": [
@@ -34355,7 +34355,7 @@
         "volume": 335556,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.3",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 26.3",
           "priority": 94
         },
         "ohlc": [
@@ -34795,7 +34795,7 @@
         "volume": 41188156,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.4",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 9.4",
           "priority": 96
         },
         "ohlc": [
@@ -35235,7 +35235,7 @@
         "volume": 8465697,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 52.8",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 52.8",
           "priority": 93
         },
         "ohlc": [
@@ -35675,7 +35675,7 @@
         "volume": 38438238,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 197.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 197.5",
           "priority": 93
         },
         "ohlc": [
@@ -36115,7 +36115,7 @@
         "volume": 1881412,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 65.2",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 65.2",
           "priority": 93
         },
         "ohlc": [
@@ -36555,7 +36555,7 @@
         "volume": 139209943,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.0",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 67.0",
           "priority": 95
         },
         "ohlc": [
@@ -36997,7 +36997,7 @@
         "volume": 507131,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 10.4",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 10.4",
           "priority": 92
         },
         "ohlc": [
@@ -37437,7 +37437,7 @@
         "volume": 12102937,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 131.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 131.5",
           "priority": 92
         },
         "ohlc": [
@@ -37877,7 +37877,7 @@
         "volume": 14391630,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1495.0",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1495.0",
           "priority": 95
         },
         "ohlc": [
@@ -38317,7 +38317,7 @@
         "volume": 3010631,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.7",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 22.7",
           "priority": 93
         },
         "ohlc": [
@@ -38757,7 +38757,7 @@
         "volume": 2875666,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.4",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 15.4",
           "priority": 92
         },
         "ohlc": [
@@ -39197,7 +39197,7 @@
         "volume": 4869085,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 23.7",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 23.7",
           "priority": 92
         },
         "ohlc": [
@@ -39637,7 +39637,7 @@
         "volume": 6865240,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 267.5",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 267.5",
           "priority": 95
         },
         "ohlc": [
@@ -40077,7 +40077,7 @@
         "volume": 8937333,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 60.5",
           "priority": 92
         },
         "ohlc": [
@@ -40517,7 +40517,7 @@
         "volume": 5217790,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 53.6",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 53.6",
           "priority": 92
         },
         "ohlc": [
@@ -40957,7 +40957,7 @@
         "volume": 1795285,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 21.1",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 21.1",
           "priority": 93
         },
         "ohlc": [
@@ -41397,7 +41397,7 @@
         "volume": 2716013,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1655.0",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 1655.0",
           "priority": 94
         },
         "ohlc": [
@@ -41837,7 +41837,7 @@
         "volume": 11100011,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 39.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 39.0",
           "priority": 92
         },
         "ohlc": [
@@ -42277,7 +42277,7 @@
         "volume": 3520346,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 705.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 705.0",
           "priority": 92
         },
         "ohlc": [
@@ -42717,7 +42717,7 @@
         "volume": 12545710,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 53.1",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 53.1",
           "priority": 92
         },
         "ohlc": [
@@ -43157,7 +43157,7 @@
         "volume": 2780078,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 123.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 123.5",
           "priority": 93
         },
         "ohlc": [
@@ -43597,7 +43597,7 @@
         "volume": 2138053,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 105.5",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 105.5",
           "priority": 95
         },
         "ohlc": [
@@ -44037,7 +44037,7 @@
         "volume": 31448,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 72.5",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 72.5",
           "priority": 98
         },
         "ohlc": [
@@ -44477,7 +44477,7 @@
         "volume": 1772600,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 109.5",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 109.5",
           "priority": 94
         },
         "ohlc": [
@@ -44917,7 +44917,7 @@
         "volume": 16277555,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.3",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 95.3",
           "priority": 93
         },
         "ohlc": [
@@ -45357,7 +45357,7 @@
         "volume": 1422462,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 35.7",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 35.7",
           "priority": 95
         },
         "ohlc": [
@@ -45797,7 +45797,7 @@
         "volume": 366213,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 28.5",
           "priority": 92
         },
         "ohlc": [
@@ -46237,7 +46237,7 @@
         "volume": 6175807,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 51.6",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 51.6",
           "priority": 93
         },
         "ohlc": [
@@ -46677,7 +46677,7 @@
         "volume": 8353501,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 379.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 379.0",
           "priority": 92
         },
         "ohlc": [
@@ -47117,7 +47117,7 @@
         "volume": 15942226,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 112.5",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 112.5",
           "priority": 93
         },
         "ohlc": [
@@ -47557,7 +47557,7 @@
         "volume": 2865951,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.3",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 22.3",
           "priority": 93
         },
         "ohlc": [
@@ -47997,7 +47997,7 @@
         "volume": 11915709,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 102.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 102.5",
           "priority": 92
         },
         "ohlc": [
@@ -48437,7 +48437,7 @@
         "volume": 3187203,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.9",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 29.9",
           "priority": 93
         },
         "ohlc": [
@@ -48877,7 +48877,7 @@
         "volume": 8465651,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 88.5",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 88.5",
           "priority": 92
         },
         "ohlc": [
@@ -49317,7 +49317,7 @@
         "volume": 1257161,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2930.0",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 2930.0",
           "priority": 92
         },
         "ohlc": [
@@ -49757,7 +49757,7 @@
         "volume": 8529994,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 469.5",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 469.5",
           "priority": 94
         },
         "ohlc": [
@@ -50197,7 +50197,7 @@
         "volume": 1150974,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 670.0",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 670.0",
           "priority": 95
         },
         "ohlc": [
@@ -50637,7 +50637,7 @@
         "volume": 45748971,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 185.0",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 185.0",
           "priority": 94
         },
         "ohlc": [
@@ -51077,7 +51077,7 @@
         "volume": 13855423,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 74.5",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 74.5",
           "priority": 94
         },
         "ohlc": [
@@ -51517,7 +51517,7 @@
         "volume": 9177227,
         "signal": {
           "type": "breakout",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.1",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。支撐設 46.1",
           "priority": 98
         },
         "ohlc": [
