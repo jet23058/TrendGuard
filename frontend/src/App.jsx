@@ -710,7 +710,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
             {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
           </div>
           <div className={`text-right ${isUp ? 'text-red-400' : 'text-green-400'}`}>
-            <div className="text-lg font-bold font-mono">{currentPrice?.toFixed(0)}</div>
+            <div className="text-lg font-bold font-mono">{currentPrice?.toFixed(2)}</div>
             <div className="text-xs font-medium flex items-center justify-end gap-1">
               {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
               {changePct > 0 ? '+' : ''}{changePct?.toFixed(2)}%
@@ -1376,10 +1376,14 @@ export default function App() {
 
   const scanTime = useMemo(() => {
     if (!data?.updatedAt) return 'N/A';
-    return new Date(data.updatedAt).toLocaleString('zh-TW', {
+    // GitHub Actions 產生的時間是 UTC (無後綴)，需視為 UTC 處理
+    const dateStr = data.updatedAt.endsWith('Z') ? data.updatedAt : `${data.updatedAt}Z`;
+
+    return new Date(dateStr).toLocaleString('zh-TW', {
       year: 'numeric', month: '2-digit', day: '2-digit',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
-      timeZoneName: 'short'
+      timeZoneName: 'short',
+      timeZone: 'Asia/Taipei'
     });
   }, [data]);
 
@@ -1419,16 +1423,16 @@ export default function App() {
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-xl font-bold tracking-tight text-white">利弗摩爾台股戰情室</h1>
-                
+
                 {/* 懸浮說明 Tooltip */}
                 <div className="group relative flex items-center">
                   <Info className="w-5 h-5 text-gray-400 hover:text-yellow-400 cursor-help transition-colors" />
-                  
+
                   {/* Tooltip 本體 */}
                   <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-80 p-4 bg-[#FEFCE8] border-2 border-yellow-400 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform translate-y-2 group-hover:translate-y-0">
                     {/* 小三角形箭頭 */}
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FEFCE8] border-t-2 border-l-2 border-yellow-400 transform rotate-45"></div>
-                    
+
                     {/* 內容 */}
                     <div className="relative z-10 text-left">
                       <h4 className="text-[#854D0E] font-bold text-base mb-2 border-b border-yellow-300 pb-2">
