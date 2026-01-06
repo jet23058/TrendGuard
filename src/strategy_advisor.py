@@ -37,10 +37,10 @@ def check_risk_status(
     
     price_change_pct = (current_price - cost) / cost
     
-    # 1. 硬性停損
+    # 1. 硬性支撐
     if price_change_pct <= -0.10:
         return {
-            "text": "⚠️ 跌幅達 10%，已觸發策略預設之停損門檻。",
+            "text": "⚠️ 跌幅達 10%，已觸發策略預設之支撐門檻。",
             "type": "danger",
             "priority": 100,
             "action": "STOP_LOSS_ALERT"

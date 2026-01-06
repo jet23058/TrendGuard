@@ -6,7 +6,7 @@ Configuration settings for Livermore Trader Dashboard
 COLORS = {
     "primary": "#6366F1",       # Indigo
     "success": "#00D4AA",       # Green (上漲/新進場)
-    "danger": "#FF6B6B",        # Red (下跌/停損)
+    "danger": "#FF6B6B",        # Red (下跌/支撐)
     "warning": "#FFD93D",       # Yellow (警戒/過熱)
     "neutral": "#6C7A89",       # Gray (中性/續抱)
     "background": "#0F1117",    # Dark background
@@ -35,7 +35,7 @@ KD_PARAMS = {
 
 # Trading Rules (Livermore)
 TRADING_RULES = {
-    "stop_loss_pct": 0.10,      # 10% 停損
+    "stop_loss_pct": 0.10,      # 10% 支撐
     "profit_target_pct": 0.20,  # 20% 獲利目標
     "volume_threshold": 0.5,    # 量能閾值 (5日均量的 50%)
     "price_change_threshold": 0.02,  # 價格變動閾值

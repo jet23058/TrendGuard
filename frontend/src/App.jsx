@@ -750,7 +750,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
           </div>
         </button>
         <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-xs text-gray-400">停損</div>
+          <div className="text-xs text-gray-400">支撐</div>
           <div className="font-mono text-sm font-bold text-white">{stopLoss?.toFixed(1)}</div>
         </div>
       </div>
@@ -1086,7 +1086,7 @@ const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user }) => {
 
               if (cost > 0) {
                 if (currentPrice < cost * 0.9) {
-                  analysisText = "⚠️ 觸發策略設定之 10% 停損門檻。";
+                  analysisText = "⚠️ 觸發策略設定之 10% 支撐門檻。";
                   analysisType = "danger";
                 } else if (currentPrice > cost * 1.2) {
                   analysisText = "🚀 帳面獲利超過 20%，趨勢強勁。";
@@ -1370,7 +1370,7 @@ export default function App() {
   const stats = useMemo(() => ({
     total: data?.stocks?.length || 0,
     industries: Object.keys(groupedByIndustry).length,
-    buySignals: data?.stocks?.filter(s => s.analysis_result?.type === 'bullish_breakout').length || 0,
+    buySignals: data?.stocks?.filter(s => s.signal?.type === 'breakout').length || 0,
     portfolioCount: portfolio.length
   }), [data, groupedByIndustry, portfolio]);
 
@@ -1444,7 +1444,7 @@ export default function App() {
                       <ul className="text-[#713F12] text-xs space-y-1.5 list-disc pl-4">
                         <li><strong className="text-[#854D0E]">順勢而為：</strong>不猜頭摸底，沿著最小阻力線操作。</li>
                         <li><strong className="text-[#854D0E]">關鍵點 (Pivot)：</strong>耐心等待股價突破關鍵價位再進場。</li>
-                        <li><strong className="text-[#854D0E]">資金管理：</strong>虧損絕不超過本金 10%，嚴格執行停損。</li>
+                        <li><strong className="text-[#854D0E]">資金管理：</strong>虧損絕不超過本金 10%，嚴格執行。</li>
                         <li><strong className="text-[#854D0E]">試單與加碼：</strong>分批進場，只有在賺錢時才加碼。</li>
                       </ul>
                     </div>
