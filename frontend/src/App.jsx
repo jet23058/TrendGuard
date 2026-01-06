@@ -962,12 +962,12 @@ const DailyChangesSection = ({ changes, portfolio }) => {
   );
 };
 
-// --- 6. 不在推薦但在庫存的股票 (簡化版：不使用即時 API) ---
-// --- 6. 不在推薦但在庫存的股票 (手動同步 + Firestore 持久化) ---
-const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
+// --- 6. 不在掃描結果但在庫存的股票 (簡化版：不使用即時 API) ---
+// --- 6. 不在掃描結果但在庫存的股票 (手動同步 + Firestore 持久化) ---
+const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user }) => {
   const [syncedData, setSyncedData] = useState({});
   const [loading, setLoading] = useState(false);
-  const unlistedStocks = portfolio.filter(p => !recommendedTickers.includes(p.ticker));
+  const unlistedStocks = portfolio.filter(p => !scanResultTickers.includes(p.ticker));
 
   // 監聽 Firestore 資料
   useEffect(() => {
@@ -1077,26 +1077,26 @@ const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
 
             // 如果已同步資料，使用完整 StockCardMini 顯示
             if (apiData) {
-              // 簡易策略建議 logic
-              let advice = "資料已同步，請自行判斷。";
-              let adviceType = "hold";
+              // 簡易策略分析 logic (僅分析事實，非投資建議)
+              let analysisText = "資料已同步，尚未出現明確訊號。";
+              let analysisType = "neutral";
 
               const currentPrice = apiData.currentPrice;
               const cost = stock.cost || 0;
 
               if (cost > 0) {
                 if (currentPrice < cost * 0.9) {
-                  advice = "⚠️ 觸發 10% 停損警告！離場觀望。";
-                  adviceType = "sell";
+                  analysisText = "⚠️ 觸發策略設定之 10% 停損門檻。";
+                  analysisType = "danger";
                 } else if (currentPrice > cost * 1.2) {
-                  advice = "🚀 獲利 > 20%，可考慮加碼。";
-                  adviceType = "buy";
+                  analysisText = "🚀 帳面獲利超過 20%，趨勢強勁。";
+                  analysisType = "success";
                 } else if (apiData.ma20 && currentPrice < apiData.ma20) {
-                  advice = "跌破月線，請留意風險。";
-                  adviceType = "neutral";
+                  analysisText = "股價跌破 20 日均線。";
+                  analysisType = "warning";
                 } else if (apiData.ma5 && currentPrice > apiData.ma5 && currentPrice > apiData.ma20) {
-                  advice = "均線之上，續抱觀察。";
-                  adviceType = "hold";
+                  analysisText = "股價位於均線之上。";
+                  analysisType = "info";
                 }
               }
 
@@ -1104,9 +1104,9 @@ const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
               const fullData = {
                 ...apiData,
                 ticker: stock.ticker,
-                recommendation: {
-                  text: advice,
-                  type: adviceType
+                analysis_result: {
+                  text: analysisText,
+                  type: analysisType
                 }
               };
 
@@ -1308,7 +1308,7 @@ export default function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/data/daily_recommendations.json');
+      const response = await fetch('/data/daily_scan_results.json');
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       setData(await response.json());
     } catch (e) {
@@ -1342,7 +1342,7 @@ export default function App() {
   };
 
   const portfolioTickers = useMemo(() => portfolio.map(p => p.ticker), [portfolio]);
-  const recommendedTickers = useMemo(() => data?.stocks?.map(s => s.ticker) || [], [data]);
+  const scanResultTickers = useMemo(() => data?.stocks?.map(s => s.ticker) || [], [data]);
 
   // 按產業分組，庫存所在產業優先
   const groupedByIndustry = useMemo(() => {
@@ -1370,7 +1370,7 @@ export default function App() {
   const stats = useMemo(() => ({
     total: data?.stocks?.length || 0,
     industries: Object.keys(groupedByIndustry).length,
-    buySignals: data?.stocks?.filter(s => s.recommendation?.type === 'buy').length || 0,
+    buySignals: data?.stocks?.filter(s => s.analysis_result?.type === 'bullish_breakout').length || 0,
     portfolioCount: portfolio.length
   }), [data, groupedByIndustry, portfolio]);
 
@@ -1392,7 +1392,7 @@ export default function App() {
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">載入每日推薦資料中...</p>
+          <p className="text-gray-400">載入每日掃描結果中...</p>
         </div>
       </div>
     );
@@ -1538,8 +1538,8 @@ export default function App() {
         {/* Daily Changes Summary */}
         <DailyChangesSection changes={data?.changes} portfolio={portfolio} />
 
-        {/* 不在推薦但在庫存的股票 */}
-        <UnlistedPortfolioSection portfolio={portfolio} recommendedTickers={recommendedTickers} user={user} />
+        {/* 不在掃描結果但在庫存的股票 */}
+        <UnlistedPortfolioSection portfolio={portfolio} scanResultTickers={scanResultTickers} user={user} />
 
         <div className="border-t border-gray-800 my-4"></div>
 

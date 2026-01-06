@@ -4,7 +4,7 @@ Strategy Advisor Module - 利弗摩爾規則策略建議
 from typing import Optional
 
 
-def get_advice(
+def check_risk_status(
     current_price: float,
     cost: float,
     k_value: float,
@@ -14,7 +14,7 @@ def get_advice(
     breakout_type: Optional[str] = None
 ) -> dict:
     """
-    根據利弗摩爾規則生成交易建議
+    根據利弗摩爾規則生成分析結果 (僅陳述事實，不提供投資建議)
     
     Args:
         current_price: 現價
@@ -26,7 +26,7 @@ def get_advice(
         breakout_type: 突破類型 ('upward' or 'downward')
     
     Returns:
-        dict with advice, type, and priority
+        dict with status text and signal type
     """
     if cost <= 0:
         return {
@@ -37,119 +37,119 @@ def get_advice(
     
     price_change_pct = (current_price - cost) / cost
     
-    # 1. 硬性停損 - 最高優先級
+    # 1. 硬性停損
     if price_change_pct <= -0.10:
         return {
-            "text": "⚠️ 觸發 10% 硬性停損！請立即市價賣出，不要猶豫。利弗摩爾法則：控制虧損是交易的第一要務。",
+            "text": "⚠️ 觸發策略設定之 10% 停損門檻。",
             "type": "danger",
             "priority": 100,
-            "action": "SELL"
+            "action": "STOP_LOSS_ALERT"
         }
     
     # 2. 獲利超過 20%
     if price_change_pct >= 0.20:
         return {
-            "text": "🚀 獲利拉開 20%！建議進行金字塔式加碼，或設定移動停利保護獲利。這是強勢股的標誌！",
+            "text": "🚀 帳面獲利超過 20%，趨勢強勁。",
             "type": "success",
             "priority": 90,
-            "action": "HOLD_OR_ADD"
+            "action": "PROFIT_ALERT"
         }
     
-    # 3. 關鍵點突破 (金叉 + 突破前高)
+    # 3. 關鍵點突破
     if is_kd_golden_cross and is_breakout and breakout_type == "upward":
         return {
-            "text": "🔥 關鍵點突破！KD 金叉搭配價格突破前高，這是利弗摩爾最重視的買點。考慮加碼！",
+            "text": "🔥 價格突破前高，且 KD 指標呈現黃金交叉。",
             "type": "success",
             "priority": 85,
-            "action": "BUY"
+            "action": "BREAKOUT_ALERT"
         }
     
     # 4. 單純 KD 金叉
     if is_kd_golden_cross:
         return {
-            "text": "📈 KD 金叉出現！短線可能有反彈機會，但需搭配量能確認。",
+            "text": "📈 KD 指標出現黃金交叉訊號。",
             "type": "info",
             "priority": 60,
-            "action": "WATCH"
+            "action": "TECHNICAL_SIGNAL"
         }
     
     # 5. 突破前高但無金叉
     if is_breakout and breakout_type == "upward":
         return {
-            "text": "📊 價格突破前高！觀察是否有量能配合，若量增則是好訊號。",
+            "text": "📊 價格創下波段新高。",
             "type": "info",
             "priority": 55,
-            "action": "WATCH"
+            "action": "price_update"
         }
     
     # 6. 跌破前低
     if is_breakout and breakout_type == "downward":
         return {
-            "text": "⚠️ 價格跌破前低！趨勢轉弱，考慮減碼或停損。",
+            "text": "⚠️ 價格跌破波段前低。",
             "type": "warning",
             "priority": 75,
-            "action": "REDUCE"
+            "action": "price_update"
         }
     
-    # 7. 動能消失 (量縮 + 盤整)
+    # 7. 動能消失
     if volume_ratio < 0.5 and abs(price_change_pct) < 0.02:
         return {
-            "text": "💤 動能消失，進入無聊盤整區間。考慮換股操作或等待突破方向。",
+            "text": "💤 價格波動收斂，成交量縮減。",
             "type": "neutral",
             "priority": 40,
-            "action": "WAIT"
+            "action": "low_volatility"
         }
     
     # 8. KD 過熱
     if k_value >= 80:
         if price_change_pct > 0:
             return {
-                "text": "🌡️ KD 指標進入過熱區 (K > 80)，但趨勢仍屬強勢。可持有，但注意設好停利。",
+                "text": "🌡️ KD 指標進入高檔區 (K > 80)。",
                 "type": "warning",
                 "priority": 50,
-                "action": "HOLD_TRAILING"
+                "action": "overbought"
             }
         else:
             return {
-                "text": "⚠️ KD 過熱但未獲利，可能是假突破或鈍化。密切觀察。",
+                "text": "⚠️ KD 指標高檔但價格未創高 (背離疑慮)。",
                 "type": "warning",
                 "priority": 55,
-                "action": "WATCH"
+                "action": "divergence"
             }
     
     # 9. KD 超賣
     if k_value <= 20:
         return {
-            "text": "🔍 KD 進入超賣區 (K < 20)，可能有反彈機會。觀察是否出現金叉。",
+            "text": "🔍 KD 指標進入低檔區 (K < 20)。",
             "type": "info",
             "priority": 45,
-            "action": "WATCH_FOR_ENTRY"
+            "action": "oversold"
         }
     
     # 10. 小幅虧損 (5-10%)
     if -0.10 < price_change_pct <= -0.05:
         return {
-            "text": "📉 帳面虧損 5-10%，接近停損線。密切關注，若持續走弱應果斷停損。",
+            "text": "📉 帳面虧損介於 5-10% 之間。",
             "type": "warning",
             "priority": 70,
-            "action": "MONITOR"
+            "action": "drawdown"
         }
     
     # 11. 小幅獲利中
     if 0.05 <= price_change_pct < 0.20:
         return {
-            "text": f"📈 目前獲利 {price_change_pct*100:.1f}%，持續往好的方向發展。考慮設移動停利保護獲利。",
+            "text": f"📈 目前帳面獲利 {price_change_pct*100:.1f}%。",
             "type": "success",
             "priority": 30,
-            "action": "HOLD"
+            "action": "profit"
         }
     
-    # 12. 默認 - 續抱觀察
+    # 12. 默認
     return {
-        "text": "👀 續抱觀察，等待關鍵點出現。記住：沒有明確訊號時，耐心是最好的策略。",
+        "text": "👀 目前無特殊技術訊號。",
         "type": "neutral",
         "priority": 20,
-        "action": "HOLD"
+        "action": "none"
     }
 
 

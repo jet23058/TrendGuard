@@ -18,7 +18,7 @@ from src.technical_analysis import (
     calculate_kd, detect_kd_cross, get_kd_status,
     get_volume_analysis, detect_breakout
 )
-from src.strategy_advisor import get_advice
+from src.strategy_advisor import check_risk_status
 from src.charts import create_candlestick_chart
 
 
@@ -338,7 +338,7 @@ def render_stock_analysis_content(symbol: str, is_new: bool = False):
     breakout = detect_breakout(df)
     
     # Get advice (using current price as "cost" for recommendation purposes)
-    advice = get_advice(
+    advice = check_risk_status(
         current_price=current_price,
         cost=current_price * 0.95,  # Assume hypothetical 5% gain for analysis
         k_value=k_value,
