@@ -24,7 +24,8 @@ import {
   User as UserIcon,
   RefreshCw,
   Sparkles,
-  MinusCircle
+  MinusCircle,
+  Info // 新增 Info 圖示
 } from 'lucide-react';
 import Tesseract from 'tesseract.js';
 import { auth, db, googleProvider } from './firebase';
@@ -991,8 +992,6 @@ const UnlistedPortfolioSection = ({ portfolio, recommendedTickers, user }) => {
     }
     setLoading(true);
 
-    setLoading(true);
-
     // 改為序列執行 (Sequential) 以避免觸發 API Rate Limit (403 Forbidden)
     for (const stock of unlistedStocks) {
       try {
@@ -1418,8 +1417,38 @@ export default function App() {
               <BarChart2 className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight text-white">利弗摩爾台股戰情室</h1>
               <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight text-white">利弗摩爾台股戰情室</h1>
+                
+                {/* 懸浮說明 Tooltip */}
+                <div className="group relative flex items-center">
+                  <Info className="w-5 h-5 text-gray-400 hover:text-yellow-400 cursor-help transition-colors" />
+                  
+                  {/* Tooltip 本體 */}
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-80 p-4 bg-[#FEFCE8] border-2 border-yellow-400 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform translate-y-2 group-hover:translate-y-0">
+                    {/* 小三角形箭頭 */}
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FEFCE8] border-t-2 border-l-2 border-yellow-400 transform rotate-45"></div>
+                    
+                    {/* 內容 */}
+                    <div className="relative z-10 text-left">
+                      <h4 className="text-[#854D0E] font-bold text-base mb-2 border-b border-yellow-300 pb-2">
+                        📖 關於傑西·利弗摩爾
+                      </h4>
+                      <p className="text-[#A16207] text-xs mb-2 leading-relaxed">
+                        被譽為「投機之王」，本系統基於其《股票作手回憶錄》之核心哲學設計：
+                      </p>
+                      <ul className="text-[#713F12] text-xs space-y-1.5 list-disc pl-4">
+                        <li><strong className="text-[#854D0E]">順勢而為：</strong>不猜頭摸底，沿著最小阻力線操作。</li>
+                        <li><strong className="text-[#854D0E]">關鍵點 (Pivot)：</strong>耐心等待股價突破關鍵價位再進場。</li>
+                        <li><strong className="text-[#854D0E]">資金管理：</strong>虧損絕不超過本金 10%，嚴格執行停損。</li>
+                        <li><strong className="text-[#854D0E]">試單與加碼：</strong>分批進場，只有在賺錢時才加碼。</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mt-0.5">
                 <p className="text-xs text-gray-400">Livermore Breakout Scanner</p>
                 <span className="bg-green-900/40 text-green-500 text-[10px] px-1.5 py-0.5 rounded border border-green-800/50">真實數據</span>
               </div>
