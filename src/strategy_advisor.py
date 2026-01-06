@@ -40,7 +40,7 @@ def check_risk_status(
     # 1. 硬性停損
     if price_change_pct <= -0.10:
         return {
-            "text": "⚠️ 觸發策略設定之 10% 停損門檻。",
+            "text": "⚠️ 跌幅達 10%，已觸發策略預設之停損門檻。",
             "type": "danger",
             "priority": 100,
             "action": "STOP_LOSS_ALERT"

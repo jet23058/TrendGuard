@@ -19,9 +19,9 @@
       "k": 97.8,
       "d": 95.6,
       "volume": 83472316,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 60.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.0",
         "priority": 98
       },
       "ohlc": [
@@ -459,9 +459,9 @@
       "k": 96.9,
       "d": 95.7,
       "volume": 48547197,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1645.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1645.0",
         "priority": 97
       },
       "ohlc": [
@@ -899,9 +899,9 @@
       "k": 97.8,
       "d": 94.8,
       "volume": 1041613259,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 20.1",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 20.1",
         "priority": 97
       },
       "ohlc": [
@@ -1339,9 +1339,9 @@
       "k": 94.7,
       "d": 87.7,
       "volume": 322323673,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 14.3",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 14.3",
         "priority": 96
       },
       "ohlc": [
@@ -1779,9 +1779,9 @@
       "k": 85.0,
       "d": 73.8,
       "volume": 28521975,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 15.9",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
         "priority": 96
       },
       "ohlc": [
@@ -2219,9 +2219,9 @@
       "k": 91.9,
       "d": 82.6,
       "volume": 41188156,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 9.4",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.4",
         "priority": 96
       },
       "ohlc": [
@@ -2659,9 +2659,9 @@
       "k": 89.3,
       "d": 75.1,
       "volume": 2805667,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 32.7",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 32.7",
         "priority": 95
       },
       "ohlc": [
@@ -3099,9 +3099,9 @@
       "k": 95.3,
       "d": 94.3,
       "volume": 139209943,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 67.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.0",
         "priority": 95
       },
       "ohlc": [
@@ -3539,9 +3539,9 @@
       "k": 90.4,
       "d": 75.5,
       "volume": 1143214,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 26.1",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.1",
         "priority": 94
       },
       "ohlc": [
@@ -3979,9 +3979,9 @@
       "k": 89.4,
       "d": 87.8,
       "volume": 335556,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 26.3",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.3",
         "priority": 94
       },
       "ohlc": [
@@ -4419,9 +4419,9 @@
       "k": 78.7,
       "d": 66.5,
       "volume": 25135676,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 58.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 58.5",
         "priority": 94
       },
       "ohlc": [
@@ -4859,9 +4859,9 @@
       "k": 86.3,
       "d": 78.3,
       "volume": 490410,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 70.2",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 70.2",
         "priority": 94
       },
       "ohlc": [
@@ -5299,9 +5299,9 @@
       "k": 77.1,
       "d": 65.0,
       "volume": 5368468,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 974.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 974.0",
         "priority": 94
       },
       "ohlc": [
@@ -5739,9 +5739,9 @@
       "k": 87.6,
       "d": 79.1,
       "volume": 5010359,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 2340.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2340.0",
         "priority": 94
       },
       "ohlc": [
@@ -6179,9 +6179,9 @@
       "k": 87.6,
       "d": 82.3,
       "volume": 515252,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 16.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 16.5",
         "priority": 93
       },
       "ohlc": [
@@ -6619,9 +6619,9 @@
       "k": 86.8,
       "d": 82.8,
       "volume": 9520887,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 404.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 404.0",
         "priority": 93
       },
       "ohlc": [
@@ -7059,9 +7059,9 @@
       "k": 85.8,
       "d": 81.1,
       "volume": 8465697,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 52.8",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 52.8",
         "priority": 93
       },
       "ohlc": [
@@ -7499,9 +7499,9 @@
       "k": 84.0,
       "d": 80.6,
       "volume": 9182258,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 38.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 38.0",
         "priority": 93
       },
       "ohlc": [
@@ -7939,9 +7939,9 @@
       "k": 87.6,
       "d": 84.0,
       "volume": 4403604,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 417.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 417.0",
         "priority": 93
       },
       "ohlc": [
@@ -8379,9 +8379,9 @@
       "k": 77.0,
       "d": 68.4,
       "volume": 216740886,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 34.2",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 34.2",
         "priority": 93
       },
       "ohlc": [
@@ -8819,9 +8819,9 @@
       "k": 92.9,
       "d": 84.5,
       "volume": 83724366,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 46.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.5",
         "priority": 93
       },
       "ohlc": [
@@ -9259,9 +9259,9 @@
       "k": 80.2,
       "d": 76.5,
       "volume": 1670938,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 29.7",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.7",
         "priority": 93
       },
       "ohlc": [
@@ -9699,9 +9699,9 @@
       "k": 90.0,
       "d": 87.7,
       "volume": 3024527,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 152.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 152.5",
         "priority": 93
       },
       "ohlc": [
@@ -10139,9 +10139,9 @@
       "k": 95.4,
       "d": 92.0,
       "volume": 402987766,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 95.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.0",
         "priority": 93
       },
       "ohlc": [
@@ -10579,9 +10579,9 @@
       "k": 87.4,
       "d": 85.0,
       "volume": 4653622,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 819.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 819.0",
         "priority": 93
       },
       "ohlc": [
@@ -11019,9 +11019,9 @@
       "k": 89.7,
       "d": 86.0,
       "volume": 15947032,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 67.1",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.1",
         "priority": 93
       },
       "ohlc": [
@@ -11459,9 +11459,9 @@
       "k": 73.6,
       "d": 54.3,
       "volume": 15171646,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 40.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 40.0",
         "priority": 93
       },
       "ohlc": [
@@ -11899,9 +11899,9 @@
       "k": 87.1,
       "d": 76.5,
       "volume": 8447248,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 104.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 104.0",
         "priority": 93
       },
       "ohlc": [
@@ -12339,9 +12339,9 @@
       "k": 90.6,
       "d": 88.0,
       "volume": 38438238,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 197.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 197.5",
         "priority": 93
       },
       "ohlc": [
@@ -12779,9 +12779,9 @@
       "k": 81.1,
       "d": 76.8,
       "volume": 1881412,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 65.2",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 65.2",
         "priority": 93
       },
       "ohlc": [
@@ -13219,9 +13219,9 @@
       "k": 82.8,
       "d": 78.6,
       "volume": 7565293,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 28.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.0",
         "priority": 92
       },
       "ohlc": [
@@ -13659,9 +13659,9 @@
       "k": 66.2,
       "d": 50.8,
       "volume": 990402,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 22.1",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.1",
         "priority": 92
       },
       "ohlc": [
@@ -14099,9 +14099,9 @@
       "k": 77.2,
       "d": 58.6,
       "volume": 1066807,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 18.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 18.0",
         "priority": 92
       },
       "ohlc": [
@@ -14539,9 +14539,9 @@
       "k": 95.7,
       "d": 93.6,
       "volume": 1435368,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 15.9",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
         "priority": 92
       },
       "ohlc": [
@@ -14979,9 +14979,9 @@
       "k": 74.1,
       "d": 74.0,
       "volume": 14704548,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 422.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 422.5",
         "priority": 92
       },
       "ohlc": [
@@ -15419,9 +15419,9 @@
       "k": 68.4,
       "d": 60.5,
       "volume": 59708,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 9.7",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.7",
         "priority": 92
       },
       "ohlc": [
@@ -15859,9 +15859,9 @@
       "k": 93.3,
       "d": 91.4,
       "volume": 1055300,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 385.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 385.0",
         "priority": 92
       },
       "ohlc": [
@@ -16299,9 +16299,9 @@
       "k": 57.0,
       "d": 50.0,
       "volume": 6789117,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1185.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1185.0",
         "priority": 92
       },
       "ohlc": [
@@ -16739,9 +16739,9 @@
       "k": 89.2,
       "d": 81.1,
       "volume": 2965487,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 349.0",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 349.0",
         "priority": 92
       },
       "ohlc": [
@@ -17179,9 +17179,9 @@
       "k": 95.5,
       "d": 93.5,
       "volume": 22071,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 31.2",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 31.2",
         "priority": 92
       },
       "ohlc": [
@@ -17619,9 +17619,9 @@
       "k": 78.0,
       "d": 74.4,
       "volume": 7054508,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 283.5",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 283.5",
         "priority": 92
       },
       "ohlc": [
@@ -18059,9 +18059,9 @@
       "k": 85.6,
       "d": 73.0,
       "volume": 12793629,
-      "recommendation": {
-        "type": "buy",
-        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 12.6",
+      "signal": {
+        "type": "breakout",
+        "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 12.6",
         "priority": 92
       },
       "ohlc": [
@@ -18490,7 +18490,7 @@
   ],
   "summary": {
     "total": 42,
-    "buySignals": 42,
+    "breakoutSignals": 42,
     "counts": {
       "new": 21,
       "continued": 21,
@@ -18511,9 +18511,9 @@
         "k": 77.0,
         "d": 68.4,
         "volume": 216740886,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 34.2",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 34.2",
           "priority": 93
         },
         "ohlc": [
@@ -18951,9 +18951,9 @@
         "k": 57.0,
         "d": 50.0,
         "volume": 6789117,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1185.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1185.0",
           "priority": 92
         },
         "ohlc": [
@@ -19391,9 +19391,9 @@
         "k": 87.4,
         "d": 85.0,
         "volume": 4653622,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 819.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 819.0",
           "priority": 93
         },
         "ohlc": [
@@ -19831,9 +19831,9 @@
         "k": 77.1,
         "d": 65.0,
         "volume": 5368468,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 974.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 974.0",
           "priority": 94
         },
         "ohlc": [
@@ -20271,9 +20271,9 @@
         "k": 73.6,
         "d": 54.3,
         "volume": 15171646,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 40.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 40.0",
           "priority": 93
         },
         "ohlc": [
@@ -20711,9 +20711,9 @@
         "k": 87.6,
         "d": 79.1,
         "volume": 5010359,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 2340.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2340.0",
           "priority": 94
         },
         "ohlc": [
@@ -21151,9 +21151,9 @@
         "k": 87.1,
         "d": 76.5,
         "volume": 8447248,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 104.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 104.0",
           "priority": 93
         },
         "ohlc": [
@@ -21591,9 +21591,9 @@
         "k": 89.2,
         "d": 81.1,
         "volume": 2965487,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 349.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 349.0",
           "priority": 92
         },
         "ohlc": [
@@ -22031,9 +22031,9 @@
         "k": 82.8,
         "d": 78.6,
         "volume": 7565293,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 28.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.0",
           "priority": 92
         },
         "ohlc": [
@@ -22471,9 +22471,9 @@
         "k": 66.2,
         "d": 50.8,
         "volume": 990402,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 22.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.1",
           "priority": 92
         },
         "ohlc": [
@@ -22911,9 +22911,9 @@
         "k": 77.2,
         "d": 58.6,
         "volume": 1066807,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 18.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 18.0",
           "priority": 92
         },
         "ohlc": [
@@ -23351,9 +23351,9 @@
         "k": 95.5,
         "d": 93.5,
         "volume": 22071,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 31.2",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 31.2",
           "priority": 92
         },
         "ohlc": [
@@ -23791,9 +23791,9 @@
         "k": 95.7,
         "d": 93.6,
         "volume": 1435368,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 15.9",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
           "priority": 92
         },
         "ohlc": [
@@ -24231,9 +24231,9 @@
         "k": 78.0,
         "d": 74.4,
         "volume": 7054508,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 283.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 283.5",
           "priority": 92
         },
         "ohlc": [
@@ -24671,9 +24671,9 @@
         "k": 74.1,
         "d": 74.0,
         "volume": 14704548,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 422.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 422.5",
           "priority": 92
         },
         "ohlc": [
@@ -25111,9 +25111,9 @@
         "k": 68.4,
         "d": 60.5,
         "volume": 59708,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 9.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.7",
           "priority": 92
         },
         "ohlc": [
@@ -25551,9 +25551,9 @@
         "k": 93.3,
         "d": 91.4,
         "volume": 1055300,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 385.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 385.0",
           "priority": 92
         },
         "ohlc": [
@@ -25991,9 +25991,9 @@
         "k": 78.7,
         "d": 66.5,
         "volume": 25135676,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 58.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 58.5",
           "priority": 94
         },
         "ohlc": [
@@ -26431,9 +26431,9 @@
         "k": 85.6,
         "d": 73.0,
         "volume": 12793629,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 12.6",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 12.6",
           "priority": 92
         },
         "ohlc": [
@@ -26871,9 +26871,9 @@
         "k": 84.0,
         "d": 80.6,
         "volume": 9182258,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 38.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 38.0",
           "priority": 93
         },
         "ohlc": [
@@ -27311,9 +27311,9 @@
         "k": 86.3,
         "d": 78.3,
         "volume": 490410,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 70.2",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 70.2",
           "priority": 94
         },
         "ohlc": [
@@ -27753,9 +27753,9 @@
         "k": 87.6,
         "d": 84.0,
         "volume": 4403604,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 417.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 417.0",
           "priority": 93
         },
         "ohlc": [
@@ -28193,9 +28193,9 @@
         "k": 92.9,
         "d": 84.5,
         "volume": 83724366,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 46.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.5",
           "priority": 93
         },
         "ohlc": [
@@ -28633,9 +28633,9 @@
         "k": 80.2,
         "d": 76.5,
         "volume": 1670938,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 29.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.7",
           "priority": 93
         },
         "ohlc": [
@@ -29073,9 +29073,9 @@
         "k": 87.6,
         "d": 82.3,
         "volume": 515252,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 16.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 16.5",
           "priority": 93
         },
         "ohlc": [
@@ -29513,9 +29513,9 @@
         "k": 90.0,
         "d": 87.7,
         "volume": 3024527,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 152.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 152.5",
           "priority": 93
         },
         "ohlc": [
@@ -29953,9 +29953,9 @@
         "k": 96.9,
         "d": 95.7,
         "volume": 48547197,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1645.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1645.0",
           "priority": 97
         },
         "ohlc": [
@@ -30393,9 +30393,9 @@
         "k": 95.4,
         "d": 92.0,
         "volume": 402987766,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 95.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.0",
           "priority": 93
         },
         "ohlc": [
@@ -30833,9 +30833,9 @@
         "k": 94.7,
         "d": 87.7,
         "volume": 322323673,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 14.3",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 14.3",
           "priority": 96
         },
         "ohlc": [
@@ -31273,9 +31273,9 @@
         "k": 89.7,
         "d": 86.0,
         "volume": 15947032,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 67.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.1",
           "priority": 93
         },
         "ohlc": [
@@ -31713,9 +31713,9 @@
         "k": 85.0,
         "d": 73.8,
         "volume": 28521975,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 15.9",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.9",
           "priority": 96
         },
         "ohlc": [
@@ -32153,9 +32153,9 @@
         "k": 97.8,
         "d": 94.8,
         "volume": 1041613259,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 20.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 7 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 20.1",
           "priority": 97
         },
         "ohlc": [
@@ -32593,9 +32593,9 @@
         "k": 86.8,
         "d": 82.8,
         "volume": 9520887,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 404.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 404.0",
           "priority": 93
         },
         "ohlc": [
@@ -33033,9 +33033,9 @@
         "k": 90.4,
         "d": 75.5,
         "volume": 1143214,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 26.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.1",
           "priority": 94
         },
         "ohlc": [
@@ -33473,9 +33473,9 @@
         "k": 89.3,
         "d": 75.1,
         "volume": 2805667,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 32.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 32.7",
           "priority": 95
         },
         "ohlc": [
@@ -33913,9 +33913,9 @@
         "k": 97.8,
         "d": 95.6,
         "volume": 83472316,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 60.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.0",
           "priority": 98
         },
         "ohlc": [
@@ -34353,9 +34353,9 @@
         "k": 89.4,
         "d": 87.8,
         "volume": 335556,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 26.3",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 26.3",
           "priority": 94
         },
         "ohlc": [
@@ -34793,9 +34793,9 @@
         "k": 91.9,
         "d": 82.6,
         "volume": 41188156,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 9.4",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 6 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 9.4",
           "priority": 96
         },
         "ohlc": [
@@ -35233,9 +35233,9 @@
         "k": 85.8,
         "d": 81.1,
         "volume": 8465697,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 52.8",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 52.8",
           "priority": 93
         },
         "ohlc": [
@@ -35673,9 +35673,9 @@
         "k": 90.6,
         "d": 88.0,
         "volume": 38438238,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 197.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 197.5",
           "priority": 93
         },
         "ohlc": [
@@ -36113,9 +36113,9 @@
         "k": 81.1,
         "d": 76.8,
         "volume": 1881412,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 65.2",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 65.2",
           "priority": 93
         },
         "ohlc": [
@@ -36553,9 +36553,9 @@
         "k": 95.3,
         "d": 94.3,
         "volume": 139209943,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 67.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 67.0",
           "priority": 95
         },
         "ohlc": [
@@ -36995,9 +36995,9 @@
         "k": 74.6,
         "d": 57.7,
         "volume": 507131,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 10.4",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 10.4",
           "priority": 92
         },
         "ohlc": [
@@ -37435,9 +37435,9 @@
         "k": 89.5,
         "d": 81.6,
         "volume": 12102937,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 131.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 131.5",
           "priority": 92
         },
         "ohlc": [
@@ -37875,9 +37875,9 @@
         "k": 82.1,
         "d": 69.2,
         "volume": 14391630,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1495.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1495.0",
           "priority": 95
         },
         "ohlc": [
@@ -38315,9 +38315,9 @@
         "k": 89.3,
         "d": 78.9,
         "volume": 3010631,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 22.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.7",
           "priority": 93
         },
         "ohlc": [
@@ -38755,9 +38755,9 @@
         "k": 90.0,
         "d": 79.4,
         "volume": 2875666,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 15.4",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 15.4",
           "priority": 92
         },
         "ohlc": [
@@ -39195,9 +39195,9 @@
         "k": 64.5,
         "d": 57.1,
         "volume": 4869085,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 23.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 23.7",
           "priority": 92
         },
         "ohlc": [
@@ -39635,9 +39635,9 @@
         "k": 86.4,
         "d": 81.4,
         "volume": 6865240,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 267.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 267.5",
           "priority": 95
         },
         "ohlc": [
@@ -40075,9 +40075,9 @@
         "k": 67.5,
         "d": 53.9,
         "volume": 8937333,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 60.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 60.5",
           "priority": 92
         },
         "ohlc": [
@@ -40515,9 +40515,9 @@
         "k": 79.3,
         "d": 64.3,
         "volume": 5217790,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 53.6",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 53.6",
           "priority": 92
         },
         "ohlc": [
@@ -40955,9 +40955,9 @@
         "k": 87.0,
         "d": 82.5,
         "volume": 1795285,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 21.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 21.1",
           "priority": 93
         },
         "ohlc": [
@@ -41395,9 +41395,9 @@
         "k": 92.7,
         "d": 87.8,
         "volume": 2716013,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 1655.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 1655.0",
           "priority": 94
         },
         "ohlc": [
@@ -41835,9 +41835,9 @@
         "k": 78.6,
         "d": 59.6,
         "volume": 11100011,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 39.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 39.0",
           "priority": 92
         },
         "ohlc": [
@@ -42275,9 +42275,9 @@
         "k": 95.3,
         "d": 93.6,
         "volume": 3520346,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 705.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 705.0",
           "priority": 92
         },
         "ohlc": [
@@ -42715,9 +42715,9 @@
         "k": 87.4,
         "d": 77.9,
         "volume": 12545710,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 53.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 53.1",
           "priority": 92
         },
         "ohlc": [
@@ -43155,9 +43155,9 @@
         "k": 78.3,
         "d": 66.9,
         "volume": 2780078,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 123.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 123.5",
           "priority": 93
         },
         "ohlc": [
@@ -43595,9 +43595,9 @@
         "k": 88.2,
         "d": 84.4,
         "volume": 2138053,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 105.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 105.5",
           "priority": 95
         },
         "ohlc": [
@@ -44035,9 +44035,9 @@
         "k": 96.3,
         "d": 94.7,
         "volume": 31448,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 72.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 72.5",
           "priority": 98
         },
         "ohlc": [
@@ -44475,9 +44475,9 @@
         "k": 91.5,
         "d": 81.6,
         "volume": 1772600,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 109.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 109.5",
           "priority": 94
         },
         "ohlc": [
@@ -44915,9 +44915,9 @@
         "k": 77.5,
         "d": 63.2,
         "volume": 16277555,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 95.3",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 95.3",
           "priority": 93
         },
         "ohlc": [
@@ -45355,9 +45355,9 @@
         "k": 85.7,
         "d": 76.9,
         "volume": 1422462,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 35.7",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 35.7",
           "priority": 95
         },
         "ohlc": [
@@ -45795,9 +45795,9 @@
         "k": 82.6,
         "d": 74.4,
         "volume": 366213,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 28.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 28.5",
           "priority": 92
         },
         "ohlc": [
@@ -46235,9 +46235,9 @@
         "k": 79.5,
         "d": 61.7,
         "volume": 6175807,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 51.6",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 51.6",
           "priority": 93
         },
         "ohlc": [
@@ -46675,9 +46675,9 @@
         "k": 91.4,
         "d": 84.6,
         "volume": 8353501,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 379.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 379.0",
           "priority": 92
         },
         "ohlc": [
@@ -47115,9 +47115,9 @@
         "k": 89.3,
         "d": 82.0,
         "volume": 15942226,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 112.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 112.5",
           "priority": 93
         },
         "ohlc": [
@@ -47555,9 +47555,9 @@
         "k": 79.5,
         "d": 67.9,
         "volume": 2865951,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 22.3",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 22.3",
           "priority": 93
         },
         "ohlc": [
@@ -47995,9 +47995,9 @@
         "k": 57.6,
         "d": 36.2,
         "volume": 11915709,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 102.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 102.5",
           "priority": 92
         },
         "ohlc": [
@@ -48435,9 +48435,9 @@
         "k": 78.6,
         "d": 73.1,
         "volume": 3187203,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 29.9",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 3 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 29.9",
           "priority": 93
         },
         "ohlc": [
@@ -48875,9 +48875,9 @@
         "k": 85.0,
         "d": 82.4,
         "volume": 8465651,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 88.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 88.5",
           "priority": 92
         },
         "ohlc": [
@@ -49315,9 +49315,9 @@
         "k": 76.8,
         "d": 71.1,
         "volume": 1257161,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 2930.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 2 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 2930.0",
           "priority": 92
         },
         "ohlc": [
@@ -49755,9 +49755,9 @@
         "k": 85.9,
         "d": 86.0,
         "volume": 8529994,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 469.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 469.5",
           "priority": 94
         },
         "ohlc": [
@@ -50195,9 +50195,9 @@
         "k": 83.1,
         "d": 72.4,
         "volume": 1150974,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 670.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 5 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 670.0",
           "priority": 95
         },
         "ohlc": [
@@ -50635,9 +50635,9 @@
         "k": 90.8,
         "d": 82.5,
         "volume": 45748971,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 185.0",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 185.0",
           "priority": 94
         },
         "ohlc": [
@@ -51075,9 +51075,9 @@
         "k": 84.0,
         "d": 76.2,
         "volume": 13855423,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 74.5",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 4 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 74.5",
           "priority": 94
         },
         "ohlc": [
@@ -51515,9 +51515,9 @@
         "k": 96.4,
         "d": 94.8,
         "volume": 9177227,
-        "recommendation": {
-          "type": "buy",
-          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，符合利弗摩爾關鍵點買進條件。停損設 46.1",
+        "signal": {
+          "type": "breakout",
+          "text": "🔥 突破 20 日新高！連續 8 根紅 K，站上所有均線，股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。停損設 46.1",
           "priority": 98
         },
         "ohlc": [

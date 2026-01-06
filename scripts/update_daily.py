@@ -224,9 +224,9 @@ def check_livermore_criteria(code: str) -> Optional[dict]:
             "k": latest_k,
             "d": latest_d,
             "volume": int(today['Volume']),
-            "analysis_result": {
-                "type": "bullish_breakout",
-                "text": f"🔥 股價突破 {LOOKBACK_DAYS} 日新高，連續 {consecutive_red} 日收紅，且均線呈現多頭排列。技術支撐位 {round(stop_loss, 1)}",
+            "signal": {
+                "type": "breakout",
+                "text": f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。技術支撐位 {round(stop_loss, 1)}",
                 "priority": 90 + consecutive_red  # 連紅越多優先級越高
             },
             "ohlc": ohlc_data
@@ -311,7 +311,7 @@ def main():
     print(f"符合條件: {len(results)} 檔\n")
     
     # 按連紅天數排序 (越多越強)
-    results.sort(key=lambda x: x['analysis_result']['priority'], reverse=True)
+    results.sort(key=lambda x: x['signal']['priority'], reverse=True)
     
     # 計算差異
     changes = calculate_changes(previous_data, results)
