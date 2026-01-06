@@ -60,7 +60,94 @@ def render_header():
     """Render header section"""
     today_str = datetime.now().strftime("%Y年%m月%d日")
     
+    # 定義 Tooltip 的 CSS 樣式
+    tooltip_style = """
+    <style>
+        /* Tooltip 容器 */
+        .livermore-tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 12px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        /* i 圖示樣式 */
+        .livermore-tooltip .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 1px solid #6366F1;
+            color: #A78BFA;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: serif;
+            font-style: italic;
+            transition: all 0.2s ease;
+        }
+
+        /* 滑鼠移上去時圖示變色 */
+        .livermore-tooltip:hover .info-icon {
+            background: #6366F1;
+            color: #FFFFFF;
+        }
+
+        /* 彈出說明框樣式 (黃色底) */
+        .livermore-tooltip .tooltip-content {
+            visibility: hidden;
+            width: 340px;
+            background-color: #FEFCE8; /* 淺黃色背景 */
+            color: #854D0E;            /* 深褐色文字 */
+            text-align: left;
+            border-radius: 12px;
+            padding: 16px;
+            
+            /* 定位 */
+            position: absolute;
+            z-index: 999;
+            top: 135%;
+            left: 50%;
+            transform: translateX(-50%);
+            
+            /* 特效 */
+            opacity: 0;
+            transition: opacity 0.3s, top 0.3s;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border: 1px solid #FDE047; /* 黃色邊框 */
+            
+            /* 文字設定 */
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: normal;
+            white-space: normal;
+        }
+
+        /* 小三角形箭頭 */
+        .livermore-tooltip .tooltip-content::after {
+            content: "";
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: transparent transparent #FEFCE8 transparent;
+        }
+
+        /* Hover 時顯示說明框 */
+        .livermore-tooltip:hover .tooltip-content {
+            visibility: visible;
+            opacity: 1;
+            top: 125%;
+        }
+    </style>
+    """
+    
     st.markdown(f"""
+    {tooltip_style}
     <div style="
         background: linear-gradient(135deg, #1E2130 0%, #2D3250 100%);
         border-radius: 16px;
@@ -71,15 +158,33 @@ def render_header():
     ">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
             <div>
-                <h1 style="
-                    margin: 0;
-                    font-size: 28px;
-                    font-weight: 700;
-                    background: linear-gradient(90deg, #6366F1, #A78BFA);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                ">🎯 利弗摩爾台股戰情室</h1>
+                <div style="display: flex; align-items: center;">
+                    <h1 style="
+                        margin: 0;
+                        font-size: 28px;
+                        font-weight: 700;
+                        background: linear-gradient(90deg, #6366F1, #A78BFA);
+                        -webkit-background-clip: text;
+                        -webkit-text-fill-color: transparent;
+                        background-clip: text;
+                    ">🎯 利弗摩爾台股戰情室</h1>
+                    
+                    <div class="livermore-tooltip">
+                        <span class="info-icon">i</span>
+                        <div class="tooltip-content">
+                            <strong style="font-size: 16px; display: block; margin-bottom: 8px; color: #713F12; border-bottom: 1px solid #FDE047; padding-bottom: 4px;">
+                                📖 關於傑西·利弗摩爾 (Jesse Livermore)
+                            </strong>
+                            <span style="font-size: 13px;">被譽為「投機之王」，本系統基於其《股票作手回憶錄》之核心哲學設計：</span>
+                            <ul style="margin: 8px 0 0 16px; padding: 0; list-style-type: circle;">
+                                <li><strong>順勢而為：</strong>不猜頭摸底，沿著最小阻力線操作。</li>
+                                <li><strong>關鍵點 (Pivot Points)：</strong>耐心等待股價突破關鍵價位再進場。</li>
+                                <li><strong>資金管理：</strong>虧損絕不超過本金 10%，嚴格執行停損。</li>
+                                <li><strong>試單與加碼：</strong>分批進場，只有在賺錢時才加碼 (Add up)。</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
                 <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px;">
                     📅 {today_str} | 每日觀察清單報告
                 </p>
