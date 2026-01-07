@@ -1554,7 +1554,29 @@ export default function App() {
           />
         ))}
       </main>
-
+      <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 mt-8">
+        <div className="flex items-center gap-2 mb-4">
+          <Briefcase className="w-5 h-5 text-yellow-500" />
+          <h2 className="text-xl font-bold text-white">關於本站策略：傑西·利弗摩爾的關鍵點哲學</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-300 leading-relaxed">
+          <div>
+            <h3 className="font-bold text-white mb-2">核心交易邏輯</h3>
+            <p className="mb-4 text-sm">
+              本系統並非單純的技術指標篩選器，而是基於傳奇交易員 Jesse Livermore 在《股票作手回憶錄》中提出的「關鍵點 (Pivot Point)」理論設計。
+              我們捕捉當股價突破長期整理區間，且同時伴隨成交量放大與均線多頭排列的時刻。這通常意味著「最小阻力線」已經確立。
+            </p>
+          </div>
+          <div>
+            <h3 className="font-bold text-white mb-2">風險控管原則</h3>
+            <ul className="list-disc pl-5 space-y-2 text-sm">
+              <li><strong className="text-gray-200">資金保護：</strong> 系統會自動計算支撐位，協助投資人嚴格執行停損，避免單筆虧損擴大。</li>
+              <li><strong className="text-gray-200">試單與加碼：</strong> 真正的趨勢不會一天結束。利弗摩爾強調「只有在賺錢的時候才加碼」，本系統會標示出適合加碼的強勢訊號。</li>
+            </ul>
+          </div>
+        </div>
+      </section>
       <footer className="text-center py-6 border-t border-gray-800 mt-10">
         <p className="text-gray-500 text-xs">🎯 利弗摩爾台股戰情室 | 基於 Jesse Livermore 交易哲學設計</p>
         <p className="text-gray-600 text-xs mt-1">⚠️ 本系統僅供參考，不構成投資建議。投資有風險，請謹慎評估。</p>
