@@ -66,6 +66,9 @@ def fetch_market_alerts():
                     start_dt = roc_to_date(start_roc)
                     end_dt = roc_to_date(end_roc)
                     
+                    # Fix: Handle compact date format for TWSE if necessary, or ensure robust parsing
+                    # TWSE usually returns 114/11/06. ROC function handles that.
+                    
                     if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1): # +1 buffer
                         # Parse frequency (e.g. 5分鐘)
                         freq = "處置"
@@ -114,6 +117,83 @@ def fetch_market_alerts():
     except Exception as e:
         print(f"Error fetching warning: {e}")
         
+    except Exception as e:
+        print(f"Error fetching warning: {e}")
+        
+    # 3. Fetch TPEX (OTC) Alerts
+    try:
+        print("Fetching TPEX alerts...")
+        base_url = "https://www.tpex.org.tw/openapi/v1"
+        
+        # 3.1 TPEX Disposition (Punish)
+        r = requests.get(f"{base_url}/tpex_disposal_information", timeout=10)
+        if r.status_code == 200:
+            for item in r.json():
+                code = item.get('SecuritiesCompanyCode')
+                period_str = item.get('DispositionPeriod', '')
+                content = item.get('DisposalCondition', '')
+                
+                # Check active
+                if '~' in period_str:
+                    try:
+                        start_roc, end_roc = period_str.split('~')
+                        # TPEX date format often YYYMMDD e.g. 1150106, but checking sample '1150109~1150122'
+                        # If it is '115/01/09' format, logic is same. If '1150109', need adjust.
+                        # Sample output was "1150109~1150122" (no slashes)
+                        
+                        def parse_roc_compact(d_str):
+                            # d_str like "1150109"
+                            if len(d_str) == 7:
+                                return datetime(int(d_str[:3]) + 1911, int(d_str[3:5]), int(d_str[5:]))
+                            return roc_to_date(d_str) # Fallback to slash format
+                            
+                        start_dt = parse_roc_compact(start_roc)
+                        end_dt = parse_roc_compact(end_roc)
+                        
+                        if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1):
+                            # Parse frequency
+                            freq = "處置"
+                            match = re.search(r'每(\S+)分鐘', content)
+                            if match:
+                                freq = f"{match.group(1)}分盤"
+                            elif "人工管制" in content:
+                                freq = "人工管制"
+                                
+                            alerts[code] = {
+                                "type": "disposition",
+                                "badge": "處置",
+                                "color": "red",
+                                "info": f"{freq} (至 {end_roc})",
+                                "detail": f"期間: {period_str}\n措施: {content}"
+                            }
+                    except Exception as e:
+                        print(f"Error parsing TPEX disposition date for {code}: {e}")
+
+        # 3.2 TPEX Warning
+        r = requests.get(f"{base_url}/tpex_trading_warning_information", timeout=10)
+        if r.status_code == 200:
+            for item in r.json():
+                code = item.get('SecuritiesCompanyCode')
+                date_roc = item.get('Date') # e.g. "1150108"
+                
+                # Check if recent
+                alert_dt = None
+                if len(date_roc) == 7:
+                    alert_dt = datetime(int(date_roc[:3]) + 1911, int(date_roc[3:5]), int(date_roc[5:]))
+                
+                if alert_dt and (today - alert_dt).days <= 1:
+                    if code not in alerts:
+                        alerts[code] = {
+                            "type": "warning",
+                            "badge": "警示",
+                            "color": "yellow",
+                            "info": "注意股",
+                            "detail": item.get('TradingInformation', '')
+                        }
+
+    except Exception as e:
+        print(f"Error fetching TPEX alerts: {e}")
+
     return alerts
 
 # --- 設定 ---
@@ -342,7 +422,43 @@ def calculate_changes(previous_data: Optional[dict], current_stocks: list) -> di
             "removed": []
         }
 
+    # Detect if we are updating on the same day
+    prev_date = previous_data.get('date', '')
+    is_same_day = prev_date == datetime.now().strftime("%Y-%m-%d")
+    
     prev_map = {s['ticker']: s for s in previous_data['stocks']}
+    
+    # If same day, we need to reconstruct "Yesterday's State" to properly calculate Today's changes
+    # Yesterday's Stocks = (Today's Stocks - Today's New) + Today's Removed
+    if is_same_day and 'changes' in previous_data:
+        print("ℹ️ 檢測到同日更新，正在重建昨日狀態以維持差異計算準確性...")
+        current_existing_tickers = set(prev_map.keys())
+        
+        # 1. Provide tickers that were "New" today (so they weren't there yesterday)
+        today_new_tickers = {s['ticker'] for s in previous_data['changes'].get('new', [])}
+        
+        # 2. Provide tickers that were "Removed" today (so they WERE there yesterday)
+        today_removed_list = previous_data['changes'].get('removed', [])
+        today_removed_map = {s['ticker']: s for s in today_removed_list}
+        
+        # Reconstruct Yesterday's set
+        # Yesterday = (Current - New) U Removed
+        reconstructed_prev_tickers = (current_existing_tickers - today_new_tickers) | set(today_removed_map.keys())
+        
+        # Rebuild prev_map for calculation
+        # We need the stock objects. For 'removed', we have them. 
+        # For 'continued' (Current - New), they are in prev_map.
+        
+        real_prev_map = {}
+        for t in reconstructed_prev_tickers:
+            if t in today_removed_map:
+                real_prev_map[t] = today_removed_map[t]
+            elif t in prev_map:
+                real_prev_map[t] = prev_map[t]
+                
+        prev_map = real_prev_map
+        print(f"   重建完成: 昨日共有 {len(prev_map)} 檔股票")
+
     curr_map = {s['ticker']: s for s in current_stocks}
     
     prev_tickers = set(prev_map.keys())
