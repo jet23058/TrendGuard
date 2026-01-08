@@ -69,7 +69,7 @@ def fetch_market_alerts():
                     # Fix: Handle compact date format for TWSE if necessary, or ensure robust parsing
                     # TWSE usually returns 114/11/06. ROC function handles that.
                     
-                    if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1): # +1 buffer
+                    if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1):
                         # Parse frequency (e.g. 5分鐘)
                         freq = "處置"
                         match = re.search(r'每(\S+)分鐘', content)
