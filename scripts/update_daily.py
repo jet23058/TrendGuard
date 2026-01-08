@@ -10,6 +10,7 @@
 """
 import json
 import os
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -24,6 +25,96 @@ try:
 except ImportError:
     HAS_TWSTOCK = False
     print("Warning: twstock not installed, using yfinance for stock names")
+
+import re
+import requests
+from datetime import timedelta
+
+def roc_to_date(roc_str):
+    """Convert ROC date string (e.g., '114/01/05') to datetime object"""
+    try:
+        parts = roc_str.split('/')
+        year = int(parts[0]) + 1911
+        return datetime(year, int(parts[1]), int(parts[2]))
+    except:
+        return None
+
+def fetch_market_alerts():
+    """Fetch TWSE Warning and Disposition data"""
+    alerts = {}
+    today = datetime.now()
+    today_str = today.strftime('%Y%m%d')
+    start_str = (today - timedelta(days=30)).strftime('%Y%m%d') # Look back 30 days for active dispositions
+    
+    # 1. Fetch Disposition (Punish)
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/announcement/punish"
+        params = {'response': 'json', 'startDate': start_str, 'endDate': today_str}
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+        
+        if 'data' in data:
+            for item in data['data']:
+                # Fields: [Seq, Date, Code(2), Name, Count, Reason, Period(6), Measures(7), Content(8), Note]
+                code = item[2]
+                period_str = item[6] # e.g. "114/11/06～114/11/19"
+                content = item[8]
+                
+                # Check if active
+                if '～' in period_str:
+                    start_roc, end_roc = period_str.split('～')
+                    start_dt = roc_to_date(start_roc)
+                    end_dt = roc_to_date(end_roc)
+                    
+                    if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1): # +1 buffer
+                        # Parse frequency (e.g. 5分鐘)
+                        freq = "處置"
+                        match = re.search(r'每(\S+)分鐘', content)
+                        if match:
+                            freq = f"{match.group(1)}分盤"
+                        elif "人工管制" in content:
+                            freq = "人工管制"
+                            
+                        alerts[code] = {
+                            "type": "disposition",
+                            "badge": "處置",
+                            "color": "red",
+                            "info": f"{freq} (至 {end_roc})",
+                            "detail": f"期間: {period_str}\n措施: {item[7]}"
+                        }
+    except Exception as e:
+        print(f"Error fetching punish: {e}")
+
+    # 2. Fetch Warning (Notice) - Only need today's or latest
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/announcement/notice"
+        # Warning is daily, so just fetch recent few days to be safe, but we only care if it's recent
+        params = {'response': 'json', 'startDate': start_str, 'endDate': today_str}
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+        
+        if 'data' in data:
+            # Sort by date desc to get latest
+            # Warning data: [Seq, Code(1), Name, ..., Reason(4), Date(5)...]
+            # We assume the list is chronological or we check date.
+            for item in data['data']:
+                code = item[1]
+                date_roc = item[5]
+                # If date is today (or very recent)
+                alert_dt = roc_to_date(date_roc)
+                if alert_dt and (today - alert_dt).days <= 1: # Only show if warning was issued today/yesterday
+                    if code not in alerts: # Disposition has higher priority
+                        alerts[code] = {
+                            "type": "warning",
+                            "badge": "警示",
+                            "color": "yellow",
+                            "info": "注意股",
+                            "detail": item[4]
+                        }
+    except Exception as e:
+        print(f"Error fetching warning: {e}")
+        
+    return alerts
 
 # --- 設定 ---
 LOOKBACK_DAYS = 20  # 突破幾日新高
@@ -96,7 +187,7 @@ def get_all_tw_targets() -> list:
     return targets
 
 
-def check_livermore_criteria(code: str) -> Optional[dict]:
+def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) -> Optional[dict]:
     """
     檢查是否符合利弗摩爾突破條件
     
@@ -106,6 +197,8 @@ def check_livermore_criteria(code: str) -> Optional[dict]:
     3. 收盤價突破近 N 日新高
     """
     try:
+        # Check alerts first
+        alert_data = market_alerts.get(code) if market_alerts else None
         # 決定後綴
         suffix = ".TW"
         if HAS_TWSTOCK and code in twstock.codes:
@@ -229,7 +322,8 @@ def check_livermore_criteria(code: str) -> Optional[dict]:
                 "text": f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。技術支撐位 {round(stop_loss, 1)}",
                 "priority": 90 + consecutive_red  # 連紅越多優先級越高
             },
-            "ohlc": ohlc_data
+            "ohlc": ohlc_data,
+            "alert": alert_data  # Add Alert Info (None if normal)
         }
         
     except Exception as e:
@@ -273,9 +367,66 @@ def calculate_changes(previous_data: Optional[dict], current_stocks: list) -> di
     }
 
 
+def update_existing_alerts():
+    """僅更新現有檔案中的警示資訊"""
+    print(f"\n=== 市場警示更新模式 ===")
+    output_file = OUTPUT_DIR / "daily_scan_results.json"
+    
+    if not output_file.exists():
+        print("錯誤：找不到掃描結果檔案，無法更新警示")
+        sys.exit(1)
+        
+    try:
+        with open(output_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            
+        market_alerts = fetch_market_alerts()
+        print(f"取得市場警示資料: {len(market_alerts)} 筆")
+        
+        updated_count = 0
+        stocks = data.get('stocks', [])
+        
+        for stock in stocks:
+            code = stock['ticker']
+            alert_data = market_alerts.get(code)
+            
+            # Update alert field (even if None, to clear old alerts if they expired)
+            if stock.get('alert') != alert_data:
+                stock['alert'] = alert_data
+                updated_count += 1
+                if alert_data:
+                    print(f"⚠️ {code} {stock['name']} 新增/更新警示: {alert_data['badge']}")
+        
+        # Update timestamps
+        # If quoteTime doesn't exist (legacy), use old updatedAt as quoteTime
+        if 'quoteTime' not in data:
+            data['quoteTime'] = data.get('updatedAt')
+            
+        data['alertUpdateTime'] = datetime.now().isoformat()
+        data['updatedAt'] = datetime.now().isoformat() # General update time
+        
+        # Save
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+            
+        print(f"✅ 已更新 {updated_count} 筆警示狀態")
+        print(f"警示更新時間: {data['alertUpdateTime']}")
+        
+        return data
+        
+    except Exception as e:
+        print(f"更新警示失敗: {e}")
+        sys.exit(1)
+
+
 
 def main():
     """主程式"""
+    # Check arguments
+    if len(sys.argv) > 1 and sys.argv[1] == '--update-alerts':
+        update_existing_alerts()
+        return
+
     print(f"\n=== 利弗摩爾強勢突破掃描 ===")
     print(f"掃描時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"突破天數: {LOOKBACK_DAYS} 日\n")
@@ -296,6 +447,10 @@ def main():
     # 取得股票清單
     target_list = get_all_tw_targets()
     
+    # 取得市場警示 (處置/注意)
+    market_alerts = fetch_market_alerts()
+    print(f"取得市場警示資料: {len(market_alerts)} 筆")
+    
     results = []
     total = len(target_list)
     
@@ -303,7 +458,7 @@ def main():
         if i % 10 == 0:
             print(f"\r進度: {i}/{total}...", end="", flush=True)
         
-        data = check_livermore_criteria(code)
+        data = check_livermore_criteria(code, market_alerts)
         if data:
             results.append(data)
     
@@ -329,10 +484,14 @@ def main():
             status = "✨新進" if r['ticker'] in new_tickers else "⟳續漲"
             print(f"{r['ticker']:<8} {r['name']:<10} {r['currentPrice']:>8.2f} {r['consecutiveRed']:>4} {status:<6}")
 
+    current_iso = datetime.now().isoformat()
+    
     # 準備 JSON 輸出
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
-        "updatedAt": datetime.now().isoformat(),
+        "updatedAt": current_iso,
+        "quoteTime": current_iso, # New: Stock Scan Time
+        "alertUpdateTime": current_iso, # New: Alert Update Time (initially same)
         "scanType": "livermore_breakout",
         "criteria": {
             "lookbackDays": LOOKBACK_DAYS,
