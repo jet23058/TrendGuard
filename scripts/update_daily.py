@@ -7,6 +7,7 @@
 1. 股價站上所有均線 (MA5, MA10, MA20, MA60)
 2. 連續兩日紅 K (收盤 > 開盤)
 3. 收盤價突破近 N 日新高
+4. (新增) 若有市場警示(處置/注意)，則忽略技術面條件直接列入
 """
 import json
 import os
@@ -69,7 +70,9 @@ def fetch_market_alerts():
                     # Fix: Handle compact date format for TWSE if necessary, or ensure robust parsing
                     # TWSE usually returns 114/11/06. ROC function handles that.
                     
-                    if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1):
+                    # --- 修改 1: 放寬日期判斷，允許顯示「明天開始」的處置股 ---
+                    # 原本: if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1):
+                    if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1): 
                         # Parse frequency (e.g. 5分鐘)
                         freq = "處置"
                         match = re.search(r'每(\S+)分鐘', content)
@@ -150,7 +153,8 @@ def fetch_market_alerts():
                         start_dt = parse_roc_compact(start_roc)
                         end_dt = parse_roc_compact(end_roc)
                         
-                        if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1):
+                        # --- 修改 1 (TPEX): 同樣放寬日期判斷 ---
+                        if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1):
                             # Parse frequency
                             freq = "處置"
                             match = re.search(r'每(\S+)分鐘', content)
@@ -219,7 +223,9 @@ TEST_STOCKS = [
     '3455', '3516', '8064', '3481', '3289', '3402', '3580', '5452', '8431', '5351', 
     '2330', '2337', '2449', '2454', '3006', '3711', '4967', '6531', '8110', '5263', 
     '1460', '8423', '8438', '5704', '3163', '2025', '3360', '6265', '3624', '3689', 
-    '2460', '2467', '3092', '3308', '4912', '5288', '5289', '2399'
+    '2460', '2467', '3092', '3308', '4912', '5288', '5289', '2399',
+    # 測試用: 南亞科 (若不在上述清單中)
+    '2408'
 ]
 
 
@@ -275,6 +281,9 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
     1. 股價 > MA5/MA10/MA20/MA60 (多頭排列)
     2. 連續 2 日以上紅 K
     3. 收盤價突破近 N 日新高
+    
+    例外：
+    若該股票有市場警示(alert_data)，則忽略上述條件，強制納入
     """
     try:
         # Check alerts first
@@ -331,8 +340,11 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         )
         is_two_red_k = consecutive_red >= 2
         
-        # 必須同時符合三個條件
-        if not (is_breakout and is_above_all_ma and is_two_red_k):
+        # --- 修改 2: 處置股強制通關邏輯 ---
+        has_alert = alert_data is not None
+        
+        # 如果既沒有符合技術指標，也沒有警示，才過濾掉
+        if not (is_breakout and is_above_all_ma and is_two_red_k) and not has_alert:
             return None
         
         # 計算支撐點
@@ -385,6 +397,15 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         latest_k = round(float(df['K'].iloc[-1]), 1) if not pd.isna(df['K'].iloc[-1]) else 50
         latest_d = round(float(df['D'].iloc[-1]), 1) if not pd.isna(df['D'].iloc[-1]) else 50
         
+        # 動態調整 Signal 文字
+        signal_text = f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列"
+        priority_score = 90 + consecutive_red
+        
+        if has_alert and not (is_breakout and is_above_all_ma):
+             # 僅因為警示而入選
+             signal_text = f"⚠️ 市場警示股 ({alert_data.get('badge', '注意')})，技術面未達突破標準"
+             priority_score = 200 # 讓警示股排在很前面，容易看到
+        
         return {
             "ticker": code,
             "name": name,
@@ -398,9 +419,9 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
             "d": latest_d,
             "volume": int(today['Volume']),
             "signal": {
-                "type": "breakout",
-                "text": f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列。技術支撐位 {round(stop_loss, 1)}",
-                "priority": 90 + consecutive_red  # 連紅越多優先級越高
+                "type": "breakout" if (is_breakout and is_above_all_ma) else "alert",
+                "text": f"{signal_text}。技術支撐位 {round(stop_loss, 1)}",
+                "priority": priority_score
             },
             "ohlc": ohlc_data,
             "alert": alert_data  # Add Alert Info (None if normal)
