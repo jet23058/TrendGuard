@@ -7,6 +7,16 @@ on:
     # 2. 每日台灣時間 18:30 (UTC 10:30) 執行: 更新警示 (Alert Update Only)
     - cron: '30 10 * * 1-5'
   workflow_dispatch:  # 允許手動觸發
+    inputs:
+      task_type:
+        description: '執行任務類型'
+        required: true
+        default: 'auto'
+        type: choice
+        options:
+        - auto
+        - full_scan
+        - update_alerts
 
 jobs:
   update:
@@ -39,16 +49,41 @@ jobs:
       - name: Run daily update script
         env:
           TEST_MODE: 'false'  # 啟用完整掃描
+          TASK_TYPE: ${{ github.event.inputs.task_type || 'auto' }}
         run: |
           # 取得當前 UTC 小時
           CURRENT_HOUR=$(date -u +%H)
           
-          if [ "$CURRENT_HOUR" -ge 10 ]; then
-             echo "🔔 Running Market Alerts Update (18:30 TW)..."
-             python scripts/update_daily.py --update-alerts
-          else
-             echo "🔍 Running Full Stock Scan (13:30 TW)..."
+          # Logic:
+          # 1. If TASK_TYPE is 'full_scan' -> Full Scan
+          # 2. If TASK_TYPE is 'update_alerts' -> Alert Update
+          # 3. If TASK_TYPE is 'auto' (default) -> Check time
+          
+          if [ "$TASK_TYPE" == "full_scan" ]; then
+             echo "🚀 Manual Trigger: Full Stock Scan"
              python scripts/update_daily.py
+             
+          elif [ "$TASK_TYPE" == "update_alerts" ]; then
+             echo "🔔 Manual Trigger: Market Alerts Update"
+             python scripts/update_daily.py --update-alerts
+             
+          elif [ "$TASK_TYPE" == "auto" ]; then
+             # Original Auto Logic
+             if [ "$CURRENT_HOUR" -ge 10 ]; then
+                echo "🔔 Scheduled (Auto): Market Alerts Update (18:30 TW)"
+                python scripts/update_daily.py --update-alerts
+             else
+                echo "🔍 Scheduled (Auto): Full Stock Scan (13:30 TW)"
+                python scripts/update_daily.py
+             fi
+             
+          else
+             echo "⚠️ Unknown task type: $TASK_TYPE, defaulting to Auto logic"
+             if [ "$CURRENT_HOUR" -ge 10 ]; then
+                python scripts/update_daily.py --update-alerts
+             else
+                python scripts/update_daily.py
+             fi
           fi
       
       - name: Verify output file exists
