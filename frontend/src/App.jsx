@@ -673,7 +673,7 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
 
 // --- 4. 精簡版股票卡片 ---
 const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
-  const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc } = stock;
+  const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc, alert } = stock;
   const isUp = changePct >= 0;
   const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
   const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
@@ -699,14 +699,28 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
   }, [currentPrice, portfolioItem]);
 
   return (
-    <div className={`bg-gray-800 rounded-xl border overflow-hidden shadow-lg flex-shrink-0 w-72 h-[450px] flex flex-col ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
-      <div className="p-3 border-b border-gray-700 bg-gray-900/50">
+    <div className={`bg-gray-800 rounded-xl border shadow-lg flex-shrink-0 w-72 h-[450px] flex flex-col relative ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
+      <div className="p-3 border-b border-gray-700 bg-gray-900/50 rounded-t-xl">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
             <a href={yahooUrl} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded transition-colors cursor-pointer">
               {ticker} ↗
             </a>
             <h3 className="text-sm font-bold text-white truncate max-w-[80px]">{name}</h3>
+            {alert && (
+              <div className="group relative z-10">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
+                  {alert.badge}
+                </span>
+                {/* Tooltip */}
+                <div className="absolute left-0 top-full mt-1 w-48 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
+                  <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
+                    {alert.info}
+                  </div>
+                  <div className="text-gray-400 leading-relaxed">{alert.detail}</div>
+                </div>
+              </div>
+            )}
             {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
           </div>
           <div className={`text-right ${isUp ? 'text-red-400' : 'text-green-400'}`}>
@@ -756,54 +770,56 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
       </div>
 
       {chartData.length > 0 && (
-        <div className="flex-1 w-full px-2 pb-2 min-h-0 relative">
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-              <CartesianGrid stroke="#374151" strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="date" hide />
-              <YAxis yAxisId="price" orientation="right" domain={['auto', 'auto']} tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={35} />
-              <YAxis yAxisId="volume" orientation="left" domain={[0, maxVolume * 3]} hide />
-              {chartMode === 'kd' && <YAxis yAxisId="kd" orientation="left" domain={[0, 100]} hide />}
-              <Tooltip content={<CustomTooltip />} cursor={<CustomCursor />} />
+        <div className="flex-1 w-full px-2 pb-2 min-h-0 relative flex flex-col">
+          <div className="flex-1 w-full min-h-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
+                <CartesianGrid stroke="#374151" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="date" hide />
+                <YAxis yAxisId="price" orientation="right" domain={['auto', 'auto']} tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={35} />
+                <YAxis yAxisId="volume" orientation="left" domain={[0, maxVolume * 3]} hide />
+                {chartMode === 'kd' && <YAxis yAxisId="kd" orientation="left" domain={[0, 100]} hide />}
+                <Tooltip content={<CustomTooltip />} cursor={<CustomCursor />} />
 
-              {/* 成交量柱狀圖 (底層) */}
-              <Bar
-                yAxisId="volume"
-                dataKey="volume"
-                fill="#3b82f6"
-                fillOpacity={0.2}
-                isAnimationActive={false}
-              />
+                {/* 成交量柱狀圖 (底層) */}
+                <Bar
+                  yAxisId="volume"
+                  dataKey="volume"
+                  fill="#3b82f6"
+                  fillOpacity={0.2}
+                  isAnimationActive={false}
+                />
 
-              {/* K線蠟燭圖 (上層) */}
-              <Bar
-                yAxisId="price"
-                dataKey="priceRange"
-                shape={<CandleStickShape />}
-                isAnimationActive={false}
-                barSize={8}
-              />
+                {/* K線蠟燭圖 (上層) */}
+                <Bar
+                  yAxisId="price"
+                  dataKey="priceRange"
+                  shape={<CandleStickShape />}
+                  isAnimationActive={false}
+                  barSize={8}
+                />
 
-              {chartMode === 'ma' ? (
-                <>
-                  {/* 均線模式 */}
-                  <Line yAxisId="price" type="monotone" dataKey="ma5" stroke="#f59e0b" dot={false} strokeWidth={1} name="MA5" />
-                  <Line yAxisId="price" type="monotone" dataKey="ma10" stroke="#10b981" dot={false} strokeWidth={1} name="MA10" />
-                  <Line yAxisId="price" type="monotone" dataKey="ma20" stroke="#ec4899" dot={false} strokeWidth={1} name="MA20" />
-                </>
-              ) : (
-                <>
-                  {/* KD模式 */}
-                  <Line yAxisId="kd" type="monotone" dataKey="k" stroke="#fb923c" dot={false} strokeWidth={1.5} name="K" />
-                  <Line yAxisId="kd" type="monotone" dataKey="d" stroke="#22d3ee" dot={false} strokeWidth={1.5} name="D" />
-                  <ReferenceLine yAxisId="kd" y={80} stroke="rgba(239, 68, 68, 0.3)" strokeDasharray="3 3" />
-                  <ReferenceLine yAxisId="kd" y={20} stroke="rgba(34, 197, 94, 0.3)" strokeDasharray="3 3" />
-                </>
-              )}
-            </ComposedChart>
-          </ResponsiveContainer>
+                {chartMode === 'ma' ? (
+                  <>
+                    {/* 均線模式 */}
+                    <Line yAxisId="price" type="monotone" dataKey="ma5" stroke="#f59e0b" dot={false} strokeWidth={1} name="MA5" />
+                    <Line yAxisId="price" type="monotone" dataKey="ma10" stroke="#10b981" dot={false} strokeWidth={1} name="MA10" />
+                    <Line yAxisId="price" type="monotone" dataKey="ma20" stroke="#ec4899" dot={false} strokeWidth={1} name="MA20" />
+                  </>
+                ) : (
+                  <>
+                    {/* KD模式 */}
+                    <Line yAxisId="kd" type="monotone" dataKey="k" stroke="#fb923c" dot={false} strokeWidth={1.5} name="K" />
+                    <Line yAxisId="kd" type="monotone" dataKey="d" stroke="#22d3ee" dot={false} strokeWidth={1.5} name="D" />
+                    <ReferenceLine yAxisId="kd" y={80} stroke="rgba(239, 68, 68, 0.3)" strokeDasharray="3 3" />
+                    <ReferenceLine yAxisId="kd" y={20} stroke="rgba(34, 197, 94, 0.3)" strokeDasharray="3 3" />
+                  </>
+                )}
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
           {/* 圖例 */}
-          <div className="flex justify-center gap-3 text-[10px] mt-1">
+          <div className="flex justify-center gap-3 text-[10px] mt-1 shrink-0">
             {chartMode === 'ma' ? (
               <>
                 <span className="text-amber-500">● MA5</span>
@@ -1374,16 +1390,23 @@ export default function App() {
     portfolioCount: portfolio.length
   }), [data, groupedByIndustry, portfolio]);
 
-  const scanTime = useMemo(() => {
-    if (!data?.updatedAt) return 'N/A';
-    // GitHub Actions 產生的時間是 UTC (無後綴)，需視為 UTC 處理
-    const dateStr = data.updatedAt.endsWith('Z') ? data.updatedAt : `${data.updatedAt}Z`;
+  const [displayTimes, setDisplayTimes] = useState({ scan: 'N/A', alert: 'N/A' });
 
-    return new Date(dateStr).toLocaleString('zh-TW', {
-      year: 'numeric', month: '2-digit', day: '2-digit',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      timeZoneName: 'short',
-      timeZone: 'Asia/Taipei'
+  useEffect(() => {
+    if (!data) return;
+
+    const fmt = (iso) => {
+      if (!iso) return 'N/A';
+      const d = iso.endsWith('Z') ? iso : `${iso}Z`;
+      return new Date(d).toLocaleString('zh-TW', {
+        month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+        timeZone: 'Asia/Taipei'
+      });
+    };
+
+    setDisplayTimes({
+      scan: fmt(data.quoteTime || data.updatedAt),
+      alert: fmt(data.alertUpdateTime || data.updatedAt)
     });
   }, [data]);
 
@@ -1523,10 +1546,19 @@ export default function App() {
           </div>
           <div className="bg-gray-900 p-4 rounded-xl border border-gray-800">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-gray-400 text-sm">掃描時間</span>
+              <span className="text-gray-400 text-sm">更新時間</span>
               <Zap className="w-4 h-4 text-yellow-500" />
             </div>
-            <div className="text-xs font-mono text-gray-300 leading-relaxed">{scanTime}</div>
+            <div className="flex flex-col gap-1">
+              <div className="text-xs text-gray-400 flex justify-between">
+                <span>掃描:</span>
+                <span className="font-mono text-white">{displayTimes.scan}</span>
+              </div>
+              <div className="text-xs text-gray-400 flex justify-between">
+                <span>警示:</span>
+                <span className="font-mono text-yellow-500">{displayTimes.alert}</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1559,7 +1591,7 @@ export default function App() {
           <Briefcase className="w-5 h-5 text-yellow-500" />
           <h2 className="text-xl font-bold text-white">關於本站策略：傑西·利弗摩爾的關鍵點哲學</h2>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-300 leading-relaxed">
           <div>
             <h3 className="font-bold text-white mb-2">核心交易邏輯</h3>
