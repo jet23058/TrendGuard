@@ -7,7 +7,7 @@
 1. 股價站上所有均線 (MA5, MA10, MA20, MA60)
 2. 連續兩日紅 K (收盤 > 開盤)
 3. 收盤價突破近 N 日新高
-4. (新增) 若有市場警示(處置/注意)，則忽略技術面條件直接列入
+4. (修正) 警示/處置股也必須符合上述技術條件才能入選
 """
 import json
 import os
@@ -66,9 +66,6 @@ def fetch_market_alerts():
                     start_roc, end_roc = period_str.split('～')
                     start_dt = roc_to_date(start_roc)
                     end_dt = roc_to_date(end_roc)
-                    
-                    # Fix: Handle compact date format for TWSE if necessary, or ensure robust parsing
-                    # TWSE usually returns 114/11/06. ROC function handles that.
                     
                     # --- 修改 1: 放寬日期判斷，允許顯示「明天開始」的處置股 ---
                     # 原本: if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1):
@@ -140,9 +137,6 @@ def fetch_market_alerts():
                 if '~' in period_str:
                     try:
                         start_roc, end_roc = period_str.split('~')
-                        # TPEX date format often YYYMMDD e.g. 1150106, but checking sample '1150109~1150122'
-                        # If it is '115/01/09' format, logic is same. If '1150109', need adjust.
-                        # Sample output was "1150109~1150122" (no slashes)
                         
                         def parse_roc_compact(d_str):
                             # d_str like "1150109"
@@ -282,8 +276,8 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
     2. 連續 2 日以上紅 K
     3. 收盤價突破近 N 日新高
     
-    例外：
-    若該股票有市場警示(alert_data)，則忽略上述條件，強制納入
+    修正：
+    即使該股票有市場警示(alert_data)，也必須符合技術指標才能列入
     """
     try:
         # Check alerts first
@@ -340,11 +334,11 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         )
         is_two_red_k = consecutive_red >= 2
         
-        # --- 修改 2: 處置股強制通關邏輯 ---
+        # --- 修改: 嚴格執行技術篩選 (原邏輯為警示股可跳過篩選) ---
         has_alert = alert_data is not None
         
-        # 如果既沒有符合技術指標，也沒有警示，才過濾掉
-        if not (is_breakout and is_above_all_ma and is_two_red_k) and not has_alert:
+        # 修正: 必須符合突破、均線與紅K條件，否則直接剔除
+        if not (is_breakout and is_above_all_ma and is_two_red_k):
             return None
         
         # 計算支撐點
@@ -401,10 +395,10 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         signal_text = f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列"
         priority_score = 90 + consecutive_red
         
-        if has_alert and not (is_breakout and is_above_all_ma):
-             # 僅因為警示而入選
-             signal_text = f"⚠️ 市場警示股 ({alert_data.get('badge', '注意')})，技術面未達突破標準"
-             priority_score = 200 # 讓警示股排在很前面，容易看到
+        if has_alert:
+             # 如果是警示股且符合技術條件，加註警語
+             signal_text = f"⚠️ {alert_data.get('badge', '注意')}股 - {signal_text}"
+             priority_score += 10 # 稍微提高權重
         
         return {
             "ticker": code,
@@ -419,7 +413,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
             "d": latest_d,
             "volume": int(today['Volume']),
             "signal": {
-                "type": "breakout" if (is_breakout and is_above_all_ma) else "alert",
+                "type": "breakout", # 統一為 breakout，因為現在都必須符合技術條件
                 "text": f"{signal_text}。技術支撐位 {round(stop_loss, 1)}",
                 "priority": priority_score
             },
