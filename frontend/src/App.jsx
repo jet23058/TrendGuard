@@ -1586,6 +1586,7 @@ export default function App() {
           />
         ))}
       </main>
+      
       <section className="bg-gray-900 border border-gray-800 rounded-xl p-8 mt-12 mb-12">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800">
           <Briefcase className="w-8 h-8 text-yellow-500" />
@@ -1639,9 +1640,30 @@ export default function App() {
           </div>
         </div>
       </section>
-      <footer className="text-center py-6 border-t border-gray-800 mt-10">
-        <p className="text-gray-500 text-xs">🎯 利弗摩爾台股戰情室 | 基於 Jesse Livermore 交易哲學設計</p>
-        <p className="text-gray-600 text-xs mt-1">⚠️ 本系統僅供參考，不構成投資建議。投資有風險，請謹慎評估。</p>
+      
+      <footer className="py-8 border-t border-gray-800 mt-12 bg-gray-900/50">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-gray-400 font-bold mb-2">利弗摩爾台股戰情室 TrendGuard</p>
+          <p className="text-gray-500 text-xs mb-4">
+            本系統基於 Jesse Livermore 交易哲學設計，提供台股技術分析數據。
+            <br />
+            資料來源：台灣證券交易所 (TWSE) 與 Yahoo Finance。
+          </p>
+          
+          <div className="flex justify-center gap-6 text-xs text-gray-500 mb-4">
+            {/* 這些連結對 AdSense 很重要，建議之後補上真實頁面，目前可先暫時連回 # */}
+            <a href="#" className="hover:text-gray-300">隱私權政策 (Privacy Policy)</a>
+            <a href="#" className="hover:text-gray-300">使用條款 (Terms of Service)</a>
+            <a href="#" className="hover:text-gray-300">免責聲明</a>
+            <a href="#" className="hover:text-gray-300">聯絡我們</a>
+          </div>
+      
+          <p className="text-gray-600 text-[10px]">
+            ⚠️ 投資有風險，本站資訊僅供參考，不構成任何投資建議。使用者應自行承擔交易風險。
+            <br />
+            Copyright © {new Date().getFullYear()} TrendGuard. All rights reserved.
+          </p>
+        </div>
       </footer>
     </div>
   );
