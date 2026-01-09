@@ -1,8 +1,8 @@
 {
   "date": "2026-01-09",
-  "updatedAt": "2026-01-09T06:41:05.687325",
+  "updatedAt": "2026-01-09T10:47:17.049602",
   "quoteTime": "2026-01-09T06:41:05.687325",
-  "alertUpdateTime": "2026-01-09T06:41:05.687325",
+  "alertUpdateTime": "2026-01-09T10:47:17.049591",
   "scanType": "livermore_breakout",
   "criteria": {
     "lookbackDays": 20,
@@ -2653,7 +2653,13 @@
           "ma20": 46.63
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "warning",
+        "badge": "警示",
+        "color": "yellow",
+        "info": "注意股",
+        "detail": "當日本益比為110.38、股價淨值比為8.01且為其所屬產業類別股價淨值比之2.62倍、當日週轉率達8.51%(第六款)"
+      }
     },
     {
       "ticker": "1810",
@@ -12796,7 +12802,13 @@
           "ma20": 46.61
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "warning",
+        "badge": "警示",
+        "color": "yellow",
+        "info": "注意股",
+        "detail": "最近六個營業日(含當日)之累積週轉率為101.87%，當日週轉率達45.76%(第十款)"
+      }
     },
     {
       "ticker": "8455",
