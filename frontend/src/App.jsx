@@ -1586,26 +1586,56 @@ export default function App() {
           />
         ))}
       </main>
-      <section className="bg-gray-900 border border-gray-800 rounded-xl p-6 mt-8">
-        <div className="flex items-center gap-2 mb-4">
-          <Briefcase className="w-5 h-5 text-yellow-500" />
-          <h2 className="text-xl font-bold text-white">關於本站策略：傑西·利弗摩爾的關鍵點哲學</h2>
+      <section className="bg-gray-900 border border-gray-800 rounded-xl p-8 mt-12 mb-12">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800">
+          <Briefcase className="w-8 h-8 text-yellow-500" />
+          <h2 className="text-2xl font-bold text-white">深度解析：傑西·利弗摩爾 (Jesse Livermore) 的交易心法</h2>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-gray-300 leading-relaxed">
+      
+        <div className="space-y-8 text-gray-300 leading-relaxed">
+          
+          {/* 第一段：策略核心 */}
           <div>
-            <h3 className="font-bold text-white mb-2">核心交易邏輯</h3>
-            <p className="mb-4 text-sm">
-              本系統並非單純的技術指標篩選器，而是基於傳奇交易員 Jesse Livermore 在《股票作手回憶錄》中提出的「關鍵點 (Pivot Point)」理論設計。
-              我們捕捉當股價突破長期整理區間，且同時伴隨成交量放大與均線多頭排列的時刻。這通常意味著「最小阻力線」已經確立。
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <span className="bg-blue-600 w-1 h-6 block rounded-full"></span>
+              什麼是「關鍵點 (Pivot Point)」理論？
+            </h3>
+            <p className="mb-4">
+              傑西·利弗摩爾被譽為華爾街史上最偉大的投機客，他的核心哲學並非頻繁交易，而是「耐心等待」。他認為市場大部分時間都是雜亂無章的，只有當價格來到某個心理關卡——即他所謂的<strong>「關鍵點」</strong>時，真正的行情才會啟動。
+            </p>
+            <p>
+              本系統透過演算法模擬此一邏輯：我們不預測底部，而是等待股價<strong>「帶量突破」</strong>長期的盤整區間。當價格創下近期新高，且均線呈現多頭排列時，往往代表市場上的「最小阻力線 (Line of Least Resistance)」已經轉向早方。
             </p>
           </div>
+      
+          {/* 第二段：資金管理 */}
           <div>
-            <h3 className="font-bold text-white mb-2">風險控管原則</h3>
-            <ul className="list-disc pl-5 space-y-2 text-sm">
-              <li><strong className="text-gray-200">資金保護：</strong> 系統會自動計算支撐位，協助投資人嚴格執行停損，避免單筆虧損擴大。</li>
-              <li><strong className="text-gray-200">試單與加碼：</strong> 真正的趨勢不會一天結束。利弗摩爾強調「只有在賺錢的時候才加碼」，本系統會標示出適合加碼的強勢訊號。</li>
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <span className="bg-red-600 w-1 h-6 block rounded-full"></span>
+              風險控管：保本是第一要務
+            </h3>
+            <p className="mb-4">
+              利弗摩爾曾說：「賺大錢的不是依靠買進或賣出，而是依靠『等待』。」但在等待的過程中，保護本金至關重要。本系統內建嚴格的風險監控指標：
+            </p>
+            <ul className="list-disc pl-6 space-y-2 bg-gray-950/50 p-4 rounded-lg border border-gray-800">
+              <li><strong>硬性停損機制：</strong>建議投資人將單筆虧損嚴格控制在總資金的 10% 以內。系統會自動標示跌破支撐的警示，避免人性的猶豫導致虧損擴大。</li>
+              <li><strong>汰弱留強：</strong>不要在虧損的部位攤平。如果一檔股票買進後沒有如預期上漲，反而跌破關鍵點，代表判斷錯誤，應立即出場。</li>
             </ul>
+          </div>
+      
+          {/* 第三段：加碼哲學 */}
+          <div>
+            <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
+              <span className="bg-green-600 w-1 h-6 block rounded-full"></span>
+              金字塔式加碼法 (Pyramiding)
+            </h3>
+            <p>
+              真正的暴利來自於大波段趨勢。利弗摩爾強調<strong>「只有在賺錢的時候才加碼」</strong>。當第一筆試單部位出現獲利，且股價回測支撐不破、再次過高時，才是安全的加碼點。本系統的「連紅K」與「續漲榜」功能，即是為了輔助投資人判斷趨勢是否延續，以決定是否進行順勢加碼。
+            </p>
+          </div>
+      
+          <div className="bg-blue-900/20 border border-blue-800 p-4 rounded text-sm text-blue-200 mt-4">
+            <strong>系統使用指南：</strong> 請利用上方的「市場掃描」功能查看今日符合突破條件的標的，並搭配「我的庫存」功能追蹤持股狀態。所有數據僅供技術分析研究，不作為直接的買賣建議。
           </div>
         </div>
       </section>
