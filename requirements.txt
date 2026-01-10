@@ -1,4 +1,5 @@
-streamlit>=1.32.0
+stfirebase-admin==6.5.0
+google-generativeai
 yfinance>=0.2.36
 pandas>=2.0.0
 pandas_ta>=0.3.14b0

@@ -2,7 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026-01-04]
+## [2026-01-10]
+
+### Added
+- [Feat] **Daily Articles Waterfall View**: New `/articles` page with a masonry-style waterfall layout for browsing historical reports (`frontend/src/pages/ArticleList.jsx`).
+- [Feat] **AI-Powered Market Analysis**: Integrated Google Gemini API to generate daily market commentary and summaries (`scripts/article_generator.py`).
+- [Feat] **Automatic Article Indexing**: Backend now generates `articles_index.json` for fast frontend retrieval (`scripts/update_daily.py`).
+- [Feat] **Rich Article Page**: New `/report/:date` page displaying markdown content alongside interactive stock cards (`frontend/src/pages/DailyReport.jsx`).
+- [UI] **Shared Header Component**: Extracted navigation and auth controls to a reusable `Header` component with active state indication (`frontend/src/components/Header.jsx`).
+- [UI] **Interactive Charts Restored**: Restored MA/KD toggle and detailed tooltips in `StockCardMini` component (`frontend/src/components/StockCardMini.jsx`).
+
+### Changed
+- [Refactor] **Navigation Architecture**: Implemented `react-router-dom` for multi-page navigation (Dashboard / Daily Articles).
+- [Refactor] **Home Page Layout**: Removed the inline article banner from the dashboard to focus on stock data.
+- [Refactor] **Component Extraction**: Refactored `App.jsx` by extracting `IndustryGroup`, `StockCardMini`, and `Header` into separate files.
+- [Data] **Data Structure Separation**: Separated `history/` (snapshot data) and `articles/` (AI text content) in `public/data` for cleaner data management.
+
+
 
 ### Added
 - [Feat] React frontend with Vite + TailwindCSS (frontend/)

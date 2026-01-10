@@ -1,7 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
+import DailyReport from './pages/DailyReport.jsx'
+import ArticleList from './pages/ArticleList.jsx'
 
 // AdSense Injection
 const adSenseId = import.meta.env.VITE_ADSENSE_ID;
@@ -22,6 +25,12 @@ if (adSenseId) {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<App />} />
+        <Route path="/articles" element={<ArticleList />} />
+        <Route path="/report/:date" element={<DailyReport />} />
+      </Routes>
+    </BrowserRouter>
   </StrictMode>,
 )
