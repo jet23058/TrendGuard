@@ -551,12 +551,47 @@ def update_existing_alerts():
 
 
 
+# -----------------------------------------------
+# Article Generation Integration
+# -----------------------------------------------
+from article_generator import generate_daily_article, save_to_json
+
 def main():
     """主程式"""
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--update-alerts', action='store_true', help='Update existing alerts only')
+    parser.add_argument('--generate-article-only', action='store_true', help='Generate article from existing data only')
+    args = parser.parse_args()
+
     # Check arguments
-    if len(sys.argv) > 1 and sys.argv[1] == '--update-alerts':
+    if args.update_alerts:
         update_existing_alerts()
         return
+
+    # Check Manual Article Trigger
+    if args.generate_article_only:
+        print("🚀 Manual Trigger: Generating Article Only")
+        output_file = OUTPUT_DIR / "daily_scan_results.json"
+        
+        if not output_file.exists():
+            print(f"❌ Error: {output_file} not found. Cannot generate article.")
+            sys.exit(1)
+            
+        try:
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            article = generate_daily_article(data)
+            if save_to_json(article):
+                print("✅ Manual article generation and save completed successfully.")
+            else:
+                print("⚠️ Article generated but NOT saved (check errors above).")
+                sys.exit(1)
+            return
+        except Exception as e:
+            print(f"❌ Failed to generate article: {e}")
+            sys.exit(1)
 
     print(f"\n=== 利弗摩爾強勢突破掃描 ===")
     print(f"掃描時間: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -647,10 +682,70 @@ def main():
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(output, f, ensure_ascii=False, indent=2)
     
+    # [NEW] Save History JSON for Article Page
+    history_dir = OUTPUT_DIR / "history"
+    history_dir.mkdir(exist_ok=True)
+    history_file = history_dir / f"{output['date']}.json"
+    with open(history_file, 'w', encoding='utf-8') as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+    print(f"✅ History saved to {history_file}")
+    
     print(f"\n✅ 已輸出至 {output_file}")
+
+    # -----------------------------------------------
+    # Auto Generate Article
+    # -----------------------------------------------
+    try:
+        print("正在產生盤勢分析文章...")
+        article = generate_daily_article(output)
+        save_to_json(article)
+        print("✅ 已產生每日分析文章並儲存")
+    except Exception as e:
+        print(f"⚠️ 文章產生失敗 (不影響主流程): {e}")
     
     return output
 
 
+
+def generate_articles_index():
+    """Scans the articles directory and generates an index JSON file."""
+    articles_dir = OUTPUT_DIR / "articles"
+    index_file = OUTPUT_DIR / "articles_index.json"
+    
+    if not articles_dir.exists():
+        print("⚠️ No articles directory found.")
+        return
+
+    index_data = []
+    # Glob all JSON files in articles directory
+    for file_path in sorted(articles_dir.glob("*.json"), reverse=True):
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                
+                # Extract summary info
+                summary_data = {
+                    "date": data.get("date", file_path.stem),
+                    "title": data.get("title", "無標題"),
+                    "isAiGenerated": data.get("isAiGenerated", False),
+                    # Create a short preview from content if possible
+                    "preview": data.get("content", "")[:100].replace('#', '').strip() + "..." 
+                }
+                index_data.append(summary_data)
+        except Exception as e:
+            print(f"⚠️ Failed to read article {file_path.name}: {e}")
+
+    # Write index file
+    try:
+        with open(index_file, 'w', encoding='utf-8') as f:
+            json.dump(index_data, f, ensure_ascii=False, indent=2)
+        print(f"✅ Articles index generated: {index_file} ({len(index_data)} articles)")
+    except Exception as e:
+        print(f"❌ Failed to write articles index: {e}")
+
+
 if __name__ == "__main__":
     main()
+    # Always regenerate index after main process
+    generate_articles_index()
+

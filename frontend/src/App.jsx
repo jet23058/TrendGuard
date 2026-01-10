@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import {
   TrendingUp,
   TrendingDown,
@@ -28,6 +29,11 @@ import {
   Info // 新增 Info 圖示
 } from 'lucide-react';
 import Tesseract from 'tesseract.js';
+
+import StockCardMini from './components/StockCardMini';
+import SimpleMarkdown from './components/SimpleMarkdown';
+import IndustryGroup from './components/IndustryGroup';
+import Header from './components/Header';
 import { auth, db, googleProvider } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, onSnapshot } from 'firebase/firestore';
@@ -134,130 +140,7 @@ const TAIWAN_STOCKS = [
   { ticker: '00929', name: '復華台灣科技優息' }
 ];
 
-// --- 1. K線圖繪製元件 ---
-const CandleStickShape = (props) => {
-  const { x, y, width, height, payload } = props;
-  const { open, close, high, low } = payload;
 
-  if (!high || !low || !open || !close) return null;
-
-  const isUp = close >= open;
-  const color = isUp ? '#ef4444' : '#22c55e'; // 紅漲綠跌
-
-  // 確保有足夠的寬度
-  const candleWidth = Math.max(width * 0.8, 6);
-  const wickWidth = 1.5;
-  const centerX = x + width / 2;
-
-  const range = high - low;
-  if (range === 0) {
-    return <line x1={x} y1={y} x2={x + width} y2={y} stroke={color} strokeWidth={2} />;
-  }
-
-  const ratio = height / range;
-
-  // 計算各點位置
-  const yHigh = y;
-  const yLow = y + height;
-  const yOpen = y + (high - open) * ratio;
-  const yClose = y + (high - close) * ratio;
-
-  const bodyTop = Math.min(yOpen, yClose);
-  const bodyHeight = Math.max(Math.abs(yOpen - yClose), 2); // 最小高度 2px
-
-  return (
-    <g>
-      {/* 上影線 */}
-      <line
-        x1={centerX}
-        y1={yHigh}
-        x2={centerX}
-        y2={bodyTop}
-        stroke={color}
-        strokeWidth={wickWidth}
-      />
-      {/* 下影線 */}
-      <line
-        x1={centerX}
-        y1={bodyTop + bodyHeight}
-        x2={centerX}
-        y2={yLow}
-        stroke={color}
-        strokeWidth={wickWidth}
-      />
-      {/* 蠟燭體 */}
-      <rect
-        x={centerX - candleWidth / 2}
-        y={bodyTop}
-        width={candleWidth}
-        height={bodyHeight}
-        fill={color}
-        stroke={color}
-        strokeWidth={1}
-      />
-    </g>
-  );
-};
-
-const CustomCursor = (props) => {
-  const { x, y, width, height, points } = props;
-
-  // 處理不同類型的游標屬性
-  let centerX;
-  let startY = y || 0;
-  let endY = (y || 0) + (height || 200);
-
-  if (points && points.length > 0) {
-    // 線圖模式：使用 points 的 x
-    centerX = points[0].x;
-  } else if (x !== undefined) {
-    // Bar 圖模式：加上固定偏移量來對齊 K 棒中心
-    centerX = x + 15;
-  } else {
-    return null;
-  }
-
-  return (
-    <line
-      x1={centerX}
-      y1={startY}
-      x2={centerX}
-      y2={endY}
-      stroke="#ffffff"
-      strokeWidth={1.5}
-      strokeOpacity={0.8}
-    />
-  );
-};
-
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const isUp = data.close >= data.open;
-    return (
-      <div className="bg-gray-800 border border-gray-700 p-3 rounded shadow-lg text-xs z-50">
-        <p className="text-gray-400 mb-2 font-mono border-b border-gray-700 pb-1">{label}</p>
-        <div className="grid grid-cols-2 gap-x-6 gap-y-1">
-          <span className="text-gray-400">開盤</span>
-          <span className="font-mono text-right text-white">{data.open?.toFixed(1)}</span>
-          <span className="text-gray-400">最高</span>
-          <span className="font-mono text-right text-red-400">{data.high?.toFixed(1)}</span>
-          <span className="text-gray-400">最低</span>
-          <span className="font-mono text-right text-green-400">{data.low?.toFixed(1)}</span>
-          <span className="text-gray-400">收盤</span>
-          <span className={`font-mono text-right ${isUp ? 'text-red-400' : 'text-green-400'}`}>{data.close?.toFixed(1)}</span>
-        </div>
-        {data.k && (
-          <div className="mt-2 pt-2 border-t border-gray-700 grid grid-cols-2 gap-x-6">
-            <span className="text-orange-400">K: {data.k?.toFixed(1)}</span>
-            <span className="text-cyan-400 text-right">D: {data.d?.toFixed(1)}</span>
-          </div>
-        )}
-      </div>
-    );
-  }
-  return null;
-};
 
 // --- 2. 免責聲明 ---
 const Disclaimer = () => (
@@ -271,6 +154,20 @@ const Disclaimer = () => (
     </div>
   </div>
 );
+
+// --- 2.0 輔助函式：移除 Markdown 符號取得純文字 (用於預覽) ---
+const stripMarkdown = (md) => {
+  if (!md) return '';
+  return md
+    .replace(/#{1,6} /g, '') // Remove Headers
+    .replace(/\*\*/g, '')    // Remove Bold
+    .replace(/- /g, '')      // Remove List bullets
+    .replace(/---/g, '')     // Remove HR
+    .replace(/\n+/g, ' ')    // Collapse newlines
+    .trim();
+};
+
+
 
 // --- 3. 匯入庫存 Modal ---
 const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
@@ -671,226 +568,9 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
   );
 };
 
-// --- 4. 精簡版股票卡片 ---
-const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
-  const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc, alert } = stock;
-  const isUp = changePct >= 0;
-  const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
-  const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
 
-  const chartData = useMemo(() => {
-    if (!ohlc || ohlc.length === 0) return [];
-    return ohlc.slice(-20).map(item => ({ ...item, priceRange: [item.low, item.high] }));
-  }, [ohlc]);
 
-  // 計算成交量最大值用於正規化
-  const maxVolume = useMemo(() => {
-    if (!chartData.length) return 1;
-    return Math.max(...chartData.map(d => d.volume || 0));
-  }, [chartData]);
 
-  // 計算未實現損益 (如果有庫存資訊)
-  const unrealizedPL = useMemo(() => {
-    if (!portfolioItem || !portfolioItem.cost || !currentPrice) return null;
-    const diff = currentPrice - portfolioItem.cost;
-    const pl = diff * (portfolioItem.shares || 1000); // 預設 1000 股如果沒填
-    const plPct = (diff / portfolioItem.cost) * 100;
-    return { val: pl, pct: plPct };
-  }, [currentPrice, portfolioItem]);
-
-  return (
-    <div className={`bg-gray-800 rounded-xl border shadow-lg flex-shrink-0 w-72 h-[450px] flex flex-col relative ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
-      <div className="p-3 border-b border-gray-700 bg-gray-900/50 rounded-t-xl">
-        <div className="flex justify-between items-center mb-1">
-          <div className="flex items-center gap-2">
-            <a href={yahooUrl} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded transition-colors cursor-pointer">
-              {ticker} ↗
-            </a>
-            <h3 className="text-sm font-bold text-white truncate max-w-[80px]">{name}</h3>
-            {alert && (
-              <div className="group relative z-10">
-                <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
-                  {alert.badge}
-                </span>
-                {/* Tooltip */}
-                <div className="absolute left-0 top-full mt-1 w-48 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
-                  <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
-                    {alert.info}
-                  </div>
-                  <div className="text-gray-400 leading-relaxed">{alert.detail}</div>
-                </div>
-              </div>
-            )}
-            {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
-          </div>
-          <div className={`text-right ${isUp ? 'text-red-400' : 'text-green-400'}`}>
-            <div className="text-lg font-bold font-mono">{currentPrice?.toFixed(2)}</div>
-            <div className="text-xs font-medium flex items-center justify-end gap-1">
-              {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
-              {changePct > 0 ? '+' : ''}{changePct?.toFixed(2)}%
-            </div>
-          </div>
-        </div>
-
-        {/* 庫存資訊顯示區 */}
-        {portfolioItem && (
-          <div className="flex justify-between items-center text-[10px] bg-gray-800/50 rounded px-2 py-1 mt-1 border border-gray-700/50">
-            <div className="text-gray-400 flex gap-2">
-              <span>{portfolioItem.shares.toLocaleString()} 股</span>
-              <span>均價 {portfolioItem.cost}</span>
-            </div>
-            {unrealizedPL && (
-              <div className={`font-mono font-bold ${unrealizedPL.val >= 0 ? 'text-red-400' : 'text-green-400'}`}>
-                {unrealizedPL.val >= 0 ? '+' : ''}{Math.round(unrealizedPL.val).toLocaleString()} ({unrealizedPL.val >= 0 ? '+' : ''}{unrealizedPL.pct.toFixed(1)}%)
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 p-3 text-center">
-        <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-xs text-gray-400">連紅K</div>
-          <div className="font-mono text-lg font-bold text-red-400">{consecutiveRed}</div>
-        </div>
-        {/* KD 可點擊切換圖表模式 */}
-        <button
-          onClick={() => setChartMode(m => m === 'kd' ? 'ma' : 'kd')}
-          className={`rounded p-2 transition-colors ${chartMode === 'kd' ? 'bg-purple-900/50 ring-1 ring-purple-500' : 'bg-gray-700/30 hover:bg-gray-600/30'}`}
-        >
-          <div className="text-xs text-gray-400">KD {chartMode === 'kd' && '✓'}</div>
-          <div className="font-mono text-sm font-bold">
-            <span className="text-orange-400">{stock.k}</span>/<span className="text-cyan-400">{stock.d}</span>
-          </div>
-        </button>
-        <div className="bg-gray-700/30 rounded p-2">
-          <div className="text-xs text-gray-400">支撐</div>
-          <div className="font-mono text-sm font-bold text-white">{stopLoss?.toFixed(1)}</div>
-        </div>
-      </div>
-
-      {chartData.length > 0 && (
-        <div className="flex-1 w-full px-2 pb-2 min-h-0 relative flex flex-col">
-          <div className="flex-1 w-full min-h-0">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
-                <CartesianGrid stroke="#374151" strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" hide />
-                <YAxis yAxisId="price" orientation="right" domain={['auto', 'auto']} tick={{ fontSize: 9, fill: '#9ca3af' }} axisLine={false} tickLine={false} width={35} />
-                <YAxis yAxisId="volume" orientation="left" domain={[0, maxVolume * 3]} hide />
-                {chartMode === 'kd' && <YAxis yAxisId="kd" orientation="left" domain={[0, 100]} hide />}
-                <Tooltip content={<CustomTooltip />} cursor={<CustomCursor />} />
-
-                {/* 成交量柱狀圖 (底層) */}
-                <Bar
-                  yAxisId="volume"
-                  dataKey="volume"
-                  fill="#3b82f6"
-                  fillOpacity={0.2}
-                  isAnimationActive={false}
-                />
-
-                {/* K線蠟燭圖 (上層) */}
-                <Bar
-                  yAxisId="price"
-                  dataKey="priceRange"
-                  shape={<CandleStickShape />}
-                  isAnimationActive={false}
-                  barSize={8}
-                />
-
-                {chartMode === 'ma' ? (
-                  <>
-                    {/* 均線模式 */}
-                    <Line yAxisId="price" type="monotone" dataKey="ma5" stroke="#f59e0b" dot={false} strokeWidth={1} name="MA5" />
-                    <Line yAxisId="price" type="monotone" dataKey="ma10" stroke="#10b981" dot={false} strokeWidth={1} name="MA10" />
-                    <Line yAxisId="price" type="monotone" dataKey="ma20" stroke="#ec4899" dot={false} strokeWidth={1} name="MA20" />
-                  </>
-                ) : (
-                  <>
-                    {/* KD模式 */}
-                    <Line yAxisId="kd" type="monotone" dataKey="k" stroke="#fb923c" dot={false} strokeWidth={1.5} name="K" />
-                    <Line yAxisId="kd" type="monotone" dataKey="d" stroke="#22d3ee" dot={false} strokeWidth={1.5} name="D" />
-                    <ReferenceLine yAxisId="kd" y={80} stroke="rgba(239, 68, 68, 0.3)" strokeDasharray="3 3" />
-                    <ReferenceLine yAxisId="kd" y={20} stroke="rgba(34, 197, 94, 0.3)" strokeDasharray="3 3" />
-                  </>
-                )}
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-          {/* 圖例 */}
-          <div className="flex justify-center gap-3 text-[10px] mt-1 shrink-0">
-            {chartMode === 'ma' ? (
-              <>
-                <span className="text-amber-500">● MA5</span>
-                <span className="text-emerald-500">● MA10</span>
-                <span className="text-pink-500">● MA20</span>
-              </>
-            ) : (
-              <>
-                <span className="text-orange-400">● K</span>
-                <span className="text-cyan-400">● D</span>
-              </>
-            )}
-            <span className="text-blue-400/50">■ 成交量</span>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-// --- 5. 產業群組 ---
-const IndustryGroup = ({ sector, stocks, portfolioTickers, portfolio }) => {
-  // 排序：庫存優先
-  const sortedStocks = useMemo(() => {
-    return [...stocks].sort((a, b) => {
-      const aInPortfolio = portfolioTickers.includes(a.ticker);
-      const bInPortfolio = portfolioTickers.includes(b.ticker);
-      if (aInPortfolio && !bInPortfolio) return -1;
-      if (!aInPortfolio && bInPortfolio) return 1;
-      return 0;
-    });
-  }, [stocks, portfolioTickers]);
-
-  // 計算該產業中的庫存數量
-  const portfolioCount = useMemo(() => {
-    return stocks.filter(s => portfolioTickers.includes(s.ticker)).length;
-  }, [stocks, portfolioTickers]);
-
-  return (
-    <div className="mb-8">
-      <div className="flex items-center gap-2 mb-4">
-        <Factory className="w-5 h-5 text-blue-500" />
-        <h3 className="text-lg font-bold text-white">
-          {sector}
-          <span className="text-blue-400 ml-2">({stocks.length})</span>
-          {portfolioCount > 0 && (
-            <span className="text-yellow-400 ml-2 text-sm">
-              (庫存: {portfolioCount})
-            </span>
-          )}
-        </h3>
-        <ChevronRight className="w-5 h-5 text-gray-500" />
-      </div>
-      <div className="overflow-x-auto pb-4 -mx-4 px-4">
-        <div className="flex gap-3" style={{ minWidth: 'max-content' }}>
-          {sortedStocks.map(stock => {
-            const portfolioItem = portfolio.find(p => p.ticker === stock.ticker);
-            return (
-              <StockCardMini
-                key={stock.ticker}
-                stock={stock}
-                isInPortfolio={portfolioTickers.includes(stock.ticker)}
-                portfolioItem={portfolioItem}
-              />
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // --- 5.1 每日異動摘要組件 ---
 const DailyChangesSection = ({ changes, portfolio }) => {
@@ -1190,29 +870,66 @@ const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user }) => {
         <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-blue-500" />
         <div className="space-y-1">
           <p>「同步圖表」使用即時 API 並將資料儲存至雲端，之後重新整理即可直接讀取。</p>
-          <p className="opacity-80">注意：若在本地開發環境 (localhost) 且未啟動 API，同步可能會失敗。</p>
         </div>
       </div>
     </div>
   );
 };
 
+// --- 6. 文章 Banner 組件 ---
+const ArticleBanner = ({ article }) => {
+  const summary = stripMarkdown(article.content).substring(0, 100) + '...';
+
+  return (
+    <Link to={`/report/${article.date}`} className="block group cursor-pointer no-underline">
+      <div className="bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 border border-gray-700 hover:border-blue-500/50 rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-blue-900/20 relative overflow-hidden">
+        {/* 背景裝飾 */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 transition-opacity group-hover:opacity-100"></div>
+
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-6 relative z-10">
+          {/* 左側：日期與標題 */}
+          <div className="flex-shrink-0 min-w-[200px]">
+            <span className="inline-flex items-center gap-1.5 text-blue-400 text-xs font-bold bg-blue-900/30 px-2 py-1 rounded mb-2 border border-blue-800/50">
+              <Activity size={12} /> {article.date} 盤勢分析
+            </span>
+            <h3 className="text-xl font-bold text-white group-hover:text-blue-300 transition-colors">
+              {article.title || '今日大盤重點速覽'}
+            </h3>
+          </div>
+
+          {/* 中間：摘要 */}
+          <div className="hidden md:block flex-1 border-l border-gray-700 pl-6">
+            <p className="text-gray-400 text-sm leading-relaxed line-clamp-2 group-hover:text-gray-300 transition-colors">
+              {summary}
+            </p>
+          </div>
+
+          {/* 右側：Call to Action */}
+          <div className="flex items-center text-gray-500 group-hover:text-white transition-colors">
+            <span className="text-sm font-medium mr-2 hidden sm:block">閱讀全文</span>
+            <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center group-hover:bg-blue-600 transition-all">
+              <ChevronRight size={18} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+};
+
+
+
 // --- 7. 主程式 ---
 export default function App() {
   const [data, setData] = useState(null);
+  const [article, setArticle] = useState(null); // 新增文章狀態
+  // Removed selectedArticle state
+  // 用於控制 Modal 顯示
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [portfolio, setPortfolio] = useState(() => {
-    // 預設從 localStorage 載入 (未登入時)
-    try {
-      const saved = localStorage.getItem('tw_stock_portfolio');
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [portfolio, setPortfolio] = useState([]); // 僅允許登入後讀取，預設為空
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -1252,6 +969,7 @@ export default function App() {
         }
       } else {
         setIsDataLoaded(false);
+        setPortfolio([]); // 未登入狀態下清空庫存
       }
     });
     return () => unsubscribe();
@@ -1259,10 +977,9 @@ export default function App() {
 
   const [saveStatus, setSaveStatus] = useState('saved'); // 'saved', 'saving', 'error'
 
-  // 儲存庫存 (同時寫入 LocalStorage 與 Firestore)
+  // 儲存庫存 (僅寫入 Firestore)
   useEffect(() => {
-    localStorage.setItem('tw_stock_portfolio', JSON.stringify(portfolio));
-
+    // 移除 LocalStorage 寫入，確保資料安全性與隱私 (未登入即清空)
     if (user && isDataLoaded) { // 只有在登入且完成初始載入後才寫入雲端
       const saveToFirestore = async () => {
         setSaveStatus('saving');
@@ -1283,23 +1000,7 @@ export default function App() {
     }
   }, [portfolio, user, isDataLoaded]);
 
-  // 手動同步功能
-  const handleManualSync = async () => {
-    if (!user) return;
-    setSaveStatus('saving');
-    try {
-      await setDoc(doc(db, "users", user.uid), {
-        portfolio: portfolio,
-        updatedAt: new Date().toISOString()
-      }, { merge: true });
-      setSaveStatus('saved');
-      alert('同步成功！已儲存到雲端。');
-    } catch (err) {
-      console.error("Manual sync failed:", err);
-      setSaveStatus('error');
-      alert('同步失敗，請檢查網路或權限設定。');
-    }
-  };
+
 
   const handleLogin = async () => {
     try {
@@ -1313,9 +1014,8 @@ export default function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      // 登出後選擇保留當前畫面上的庫存，還是清空？
-      // 為了體驗，保留當前狀態，直到下次重新整理或登入
-      alert("已登出");
+      setPortfolio([]); // 登出後立即清空
+      // alert("已登出"); // 可選：不打擾使用者
     } catch (err) {
       console.error("Logout failed:", err);
     }
@@ -1324,9 +1024,26 @@ export default function App() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/data/daily_scan_results.json');
+      const DATA_BASE_URL = import.meta.env.DEV
+        ? '/data'
+        : 'https://raw.githubusercontent.com/jet23058/TrendGuard/data';
+
+      const response = await fetch(`${DATA_BASE_URL}/daily_scan_results.json`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      setData(await response.json());
+      const result = await response.json();
+      setData(result);
+
+      // Fetch Article if date exists
+      if (result.date) {
+        try {
+          const articleRes = await fetch(`${DATA_BASE_URL}/articles/${result.date}.json`);
+          if (articleRes.ok) {
+            setArticle(await articleRes.json());
+          }
+        } catch (err) {
+          console.warn("No article found for today");
+        }
+      }
     } catch (e) {
       setError(e.message);
     } finally {
@@ -1437,89 +1154,22 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans pb-10">
       <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} onImport={handleImport} recommendedStocks={data?.stocks || []} />
 
-      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-10 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-600 p-2 rounded-lg">
-              <BarChart2 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-bold tracking-tight text-white">利弗摩爾台股戰情室</h1>
-
-                {/* 懸浮說明 Tooltip */}
-                <div className="group relative flex items-center">
-                  <Info className="w-5 h-5 text-gray-400 hover:text-yellow-400 cursor-help transition-colors" />
-
-                  {/* Tooltip 本體 */}
-                  <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-80 p-4 bg-[#FEFCE8] border-2 border-yellow-400 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform translate-y-2 group-hover:translate-y-0">
-                    {/* 小三角形箭頭 */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FEFCE8] border-t-2 border-l-2 border-yellow-400 transform rotate-45"></div>
-
-                    {/* 內容 */}
-                    <div className="relative z-10 text-left">
-                      <h4 className="text-[#854D0E] font-bold text-base mb-2 border-b border-yellow-300 pb-2">
-                        📖 關於傑西·利弗摩爾
-                      </h4>
-                      <p className="text-[#A16207] text-xs mb-2 leading-relaxed">
-                        被譽為「投機之王」，本系統基於其《股票作手回憶錄》之核心哲學設計：
-                      </p>
-                      <ul className="text-[#713F12] text-xs space-y-1.5 list-disc pl-4">
-                        <li><strong className="text-[#854D0E]">順勢而為：</strong>不猜頭摸底，沿著最小阻力線操作。</li>
-                        <li><strong className="text-[#854D0E]">關鍵點 (Pivot)：</strong>耐心等待股價突破關鍵價位再進場。</li>
-                        <li><strong className="text-[#854D0E]">資金管理：</strong>虧損絕不超過本金 10%，嚴格執行。</li>
-                        <li><strong className="text-[#854D0E]">試單與加碼：</strong>分批進場，只有在賺錢時才加碼。</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-0.5">
-                <p className="text-xs text-gray-400">Livermore Breakout Scanner</p>
-                <span className="bg-green-900/40 text-green-500 text-[10px] px-1.5 py-0.5 rounded border border-green-800/50">真實數據</span>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            {user ? (
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handleManualSync}
-                  title="手動同步 (點擊強制儲存)"
-                  className="p-1.5 rounded-full hover:bg-gray-800 text-gray-400 transition-colors relative"
-                >
-                  <RefreshCw size={16} className={saveStatus === 'saving' ? 'animate-spin text-blue-400' : saveStatus === 'error' ? 'text-red-400' : ''} />
-                  {saveStatus === 'error' && <span className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></span>}
-                </button>
-                <div className="flex items-center gap-2 bg-gray-800 py-1.5 px-3 rounded-full border border-gray-700">
-                  <img src={user.photoURL} alt={user.displayName} className="w-6 h-6 rounded-full" />
-                  <span className="text-sm text-gray-300 hidden md:block">{user.displayName}</span>
-                  <button onClick={handleLogout} className="text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition-colors" title="登出">
-                    <LogOut size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={handleLogin}
-                className="flex items-center gap-2 text-gray-300 hover:text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                <UserIcon size={16} />
-                <span className="text-sm font-medium">登入 Google</span>
-              </button>
-            )}
-
-            <button onClick={() => setIsImportModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium transition-colors flex items-center gap-2">
-              <Upload size={16} /> 匯入庫存 {portfolio.length > 0 && <span className="bg-yellow-500 text-yellow-900 text-xs px-1.5 py-0.5 rounded-full font-bold">{portfolio.length}</span>}
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header
+        user={user}
+        onLogin={handleLogin}
+        onLogout={handleLogout}
+      />
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
         {/* 免責聲明 */}
         <Disclaimer />
+
+        {/* 文章區塊 (已移除：首頁不顯示文章) */}
+
+        {/* 統計卡片 */}
+
+        {/* 文章閱讀 Modal Removed */}
+
 
         {/* 統計卡片 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -1586,15 +1236,15 @@ export default function App() {
           />
         ))}
       </main>
-      
+
       <section className="bg-gray-900 border border-gray-800 rounded-xl p-8 mt-12 mb-12">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800">
           <Briefcase className="w-8 h-8 text-yellow-500" />
           <h2 className="text-2xl font-bold text-white">深度解析：傑西·利弗摩爾 (Jesse Livermore) 的交易心法</h2>
         </div>
-      
+
         <div className="space-y-8 text-gray-300 leading-relaxed">
-          
+
           {/* 第一段：策略核心 */}
           <div>
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
@@ -1608,7 +1258,7 @@ export default function App() {
               本系統透過演算法模擬此一邏輯：我們不預測底部，而是等待股價<strong>「帶量突破」</strong>長期的盤整區間。當價格創下近期新高，且均線呈現多頭排列時，往往代表市場上的「最小阻力線 (Line of Least Resistance)」已經轉向早方。
             </p>
           </div>
-      
+
           {/* 第二段：資金管理 */}
           <div>
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
@@ -1623,7 +1273,7 @@ export default function App() {
               <li><strong>汰弱留強：</strong>不要在虧損的部位攤平。如果一檔股票買進後沒有如預期上漲，反而跌破關鍵點，代表判斷錯誤，應立即出場。</li>
             </ul>
           </div>
-      
+
           {/* 第三段：加碼哲學 */}
           <div>
             <h3 className="text-lg font-bold text-white mb-3 flex items-center gap-2">
@@ -1634,37 +1284,55 @@ export default function App() {
               真正的暴利來自於大波段趨勢。利弗摩爾強調<strong>「只有在賺錢的時候才加碼」</strong>。當第一筆試單部位出現獲利，且股價回測支撐不破、再次過高時，才是安全的加碼點。本系統的「連紅K」與「續漲榜」功能，即是為了輔助投資人判斷趨勢是否延續，以決定是否進行順勢加碼。
             </p>
           </div>
-      
+
           <div className="bg-blue-900/20 border border-blue-800 p-4 rounded text-sm text-blue-200 mt-4">
             <strong>系統使用指南：</strong> 請利用上方的「市場掃描」功能查看今日符合突破條件的標的，並搭配「我的庫存」功能追蹤持股狀態。所有數據僅供技術分析研究，不作為直接的買賣建議。
           </div>
         </div>
       </section>
-      
+
       <footer className="py-8 border-t border-gray-800 mt-12 bg-gray-900/50">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-gray-400 font-bold mb-2">利弗摩爾台股戰情室 TrendGuard</p>
-          <p className="text-gray-500 text-xs mb-4">
-            本系統基於 Jesse Livermore 交易哲學設計，提供台股技術分析數據。
-            <br />
-            資料來源：台灣證券交易所 (TWSE) 與 Yahoo Finance。
-          </p>
-          
-          <div className="flex justify-center gap-6 text-xs text-gray-500 mb-4">
-            {/* 這些連結對 AdSense 很重要，建議之後補上真實頁面，目前可先暫時連回 # */}
-            <a href="#" className="hover:text-gray-300">隱私權政策 (Privacy Policy)</a>
-            <a href="#" className="hover:text-gray-300">使用條款 (Terms of Service)</a>
-            <a href="#" className="hover:text-gray-300">免責聲明</a>
-            <a href="#" className="hover:text-gray-300">聯絡我們</a>
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="md:flex md:justify-between mb-8">
+            <div className="mb-6 md:mb-0">
+              <p className="text-gray-400 font-bold mb-2">利弗摩爾台股戰情室 TrendGuard</p>
+              <p className="text-gray-500 text-xs mb-4">
+                本系統基於 Jesse Livermore 交易哲學設計，提供台股技術分析數據。
+                <br />
+                資料來源：台灣證券交易所 (TWSE) 與 Yahoo Finance。
+              </p>
+            </div>
+
+            {/* 歷史報告連結 */}
+            <div>
+              <h3 className="text-white font-bold mb-4 text-sm">📊 歷史市場分析報告</h3>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/report/2026-01-10" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-blue-400 transition-colors border border-gray-700">
+                  2026-01-10 盤後分析
+                </Link>
+                <Link to="/report/2026-01-09" className="px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded text-sm text-gray-400 transition-colors border border-gray-700">
+                  2026-01-09 盤後分析
+                </Link>
+              </div>
+            </div>
           </div>
-      
-          <p className="text-gray-600 text-[10px]">
-            ⚠️ 投資有風險，本站資訊僅供參考，不構成任何投資建議。使用者應自行承擔交易風險。
-            <br />
-            Copyright © {new Date().getFullYear()} TrendGuard. All rights reserved.
-          </p>
+
+          <div className="border-t border-gray-800 pt-8 text-center">
+            <div className="flex justify-center gap-6 text-xs text-gray-500 mb-4">
+              <a href="#" className="hover:text-gray-300">隱私權政策 (Privacy Policy)</a>
+              <a href="#" className="hover:text-gray-300">使用條款 (Terms of Service)</a>
+              <a href="#" className="hover:text-gray-300">免責聲明</a>
+              <a href="#" className="hover:text-gray-300">聯絡我們</a>
+            </div>
+
+            <p className="text-gray-600 text-[10px]">
+              ⚠️ 投資有風險，本站資訊僅供參考，不構成任何投資建議。使用者應自行承擔交易風險。
+              <br />
+              Copyright © {new Date().getFullYear()} TrendGuard. All rights reserved.
+            </p>
+          </div>
         </div>
       </footer>
-    </div>
+    </div >
   );
 }
