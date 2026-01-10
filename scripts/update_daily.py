@@ -554,7 +554,10 @@ def update_existing_alerts():
 # -----------------------------------------------
 # Article Generation Integration
 # -----------------------------------------------
-from article_generator import generate_daily_article, save_to_json
+try:
+    from article_generator import generate_daily_article, save_to_json
+except ModuleNotFoundError:
+    from scripts.article_generator import generate_daily_article, save_to_json
 
 def main():
     """主程式"""
