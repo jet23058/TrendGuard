@@ -17,6 +17,7 @@ on:
         - auto
         - full_scan
         - update_alerts
+        - generate_article
 
 jobs:
   update:
@@ -38,7 +39,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install yfinance pandas pytest twstock lxml requests
+          pip install yfinance pandas pytest twstock lxml requests google-generativeai
       
       - name: Run tests first
         run: |
@@ -50,6 +51,7 @@ jobs:
         env:
           TEST_MODE: 'false'  # 啟用完整掃描
           TASK_TYPE: ${{ github.event.inputs.task_type || 'auto' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           # 取得當前 UTC 小時
           CURRENT_HOUR=$(date -u +%H)
@@ -66,6 +68,16 @@ jobs:
           elif [ "$TASK_TYPE" == "update_alerts" ]; then
              echo "🔔 Manual Trigger: Market Alerts Update"
              python scripts/update_daily.py --update-alerts
+             
+          elif [ "$TASK_TYPE" == "generate_article" ]; then
+             echo "📝 Manual Trigger: Article Generation Only"
+             
+             # Download latest data if processing only article
+             mkdir -p frontend/public/data
+             echo "⬇️ Downloading latest scan results..."
+             curl -f -o frontend/public/data/daily_scan_results.json "https://raw.githubusercontent.com/${{ github.repository }}/data/daily_scan_results.json" || echo "⚠️ Failed to download data, allowing script to check."
+             
+             python scripts/article_generator.py
              
           elif [ "$TASK_TYPE" == "auto" ]; then
              # Original Auto Logic

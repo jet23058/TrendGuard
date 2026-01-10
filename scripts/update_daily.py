@@ -566,7 +566,17 @@ def main():
 
     # Check arguments
     if args.update_alerts:
-        update_existing_alerts()
+        data = update_existing_alerts()
+        
+        # Merge article generation for alert updates
+        try:
+            print("正在更新盤勢分析文章 (含警示資訊)...")
+            article = generate_daily_article(data)
+            save_to_json(article)
+            print("✅ 已更新每日分析文章並儲存")
+        except Exception as e:
+            print(f"⚠️ 文章更新失敗: {e}")
+            
         return
 
     # Check Manual Article Trigger
