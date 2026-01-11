@@ -273,6 +273,15 @@ def main(manual_trigger=False):
         if manual_trigger:
             sys.exit(1)
     else:
+        # Also save to history folder for DailyReport page
+        print("Saving to history folder...")
+        history_dir = OUTPUT_DIR / "history"
+        history_dir.mkdir(exist_ok=True)
+        history_file = history_dir / f"{data['date']}.json"
+        with open(history_file, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"✅ History saved to {history_file}")
+        
         # Regenerate the articles index after saving
         print("Regenerating articles index...")
         try:
