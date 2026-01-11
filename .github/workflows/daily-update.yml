@@ -39,7 +39,7 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install yfinance pandas pytest twstock lxml requests google-generativeai
+          pip install yfinance pandas pytest twstock lxml requests google-genai
       
       - name: Run tests first
         run: |
@@ -52,6 +52,7 @@ jobs:
           TEST_MODE: 'false'  # 啟用完整掃描
           TASK_TYPE: ${{ github.event.inputs.task_type || 'auto' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
         run: |
           # 取得當前 UTC 小時
           CURRENT_HOUR=$(date -u +%H)

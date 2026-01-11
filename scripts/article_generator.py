@@ -112,13 +112,13 @@ def get_stock_analysis(scan_results: dict) -> tuple:
 
 # Try importing Gemini, handle import error gracefully
 try:
-    import google.generativeai as genai
+    from google import genai
     HAS_GEMINI = True
 except ImportError:
     HAS_GEMINI = False
 
 def ask_gemini(prompt: str, model_name=None) -> str:
-    """Invokes Gemini API to generate text."""
+    """Invokes Gemini API to generate text using new google.genai SDK."""
     api_key = os.environ.get("GEMINI_API_KEY")
     if not model_name:
         model_name = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
@@ -126,9 +126,11 @@ def ask_gemini(prompt: str, model_name=None) -> str:
         return None
     
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel(model_name)
-        response = model.generate_content(prompt)
+        client = genai.Client(api_key=api_key)
+        response = client.models.generate_content(
+            model=model_name,
+            contents=prompt
+        )
         return response.text
     except Exception as e:
         print(f"⚠️ Gemini API Error: {e}")
