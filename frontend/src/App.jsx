@@ -1152,12 +1152,13 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans pb-10">
-      <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} onImport={handleImport} recommendedStocks={data?.stocks || []} />
+      {user && <ImportModal isOpen={isImportModalOpen} onClose={() => setIsImportModalOpen(false)} onImport={handleImport} recommendedStocks={data?.stocks || []} />}
 
       <Header
         user={user}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        onImport={() => setIsImportModalOpen(true)}
       />
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
@@ -1187,10 +1188,20 @@ export default function App() {
             </div>
             <div className="text-2xl font-bold text-purple-400 font-mono">{stats.industries} <span className="text-sm text-gray-500 font-normal">類</span></div>
           </div>
-          <div className="bg-gray-900 p-4 rounded-xl border border-yellow-900/50">
+          <div
+            onClick={() => user && setIsImportModalOpen(true)}
+            className={`bg-gray-900 p-4 rounded-xl border border-yellow-900/50 ${user ? 'cursor-pointer hover:bg-gray-800 transition-colors' : ''}`}
+          >
             <div className="flex items-center justify-between mb-2">
               <span className="text-gray-400 text-sm">我的庫存</span>
-              <Briefcase className="w-4 h-4 text-yellow-500" />
+              {user ? (
+                <button className="flex items-center gap-1 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 px-2 py-1 rounded text-xs transition-colors">
+                  <PlusCircle className="w-3 h-3" />
+                  匯入
+                </button>
+              ) : (
+                <Briefcase className="w-4 h-4 text-yellow-500" />
+              )}
             </div>
             <div className="text-2xl font-bold text-yellow-400 font-mono">{stats.portfolioCount} <span className="text-sm text-gray-500 font-normal">檔</span></div>
           </div>

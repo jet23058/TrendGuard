@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { BarChart2, Info, LogOut, User as UserIcon } from 'lucide-react';
 
-const Header = ({ user, onLogin, onLogout }) => {
+const Header = ({ user, onLogin, onLogout, onImport }) => {
     const location = useLocation();
 
     // Helper to determine if link is active
@@ -60,13 +60,38 @@ const Header = ({ user, onLogin, onLogout }) => {
                     {/* User Controls */}
                     <div className="flex items-center gap-4">
                         {user ? (
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2 bg-gray-800 py-1.5 px-3 rounded-full border border-gray-700">
-                                    <img src={user.photoURL} alt={user.displayName} className="w-6 h-6 rounded-full" />
-                                    <span className="text-sm text-gray-300 hidden md:block">{user.displayName}</span>
-                                    <button onClick={onLogout} className="text-gray-400 hover:text-red-400 p-1 rounded-full hover:bg-gray-700 transition-colors" title="登出">
-                                        <LogOut size={16} />
-                                    </button>
+                            <div className="flex items-center gap-2">
+                                {/* Import Button */}
+                                <button
+                                    onClick={onImport}
+                                    className="flex items-center gap-1 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-yellow-600/30"
+                                >
+                                    <span className="text-sm">+</span>
+                                    匯入庫存
+                                </button>
+
+                                {/* User Avatar with Dropdown */}
+                                <div className="relative group">
+                                    <img
+                                        src={user.photoURL}
+                                        alt={user.displayName}
+                                        className="w-8 h-8 rounded-full cursor-pointer border-2 border-gray-700 hover:border-blue-500 transition-colors"
+                                    />
+                                    {/* Dropdown on hover */}
+                                    <div className="absolute right-0 top-full mt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                                        <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-2 min-w-[120px]">
+                                            <div className="px-3 py-2 text-xs text-gray-400 border-b border-gray-700 mb-1">
+                                                {user.displayName}
+                                            </div>
+                                            <button
+                                                onClick={onLogout}
+                                                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-400 hover:bg-gray-700 rounded transition-colors"
+                                            >
+                                                <LogOut size={14} />
+                                                登出
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         ) : (
