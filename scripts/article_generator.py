@@ -272,6 +272,14 @@ def main(manual_trigger=False):
         print("Save failed.")
         if manual_trigger:
             sys.exit(1)
+    else:
+        # Regenerate the articles index after saving
+        print("Regenerating articles index...")
+        try:
+            from update_daily import generate_articles_index
+        except ModuleNotFoundError:
+            from scripts.update_daily import generate_articles_index
+        generate_articles_index()
 
 if __name__ == "__main__":
     main(manual_trigger=True)
