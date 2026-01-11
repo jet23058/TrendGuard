@@ -117,9 +117,11 @@ try:
 except ImportError:
     HAS_GEMINI = False
 
-def ask_gemini(prompt: str, model_name="gemini-1.5-flash") -> str:
+def ask_gemini(prompt: str, model_name=None) -> str:
     """Invokes Gemini API to generate text."""
     api_key = os.environ.get("GEMINI_API_KEY")
+    if not model_name:
+        model_name = os.environ.get("GEMINI_MODEL", "gemini-2.0-flash")
     if not api_key or not HAS_GEMINI:
         return None
     
