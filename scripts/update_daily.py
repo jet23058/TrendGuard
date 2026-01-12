@@ -721,7 +721,7 @@ def main():
 
 
 def generate_articles_index():
-    """Scans the articles directory and generates an index JSON file."""
+    """Appends new articles to the existing index JSON file."""
     articles_dir = OUTPUT_DIR / "articles"
     index_file = OUTPUT_DIR / "articles_index.json"
     
@@ -729,30 +729,52 @@ def generate_articles_index():
         print("⚠️ No articles directory found.")
         return
 
-    index_data = []
-    # Glob all JSON files in articles directory
+    # 1. Try to load existing index from data branch (GitHub)
+    existing_index = []
+    try:
+        import urllib.request
+        url = "https://raw.githubusercontent.com/jet23058/TrendGuard/data/articles_index.json"
+        with urllib.request.urlopen(url, timeout=10) as response:
+            existing_index = json.loads(response.read().decode('utf-8'))
+            print(f"📥 Loaded existing index with {len(existing_index)} articles")
+    except Exception as e:
+        print(f"⚠️ Could not fetch existing index (will create new): {e}")
+    
+    # 2. Build a set of existing dates for deduplication
+    existing_dates = {item['date'] for item in existing_index}
+    
+    # 3. Scan local articles directory for new articles
+    new_articles = []
     for file_path in sorted(articles_dir.glob("*.json"), reverse=True):
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+                article_date = data.get("date", file_path.stem)
                 
-                # Extract summary info
+                # Skip if already in index
+                if article_date in existing_dates:
+                    continue
+                    
                 summary_data = {
-                    "date": data.get("date", file_path.stem),
+                    "date": article_date,
                     "title": data.get("title", "無標題"),
                     "isAiGenerated": data.get("isAiGenerated", False),
-                    # Create a short preview from content if possible
                     "preview": data.get("content", "")[:100].replace('#', '').strip() + "..." 
                 }
-                index_data.append(summary_data)
+                new_articles.append(summary_data)
+                print(f"➕ Adding new article: {article_date}")
         except Exception as e:
             print(f"⚠️ Failed to read article {file_path.name}: {e}")
 
-    # Write index file
+    # 4. Merge and sort (newest first)
+    merged_index = new_articles + existing_index
+    merged_index.sort(key=lambda x: x['date'], reverse=True)
+    
+    # 5. Write updated index file
     try:
         with open(index_file, 'w', encoding='utf-8') as f:
-            json.dump(index_data, f, ensure_ascii=False, indent=2)
-        print(f"✅ Articles index generated: {index_file} ({len(index_data)} articles)")
+            json.dump(merged_index, f, ensure_ascii=False, indent=2)
+        print(f"✅ Articles index updated: {index_file} ({len(merged_index)} total articles)")
     except Exception as e:
         print(f"❌ Failed to write articles index: {e}")
 
