@@ -660,7 +660,7 @@ const DailyChangesSection = ({ changes, portfolio }) => {
 
 // --- 6. 不在掃描結果但在庫存的股票 (簡化版：不使用即時 API) ---
 // --- 6. 不在掃描結果但在庫存的股票 (手動同步 + Firestore 持久化) ---
-const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user }) => {
+const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user, stockHistoryMap = {} }) => {
   const [syncedData, setSyncedData] = useState({});
   const [loading, setLoading] = useState(false);
   const unlistedStocks = portfolio.filter(p => !scanResultTickers.includes(p.ticker));
@@ -1257,7 +1257,7 @@ export default function App() {
         <DailyChangesSection changes={data?.changes} portfolio={portfolio} />
 
         {/* 不在掃描結果但在庫存的股票 */}
-        <UnlistedPortfolioSection portfolio={portfolio} scanResultTickers={scanResultTickers} user={user} />
+        <UnlistedPortfolioSection portfolio={portfolio} scanResultTickers={scanResultTickers} user={user} stockHistoryMap={stockHistoryMap} />
 
         <div className="border-t border-gray-800 my-4"></div>
 

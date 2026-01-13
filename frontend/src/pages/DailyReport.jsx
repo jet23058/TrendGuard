@@ -137,6 +137,7 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
                                 stocks={stocks}
                                 portfolioTickers={[]}
                                 portfolio={[]}
+                                stockHistoryMap={{}}
                             />
                         ))}
                     </div>
