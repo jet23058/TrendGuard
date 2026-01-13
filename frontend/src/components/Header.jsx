@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, Info, LogOut, User as UserIcon } from 'lucide-react';
+import { BarChart2, Info, LogOut, User as UserIcon, Menu, X } from 'lucide-react';
 
 const Header = ({ user, onLogin, onLogout, onImport }) => {
     const location = useLocation();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     // Helper to determine if link is active
     const getLinkClass = (path) => {
@@ -17,18 +18,26 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
         <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-10 shadow-lg">
             <div className="max-w-7xl mx-auto px-4 py-3">
                 <div className="flex justify-between items-center mb-0">
-                    <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-4 md:gap-6">
                         <div className="flex items-center gap-3">
                             <div className="bg-blue-600 p-2 rounded-lg">
                                 <BarChart2 className="w-6 h-6 text-white" />
                             </div>
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h1 className="text-xl font-bold tracking-tight text-white hidden md:block">利弗摩爾台股戰情室</h1>
-                                    <h1 className="text-xl font-bold tracking-tight text-white md:hidden">戰情室</h1>
+                                    <h1 className="text-xl font-bold tracking-tight text-white hidden md:block">趨勢守衛者</h1>
+                                    <h1 className="text-xl font-bold tracking-tight text-white md:hidden">趨勢守衛者</h1>
+
+                                    {/* Mobile Menu Button */}
+                                    <button
+                                        className="md:hidden p-1 hover:bg-gray-800 rounded transition-colors"
+                                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                    >
+                                        {mobileMenuOpen ? <X size={20} className="text-gray-400" /> : <Menu size={20} className="text-gray-400" />}
+                                    </button>
 
                                     {/* Tooltip */}
-                                    <div className="group relative flex items-center">
+                                    <div className="group relative flex items-center hidden md:flex">
                                         <Info className="w-5 h-5 text-gray-400 hover:text-yellow-400 cursor-help transition-colors" />
                                         <div className="absolute left-1/2 -translate-x-1/2 top-full mt-3 w-80 p-4 bg-[#FEFCE8] border-2 border-yellow-400 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 transform translate-y-2 group-hover:translate-y-0">
                                             <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-[#FEFCE8] border-t-2 border-l-2 border-yellow-400 transform rotate-45"></div>
@@ -50,9 +59,9 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                             </div>
                         </div>
 
-                        {/* Primary Nav */}
+                        {/* Desktop Nav */}
                         <nav className="hidden md:flex items-center gap-2">
-                            <Link to="/" className={getLinkClass('/')}>戰情室</Link>
+                            <Link to="/" className={getLinkClass('/')}>趨勢守衛者</Link>
                             <Link to="/articles" className={getLinkClass('/articles')}>每日文章</Link>
                         </nav>
                     </div>
@@ -107,6 +116,28 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                     </div>
                 </div>
             </div>
+
+            {/* Mobile Dropdown Menu */}
+            {mobileMenuOpen && (
+                <div className="md:hidden border-t border-gray-800 mt-3 pt-3">
+                    <nav className="flex flex-col gap-2">
+                        <Link
+                            to="/"
+                            className={getLinkClass('/')}
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            趨勢守衛者
+                        </Link>
+                        <Link
+                            to="/articles"
+                            className={getLinkClass('/articles')}
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            每日文章
+                        </Link>
+                    </nav>
+                </div>
+            )}
         </header>
     );
 };

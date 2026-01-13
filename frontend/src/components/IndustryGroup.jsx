@@ -3,7 +3,7 @@ import { Factory } from 'lucide-react';
 import StockCardMini from './StockCardMini';
 
 // --- 5. 產業群組 ---
-const IndustryGroup = ({ sector, stocks, portfolioTickers = [], portfolio = [] }) => {
+const IndustryGroup = ({ sector, stocks, portfolioTickers = [], portfolio = [], stockHistoryMap = {} }) => {
     // 排序：庫存優先
     const sortedStocks = useMemo(() => {
         return [...stocks].sort((a, b) => {
@@ -46,6 +46,7 @@ const IndustryGroup = ({ sector, stocks, portfolioTickers = [], portfolio = [] }
                             stock={stock}
                             isInPortfolio={isInPortfolio}
                             portfolioItem={item}
+                            historyDates={stockHistoryMap[stock.ticker] || []}
                         />
                     );
                 })}

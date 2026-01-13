@@ -812,6 +812,7 @@ const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user }) => {
                   stock={fullData}
                   portfolioItem={stock}
                   isInPortfolio={true}
+                  historyDates={stockHistoryMap[stock.ticker] || []}
                 />
               );
             }
@@ -932,6 +933,7 @@ export default function App() {
   const [portfolio, setPortfolio] = useState([]); // 僅允許登入後讀取，預設為空
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [stockHistoryMap, setStockHistoryMap] = useState({}); // { ticker: [date1, date2, ...] }
 
   // 監聽登入狀態與資料同步
   useEffect(() => {
@@ -1043,6 +1045,39 @@ export default function App() {
         } catch (err) {
           console.warn("No article found for today");
         }
+      }
+
+      // Fetch stock history from articles_index and history files
+      try {
+        const indexRes = await fetch(`${DATA_BASE_URL}/articles_index.json`);
+        if (indexRes.ok) {
+          const indexData = await indexRes.json();
+          const historyMap = {};
+
+          // Fetch each history file and build the map
+          await Promise.all(
+            indexData.slice(0, 30).map(async (article) => { // Limit to last 30 days
+              try {
+                const histRes = await fetch(`${DATA_BASE_URL}/history/${article.date}.json`);
+                if (histRes.ok) {
+                  const histData = await histRes.json();
+                  (histData.stocks || []).forEach(stock => {
+                    if (!historyMap[stock.ticker]) {
+                      historyMap[stock.ticker] = [];
+                    }
+                    historyMap[stock.ticker].push(article.date);
+                  });
+                }
+              } catch (e) {
+                // Skip failed history files
+              }
+            })
+          );
+
+          setStockHistoryMap(historyMap);
+        }
+      } catch (err) {
+        console.warn("Could not load stock history:", err);
       }
     } catch (e) {
       setError(e.message);
@@ -1234,6 +1269,7 @@ export default function App() {
             stocks={stocks}
             portfolioTickers={portfolioTickers}
             portfolio={portfolio}
+            stockHistoryMap={stockHistoryMap}
           />
         ))}
       </main>
@@ -1296,7 +1332,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="md:flex md:justify-between mb-8">
             <div className="mb-6 md:mb-0">
-              <p className="text-gray-400 font-bold mb-2">利弗摩爾台股戰情室 TrendGuard</p>
+              <p className="text-gray-400 font-bold mb-2">趨勢守衛者 TrendGuard</p>
               <p className="text-gray-500 text-xs mb-4">
                 本系統基於 Jesse Livermore 交易哲學設計，提供台股技術分析數據。
                 <br />

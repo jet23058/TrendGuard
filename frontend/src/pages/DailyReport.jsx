@@ -94,7 +94,7 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
             <nav className="border-b border-gray-800 bg-gray-900/50 backdrop-blur sticky top-0 z-10">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <Link to="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                        <ArrowLeft size={20} /> <span className="font-bold">返回戰情室</span>
+                        <ArrowLeft size={20} /> <span className="font-bold">返回</span>
                     </Link>
                     <div className="text-sm text-gray-500 font-mono">{date}</div>
                 </div>

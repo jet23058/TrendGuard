@@ -37,7 +37,7 @@ def render_header(portfolio_stats: dict, date_str: str = None):
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
-                ">🎯 利弗摩爾台股戰情室</h1>
+                ">🎯 趨勢守衛者</h1>
                 <p style="margin: 8px 0 0 0; color: #9CA3AF; font-size: 14px;">
                     📅 {date_str} | Livermore Trader Dashboard
                 </p>

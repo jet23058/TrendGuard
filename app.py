@@ -1,5 +1,5 @@
 """
-利弗摩爾台股戰情室 (Livermore Trader Dashboard)
+趨勢守衛者 (Livermore Trader Dashboard)
 Main Application - Watchlist Mode
 """
 import streamlit as st
@@ -24,7 +24,7 @@ from src.charts import create_candlestick_chart
 
 # Page config
 st.set_page_config(
-    page_title="利弗摩爾台股戰情室",
+    page_title="趨勢守衛者",
     page_icon="🎯",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -167,7 +167,7 @@ def render_header():
                         -webkit-background-clip: text;
                         -webkit-text-fill-color: transparent;
                         background-clip: text;
-                    ">🎯 利弗摩爾台股戰情室</h1>
+                    ">🎯 趨勢守衛者</h1>
                     
                     <div class="livermore-tooltip">
                         <span class="info-icon">i</span>
@@ -601,7 +601,7 @@ def main():
         border-top: 1px solid rgba(99, 102, 241, 0.2);
     ">
         <p style="color: #6C7A89; font-size: 12px; margin: 0;">
-            🎯 利弗摩爾台股戰情室 | 基於 Jesse Livermore 交易哲學設計
+            🎯 趨勢守衛者 | 基於 Jesse Livermore 交易哲學設計
         </p>
         <p style="color: #4B5563; font-size: 11px; margin: 8px 0 0 0;">
             ⚠️ 本系統僅供參考，不構成投資建議。投資有風險，請謹慎評估。

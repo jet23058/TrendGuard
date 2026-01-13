@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
 import {
     ComposedChart,
     Line,
@@ -11,6 +11,7 @@ import {
     ResponsiveContainer,
     ReferenceLine
 } from 'recharts';
+import StockHistoryCalendar from './StockHistoryCalendar';
 
 // --- 1. K線圖繪製元件 ---
 const CandleStickShape = (props) => {
@@ -138,11 +139,12 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 // --- 精簡版股票卡片 (Rich Version Restored) ---
-const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
+const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] }) => {
     const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc, alert } = stock;
     const isUp = changePct >= 0;
     const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
     const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
+    const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
     const chartData = useMemo(() => {
         if (!ohlc || ohlc.length === 0) return [];
@@ -182,6 +184,13 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
                             {ticker} ↗
                         </a>
                         <h3 className="text-sm font-bold text-white truncate max-w-[80px]">{name}</h3>
+                        <button
+                            onClick={() => setIsCalendarOpen(true)}
+                            className="p-1 hover:bg-gray-700 rounded transition-colors"
+                            title="查看上榜紀錄"
+                        >
+                            <BarChart2 size={14} className="text-gray-400 hover:text-blue-400" />
+                        </button>
                         {alert && (
                             <div className="group relative z-10">
                                 <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
@@ -313,6 +322,15 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem }) => {
                     </div>
                 )
             }
+
+            {/* Stock History Calendar Popup */}
+            <StockHistoryCalendar
+                isOpen={isCalendarOpen}
+                onClose={() => setIsCalendarOpen(false)}
+                stockName={name}
+                ticker={ticker}
+                historyDates={historyDates}
+            />
         </div>
     );
 };

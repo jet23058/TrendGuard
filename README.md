@@ -1,4 +1,4 @@
-# 利弗摩爾台股戰情室 (Livermore Trader Dashboard)
+# 趨勢守衛者 (Livermore Trader Dashboard)
 
 🎯 基於 Jesse Livermore 交易哲學設計的台股觀察清單與分析工具
 
