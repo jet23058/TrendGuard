@@ -61,8 +61,8 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
 
                         {/* Desktop Nav */}
                         <nav className="hidden md:flex items-center gap-2">
-                            <Link to="/" className={getLinkClass('/')}>趨勢守衛者</Link>
-                            <Link to="/articles" className={getLinkClass('/articles')}>每日文章</Link>
+                            <Link to="/" className={getLinkClass('/')}>每日文章</Link>
+                            <Link to="/dashboard" className={getLinkClass('/dashboard')}>趨勢守衛者</Link>
                         </nav>
                     </div>
 
@@ -126,14 +126,14 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                             className={getLinkClass('/')}
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            趨勢守衛者
+                            每日文章
                         </Link>
                         <Link
-                            to="/articles"
-                            className={getLinkClass('/articles')}
+                            to="/dashboard"
+                            className={getLinkClass('/dashboard')}
                             onClick={() => setMobileMenuOpen(false)}
                         >
-                            每日文章
+                            趨勢守衛者
                         </Link>
                     </nav>
                 </div>
