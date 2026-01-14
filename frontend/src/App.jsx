@@ -934,6 +934,7 @@ export default function App() {
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [stockHistoryMap, setStockHistoryMap] = useState({}); // { ticker: [date1, date2, ...] }
+  const [minRedK, setMinRedK] = useState(2); // Filter: minimum consecutive red K (default 2 = show all)
 
   // 監聽登入狀態與資料同步
   useEffect(() => {
@@ -1112,11 +1113,17 @@ export default function App() {
   const portfolioTickers = useMemo(() => portfolio.map(p => p.ticker), [portfolio]);
   const scanResultTickers = useMemo(() => data?.stocks?.map(s => s.ticker) || [], [data]);
 
-  // 按產業分組，庫存所在產業優先
+  // 按產業分組，庫存所在產業優先，並套用 minRedK 篩選
   const groupedByIndustry = useMemo(() => {
     if (!data?.stocks) return {};
+
+    // 先根據 minRedK 篩選
+    const filteredStocks = data.stocks.filter(stock =>
+      (stock.consecutiveRed || 0) >= minRedK
+    );
+
     const groups = {};
-    data.stocks.forEach(stock => {
+    filteredStocks.forEach(stock => {
       const sector = stock.sector || '其他';
       if (!groups[sector]) groups[sector] = [];
       groups[sector].push(stock);
@@ -1133,7 +1140,7 @@ export default function App() {
     });
 
     return entries.reduce((acc, [k, v]) => { acc[k] = v; return acc; }, {});
-  }, [data, portfolioTickers]);
+  }, [data, portfolioTickers, minRedK]);
 
   const stats = useMemo(() => ({
     total: data?.stocks?.length || 0,
@@ -1247,6 +1254,35 @@ export default function App() {
         {/* 篩選條件 */}
         <div className="bg-blue-900/20 border border-blue-900/50 p-4 rounded-lg">
           <p className="text-blue-200 text-sm">📊 <strong>篩選條件：</strong>{data?.criteria?.description}</p>
+        </div>
+
+        {/* 連續紅K篩選器 */}
+        <div className="bg-gray-900 border border-gray-700 p-4 rounded-xl flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-gray-400 text-sm">連續紅K ≥</span>
+            <input
+              type="number"
+              min="2"
+              max="20"
+              value={minRedK}
+              onChange={(e) => setMinRedK(Math.max(2, parseInt(e.target.value) || 2))}
+              className="w-16 bg-gray-800 border border-gray-600 text-white text-center rounded px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-gray-500 text-sm">
+              篩選結果：<span className="text-blue-400 font-bold">{Object.values(groupedByIndustry).flat().length}</span> 檔
+              {minRedK > 2 && <span className="text-gray-600 ml-1">(原 {data?.stocks?.length || 0} 檔)</span>}
+            </span>
+          </div>
+          {minRedK > 2 && (
+            <button
+              onClick={() => setMinRedK(2)}
+              className="ml-auto text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-600 transition-colors"
+            >
+              重置篩選
+            </button>
+          )}
         </div>
 
         {/* Daily Changes Summary */}
