@@ -314,12 +314,12 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         past_data = df['High'].iloc[-(LOOKBACK_DAYS+1):-1]
         prev_high = float(past_data.max())
         
-        # 計算連續紅 K 天數
+        # 計算連續紅 K 天數 (含一字線漲停 c == o)
         consecutive_red = 0
         for i in range(len(df)-1, -1, -1):
             c = float(df['Close'].iloc[i])
             o = float(df['Open'].iloc[i])
-            if c > o:
+            if c >= o:  # 收盤 >= 開盤，含一字線漲停
                 consecutive_red += 1
             else:
                 break
