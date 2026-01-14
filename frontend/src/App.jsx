@@ -1240,10 +1240,6 @@ export default function App() {
                 <span>掃描:</span>
                 <span className="font-mono text-white">{displayTimes.scan}</span>
               </div>
-              <div className="text-xs text-gray-400 flex justify-between">
-                <span>警示:</span>
-                <span className="font-mono text-yellow-500">{displayTimes.alert}</span>
-              </div>
             </div>
           </div>
         </div>
