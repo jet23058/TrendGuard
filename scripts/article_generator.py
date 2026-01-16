@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -147,11 +148,18 @@ def generate_daily_article(scan_results: dict) -> dict:
     # Extract top stocks for detailed prompt
     stocks = scan_results.get('stocks', [])
     top_stocks_info = []
+    
+    # Extract leader name for title generation
+    top_stock_name = stocks[0]['name'] if stocks else "強勢股"
+    
     for s in stocks[:5]: # Top 5
         top_stocks_info.append(f"{s['name']}({s['ticker']}): Price {s['currentPrice']}, Chg {s['changePct']}%, ConsRed {s['consecutiveRed']}")
     top_stocks_str = "\n".join(top_stocks_info)
     
     sector_info, top_sectors = get_sector_rotation(stocks)
+    
+    # Extract strongest sector for title generation
+    strongest_sector = top_sectors[0] if top_sectors else "多頭"
     
     # 2. Construct Prompt for Gemini
     prompt = f"""
@@ -162,15 +170,26 @@ def generate_daily_article(scan_results: dict) -> dict:
     - Date: {date_str}
     - Total Momentum Stocks Found: {total}
     - Top Sectors: {', '.join(top_sectors)}
-    - Top Stocks (Momentum Leaders):
+    - Strongest Sector Leader: {strongest_sector}
+    - Top Stock Leader: {top_stock_name}
+    - Top Stocks (Momentum Leaders Details):
     {top_stocks_str}
     
     **Requirements:**
-    1. **Title**: Catchy, "clickbait" style title. Example: "多頭點火！台股今日 X 檔個股突破...".
+    1. **Title**: Create a HIGHLY ENGAGING, "clickbait" style title in Traditional Chinese.
+       - **CRITICAL**: Do NOT use the same title structure every day. 
+       - **Constraint**: The title MUST include specific details from today's data, such as **"{strongest_sector}" (Sector Name)**, **"{top_stock_name}" (Stock Name)**, or the number **"{total}"**.
+       - **Variety**: Randomly choose one of the following angles for the title:
+         - *Angle A (Urgency)*: "Emergency! {strongest_sector} sector is igniting! {total} stocks found."
+         - *Angle B (Curiosity)*: "Why is smart money chasing {top_stock_name}? The data reveals..."
+         - *Angle C (FOMO)*: "Missed the low? These {total} stocks are hitting new highs today!"
+         - *Angle D (Direct)*: "{strongest_sector} leads the charge! {top_stock_name} breakout confirmed."
+       - Use 1-2 Emojis (e.g., 🚀, 🔥, 💰, ⚠️) to make it pop.
+
     2. **Content**: 
        - Start with a "Market Pulse" section summarizing the general sentiment.
        - "Sector Focus": Discuss the active sectors.
-       - "Spotlight": Pick the best 1-2 stocks from the list and analyze them briefly (pretend to analyze technicals based on the data).
+       - "Spotlight": Pick the best 1-2 stocks from the list and analyze them briefly (pretend to analyze technicals based on the data provided).
        - Tone: Professional yet exciting, encouraging but notifying risks.
     3. **Format**: Return the result in pure Markdown. Use bolding and lists.
     4. **Language**: Traditional Chinese (繁體中文).
