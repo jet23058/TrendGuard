@@ -1048,32 +1048,61 @@ export default function App() {
         }
       }
 
-      // Fetch stock history from articles_index and history files
+      // Fetch stock history with LocalStorage Caching
       try {
         const indexRes = await fetch(`${DATA_BASE_URL}/articles_index.json`);
         if (indexRes.ok) {
           const indexData = await indexRes.json();
-          const historyMap = {};
+          const last30Days = indexData.slice(0, 30); // Limit to last 30 days
+          
+          // 1. 讀取快取
+          const CACHE_KEY = 'trendguard_history_cache_v1';
+          let cache = {};
+          try {
+            cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
+          } catch (e) {
+            console.warn('Cache parse error, resetting');
+          }
 
-          // Fetch each history file and build the map
-          await Promise.all(
-            indexData.slice(0, 30).map(async (article) => { // Limit to last 30 days
-              try {
-                const histRes = await fetch(`${DATA_BASE_URL}/history/${article.date}.json`);
-                if (histRes.ok) {
-                  const histData = await histRes.json();
-                  (histData.stocks || []).forEach(stock => {
-                    if (!historyMap[stock.ticker]) {
-                      historyMap[stock.ticker] = [];
-                    }
-                    historyMap[stock.ticker].push(article.date);
-                  });
+          // 2. 找出哪些日期需要下載 (快取中沒有的)
+          const datesToFetch = last30Days.filter(article => !cache[article.date]);
+
+          // 3. 平行下載缺失的日期
+          if (datesToFetch.length > 0) {
+            // console.log(`Fetching ${datesToFetch.length} new history files...`);
+            await Promise.all(
+              datesToFetch.map(async (article) => {
+                try {
+                  const histRes = await fetch(`${DATA_BASE_URL}/history/${article.date}.json`);
+                  if (histRes.ok) {
+                    const histData = await histRes.json();
+                    // 只儲存 tickers 陣列以節省空間
+                    cache[article.date] = (histData.stocks || []).map(s => s.ticker);
+                  }
+                } catch (e) {
+                  console.warn(`Failed to fetch history for ${article.date}`);
                 }
-              } catch (e) {
-                // Skip failed history files
+              })
+            );
+
+            // 4. 更新快取回 LocalStorage (清理舊資料，只留最近 60 天以防無限膨脹)
+            const sortedDates = Object.keys(cache).sort().reverse().slice(0, 60);
+            const newCache = {};
+            sortedDates.forEach(d => newCache[d] = cache[d]);
+            localStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
+          }
+
+          // 5. 構建 stockHistoryMap (Ticker -> List of Dates)
+          const historyMap = {};
+          last30Days.forEach(article => {
+            const tickers = cache[article.date] || [];
+            tickers.forEach(ticker => {
+              if (!historyMap[ticker]) {
+                historyMap[ticker] = [];
               }
-            })
-          );
+              historyMap[ticker].push(article.date);
+            });
+          });
 
           setStockHistoryMap(historyMap);
         }

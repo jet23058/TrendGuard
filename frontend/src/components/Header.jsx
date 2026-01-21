@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart2, Info, LogOut, User as UserIcon, Menu, X } from 'lucide-react';
+import { BarChart2, Info, LogOut, User as UserIcon, Menu, X, Book } from 'lucide-react';
+import DailyMemo from './DailyMemo';
 
 const Header = ({ user, onLogin, onLogout, onImport }) => {
     const location = useLocation();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isMemoOpen, setIsMemoOpen] = useState(false);
 
     // Helper to determine if link is active
     const getLinkClass = (path) => {
@@ -63,6 +65,7 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                         <nav className="hidden md:flex items-center gap-2">
                             <Link to="/" className={getLinkClass('/')}>每日文章</Link>
                             <Link to="/dashboard" className={getLinkClass('/dashboard')}>趨勢守衛者</Link>
+                            <Link to="/knowledge" className={getLinkClass('/knowledge')}>知識小站</Link>
                         </nav>
                     </div>
 
@@ -70,13 +73,23 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                     <div className="flex items-center gap-4">
                         {user ? (
                             <div className="flex items-center gap-2">
+                                {/* Memo Button */}
+                                <button
+                                    onClick={() => setIsMemoOpen(true)}
+                                    className="flex items-center gap-1 bg-blue-900/30 hover:bg-blue-800/50 text-blue-400 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-blue-700/30"
+                                >
+                                    <Book size={14} />
+                                    <span className="hidden sm:inline">筆記本</span>
+                                </button>
+
                                 {/* Import Button */}
                                 <button
                                     onClick={onImport}
                                     className="flex items-center gap-1 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border border-yellow-600/30"
                                 >
                                     <span className="text-sm">+</span>
-                                    匯入庫存
+                                    <span className="hidden sm:inline">匯入庫存</span>
+                                    <span className="sm:hidden">匯入</span>
                                 </button>
 
                                 {/* User Avatar with Dropdown */}
@@ -135,9 +148,23 @@ const Header = ({ user, onLogin, onLogout, onImport }) => {
                         >
                             趨勢守衛者
                         </Link>
+                        <Link
+                            to="/knowledge"
+                            className={getLinkClass('/knowledge')}
+                            onClick={() => setMobileMenuOpen(false)}
+                        >
+                            知識小站
+                        </Link>
                     </nav>
                 </div>
             )}
+
+            {/* Daily Memo Modal */}
+            <DailyMemo 
+                user={user} 
+                isOpen={isMemoOpen} 
+                onClose={() => setIsMemoOpen(false)} 
+            />
         </header>
     );
 };

@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.jsx'
 import DailyReport from './pages/DailyReport.jsx'
 import ArticleList from './pages/ArticleList.jsx'
+import KnowledgeHub from './pages/KnowledgeHub.jsx'
 
 // AdSense Injection
 const adSenseId = import.meta.env.VITE_ADSENSE_ID;
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<ArticleList />} />
         <Route path="/dashboard" element={<App />} />
         <Route path="/report/:date" element={<DailyReport />} />
+        <Route path="/knowledge" element={<KnowledgeHub />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

@@ -5,7 +5,12 @@ All notable changes to this project will be documented in this file.
 ## [2026-01-21]
 
 ### Added
-- [Feat] **Daily Articles Waterfall View**: New `/articles` page with a masonry-style waterfall layout for browsing historical reports (`frontend/src/pages/ArticleList.jsx`).
+- [Feat] **Knowledge Hub**: New `/knowledge` page providing educational content on Taiwan stock market terminology and trading rules (`frontend/src/pages/KnowledgeHub.jsx`).
+- [Feat] **Daily Memo Notebook**: Integrated calendar-based notebook feature in the header, allowing logged-in users to write and save daily trading notes to Firestore (`frontend/src/components/DailyMemo.jsx`).
+- [Feat] **History Data Caching**: Implemented LocalStorage caching for historical stock data to significantly reduce dashboard load time and API requests (`frontend/src/App.jsx`).
+- [UI] **Consistent Loading State**: Unified dark theme loading spinner in `index.html` to prevent white flash (FOUC) during initial load.
+
+### Changed
 - [Feat] **AI-Powered Market Analysis**: Integrated Google Gemini API to generate daily market commentary and summaries (`scripts/article_generator.py`).
 - [Feat] **Automatic Article Indexing**: Backend now generates `articles_index.json` for fast frontend retrieval (`scripts/update_daily.py`).
 - [Feat] **Rich Article Page**: New `/report/:date` page displaying markdown content alongside interactive stock cards (`frontend/src/pages/DailyReport.jsx`).
