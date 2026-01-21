@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-01-22]
+
+### Added
+- [Feat] **Strong Stock Filter**: Added a numeric input field to filter stocks by daily gain percentage (e.g. > 5%) in the dashboard (`frontend/src/App.jsx`).
+- [Feat] **Exact Red-K Mode**: Added toggle switch to filter stocks by exact consecutive red days (== N) vs minimum (>= N) (`frontend/src/App.jsx`).
+- [Feat] **Market Breadth Stats**: Backend now calculates total market rising/falling/flat counts during scanning and injects this data into AI-generated articles for broader market context (`scripts/update_daily.py`, `scripts/article_generator.py`).
+
+### Fixed
+- [Fix] **Filter Logic Bug**: Fixed React `useMemo` dependency issue where filtering by percentage didn't trigger a re-render (`frontend/src/App.jsx`).
+- [Test] **Filter Logic Tests**: Added comprehensive integration tests for all filtering scenarios using Vitest and React Testing Library (`frontend/src/App.test.jsx`).
+
 ## [2026-01-21]
 
 ### Added

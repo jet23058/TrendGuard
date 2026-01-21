@@ -162,6 +162,13 @@ def generate_daily_article(scan_results: dict) -> dict:
     summary = scan_results.get('summary', {})
     total = summary.get('total', 0)
     
+    # Market Stats (Breadth)
+    market_stats = scan_results.get('marketStats', {})
+    up_count = market_stats.get('up', 0)
+    down_count = market_stats.get('down', 0)
+    flat_count = market_stats.get('flat', 0)
+    market_breadth_str = f"Rising: {up_count}, Falling: {down_count}, Flat: {flat_count}"
+    
     # Extract top stocks for detailed prompt
     stocks = scan_results.get('stocks', [])
     top_stocks_info = []
@@ -189,6 +196,7 @@ def generate_daily_article(scan_results: dict) -> dict:
     
     **Data:**
     - Date: {date_str}
+    - Market Breadth (Scanned Universe): {market_breadth_str}
     - Total Momentum Stocks Found: {total}
     - Top Sectors: {', '.join(top_sectors)}
     - Strongest Sector Leader: {strongest_sector}
@@ -209,7 +217,7 @@ def generate_daily_article(scan_results: dict) -> dict:
        - Use 0-1 Emojis max, keep it clean.
 
     2. **Content**: 
-       - Start with a "Market Pulse" section summarizing the general sentiment.
+       - Start with a "Market Pulse" section summarizing the general sentiment. **MUST include the market breadth statistics ({market_breadth_str}) here to show overall market direction (e.g. "今日掃描範圍內，上漲家數達 xx 家...").**
        - "Sector Focus": Discuss the active sectors.
        - "Spotlight": Pick the best 1-2 stocks from the list and analyze them briefly (pretend to analyze technicals based on the data provided).
        - Tone: Professional yet exciting, encouraging but notifying risks.

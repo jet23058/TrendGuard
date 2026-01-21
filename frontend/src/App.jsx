@@ -1153,8 +1153,11 @@ export default function App() {
     let maxDays = 0;
     
     data.stocks.forEach(stock => {
+      // 確保 pct 為數值，若無資料預設為 0
+      const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
+      
       // 必須同時符合漲幅條件，才列入統計
-      if (minChangePct > 0 && (stock.changePct || 0) < minChangePct) return;
+      if (minChangePct > 0 && pct < minChangePct) return;
 
       const days = stock.consecutiveRed || 0;
       if (days < 2) return; // 只統計 2 天以上
@@ -1193,7 +1196,8 @@ export default function App() {
     // 先根據 minRedK 和 minChangePct 篩選
     const filteredStocks = data.stocks.filter(stock => {
       const days = stock.consecutiveRed || 0;
-      const pct = stock.changePct || 0;
+      // 確保 pct 為數值
+      const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
       
       // 1. 連紅 K 條件
       const redKMatch = isExactMatch ? days === minRedK : days >= minRedK;
@@ -1222,7 +1226,7 @@ export default function App() {
     });
 
     return entries.reduce((acc, [k, v]) => { acc[k] = v; return acc; }, {});
-  }, [data, portfolioTickers, minRedK]);
+  }, [data, portfolioTickers, minRedK, minChangePct, isExactMatch]);
 
   const stats = useMemo(() => ({
     total: data?.stocks?.length || 0,
@@ -1347,18 +1351,44 @@ export default function App() {
             </h3>
             
             <div className="flex items-center gap-3">
-               {/* 強勢股過濾 (>= 5%) */}
-               <label className="flex items-center gap-2 cursor-pointer bg-gray-800 px-3 py-1 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors select-none">
-                  <input 
-                    type="checkbox" 
-                    checked={minChangePct > 0} 
-                    onChange={(e) => setMinChangePct(e.target.checked ? 5 : 0)}
-                    className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-gray-900 border-gray-600"
-                  />
-                  <span className={`text-xs font-bold ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                    🔥 強勢過濾 (漲幅 &gt; 5%)
+               {/* 強勢股過濾 (自訂漲幅) */}
+               <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-colors ${minChangePct > 0 ? 'bg-gray-800 border-red-500/50' : 'bg-gray-800 border-gray-700'}`}>
+                  <span className={`text-xs font-bold whitespace-nowrap ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                    🔥 強勢過濾 &gt;
                   </span>
-               </label>
+                  <div className="relative flex items-center">
+                    <input 
+                      type="number" 
+                      min="0" 
+                      max="20"
+                      step="0.5"
+                      value={minChangePct === 0 ? '' : minChangePct} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === '') {
+                          setMinChangePct(0);
+                        } else {
+                          const num = parseFloat(val);
+                          setMinChangePct(isNaN(num) ? 0 : num);
+                        }
+                      }}
+                      placeholder="0"
+                      className="w-10 bg-transparent text-center text-sm font-mono text-white focus:outline-none focus:border-b focus:border-red-500 placeholder-gray-600 appearance-none"
+                    />
+                    <span className="text-xs text-gray-500 ml-0.5">%</span>
+                    
+                    {/* 清除按鈕 */}
+                    {minChangePct > 0 && (
+                      <button 
+                        onClick={() => setMinChangePct(0)}
+                        className="ml-2 text-gray-500 hover:text-white"
+                        title="清除過濾"
+                      >
+                        <X size={12} />
+                      </button>
+                    )}
+                  </div>
+               </div>
 
                {/* 模式切換開關 */}
                <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">

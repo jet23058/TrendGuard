@@ -117,9 +117,6 @@ def fetch_market_alerts():
     except Exception as e:
         print(f"Error fetching warning: {e}")
         
-    except Exception as e:
-        print(f"Error fetching warning: {e}")
-        
     # 3. Fetch TPEX (OTC) Alerts
     try:
         print("Fetching TPEX alerts...")
@@ -267,17 +264,14 @@ def get_all_tw_targets() -> list:
     return targets
 
 
-def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) -> Optional[dict]:
+def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) -> tuple[Optional[dict], Optional[float]]:
     """
     檢查是否符合利弗摩爾突破條件
     
-    條件：
-    1. 股價 > MA5/MA10/MA20/MA60 (多頭排列)
-    2. 連續 2 日以上紅 K
-    3. 收盤價突破近 N 日新高
-    
-    修正：
-    即使該股票有市場警示(alert_data)，也必須符合技術指標才能列入
+    Returns:
+        (full_data, change_pct)
+        - full_data: 符合條件的完整資料，若不符合則為 None
+        - change_pct: 該股票的漲跌幅 (float)，若無法取得資料則為 None
     """
     try:
         # Check alerts first
@@ -292,7 +286,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         df = yf.download(ticker, period="6mo", progress=False)
         
         if len(df) < LOOKBACK_DAYS + 2:
-            return None
+            return None, None
         
         # 處理 MultiIndex columns
         if isinstance(df.columns, pd.MultiIndex):
@@ -308,6 +302,11 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         yesterday = df.iloc[-2]
         
         current_price = float(today['Close'])
+        prev_close = float(yesterday['Close'])
+        
+        # 漲跌幅 (即便不符合條件也要回傳，用於市場統計)
+        change_pct = ((current_price - prev_close) / prev_close) * 100
+        
         open_price = float(today['Open'])
         
         # 計算近 N 日最高價 (不含今日)
@@ -334,12 +333,11 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         )
         is_two_red_k = consecutive_red >= 2
         
-        # --- 修改: 嚴格執行技術篩選 (原邏輯為警示股可跳過篩選) ---
         has_alert = alert_data is not None
         
-        # 修正: 必須符合突破、均線與紅K條件，否則直接剔除
+        # 修正: 必須符合突破、均線與紅K條件，否則直接剔除 (但回傳漲跌幅)
         if not (is_breakout and is_above_all_ma and is_two_red_k):
-            return None
+            return None, change_pct
         
         # 計算支撐點
         tech_stop = float(today['Low'])
@@ -348,9 +346,6 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
         
         # 取得中文名稱
         name, sector = get_stock_name(code)
-        
-        # 漲跌幅
-        change_pct = ((current_price - float(yesterday['Close'])) / float(yesterday['Close'])) * 100
         
         # 計算 KD 指標 (9, 3, 3)
         k_period = 9
@@ -400,7 +395,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
              signal_text = f"⚠️ {alert_data.get('badge', '注意')}股 - {signal_text}"
              priority_score += 10 # 稍微提高權重
         
-        return {
+        full_data = {
             "ticker": code,
             "name": name,
             "sector": sector,
@@ -421,9 +416,11 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
             "alert": alert_data  # Add Alert Info (None if normal)
         }
         
+        return full_data, change_pct
+        
     except Exception as e:
         # 靜默忽略錯誤
-        return None
+        return None, None
 
 
 def calculate_changes(previous_data: Optional[dict], current_stocks: list) -> dict:
@@ -633,15 +630,36 @@ def main():
     results = []
     total = len(target_list)
     
+    # 市場寬度統計 (Market Breadth)
+    market_stats = {
+        "up": 0,
+        "down": 0,
+        "flat": 0,
+        "total_scanned": 0
+    }
+    
     for i, code in enumerate(target_list):
         if i % 10 == 0:
             print(f"\r進度: {i}/{total}...", end="", flush=True)
         
-        data = check_livermore_criteria(code, market_alerts)
+        # Unpack tuple (data, change_pct)
+        data, change_pct = check_livermore_criteria(code, market_alerts)
+        
+        # 統計市場漲跌 (只要有抓到資料就算)
+        if change_pct is not None:
+            market_stats["total_scanned"] += 1
+            if change_pct > 0:
+                market_stats["up"] += 1
+            elif change_pct < 0:
+                market_stats["down"] += 1
+            else:
+                market_stats["flat"] += 1
+                
         if data:
             results.append(data)
     
     print(f"\n\n掃描完成！")
+    print(f"市場統計: 上漲 {market_stats['up']} / 下跌 {market_stats['down']} / 平盤 {market_stats['flat']}")
     print(f"符合條件: {len(results)} 檔\n")
     
     # 按連紅天數排序 (越多越強)
@@ -669,14 +687,15 @@ def main():
     output = {
         "date": datetime.now().strftime("%Y-%m-%d"),
         "updatedAt": current_iso,
-        "quoteTime": current_iso, # New: Stock Scan Time
-        "alertUpdateTime": current_iso, # New: Alert Update Time (initially same)
+        "quoteTime": current_iso, 
+        "alertUpdateTime": current_iso,
         "scanType": "livermore_breakout",
         "criteria": {
             "lookbackDays": LOOKBACK_DAYS,
             "description": f"突破 {LOOKBACK_DAYS} 日新高 + 站上所有均線 + 連續2日紅K"
         },
         "stocks": results,
+        "marketStats": market_stats, # 新增市場統計欄位
         "summary": {
             "total": len(results),
             "buySignals": len(results),
