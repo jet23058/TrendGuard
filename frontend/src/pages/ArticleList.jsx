@@ -98,11 +98,7 @@ const ArticleList = () => {
                                             <div className="text-xs font-mono text-gray-500 flex items-center gap-1">
                                                 <Calendar size={12} /> {article.date}
                                             </div>
-                                            {article.isAiGenerated && (
-                                                <div className="flex items-center gap-1 text-[10px] bg-purple-900/30 text-purple-300 px-2 py-0.5 rounded-full border border-purple-800/50">
-                                                    <Sparkles size={10} /> AI Analysis
-                                                </div>
-                                            )}
+                                            {/* AI Badge removed */}
                                         </div>
 
                                         <h2 className="text-xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors line-clamp-2 leading-relaxed">

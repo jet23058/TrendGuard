@@ -74,8 +74,8 @@ const DailyReport = () => {
     const newCount = data.changes?.new?.length || 0;
 
     // 優先使用 AI 生成的標題，否則使用動態標題
-    const marketSentiment = bullCount > 20 ? "極度火熱" : bullCount > 10 ? "多方強勢" : "震盪整理";
-    const displayTitle = article?.title || `台股${marketSentiment}！${newCount} 檔新黑馬突圍`;
+    const marketSentiment = bullCount > 20 ? "多頭氣盛" : bullCount > 10 ? "多方轉強" : "區間震盪";
+    const displayTitle = article?.title || `台股${marketSentiment}，${newCount} 檔焦點個股動能轉強`;
 
     // 優先使用 AI 生成的內容，否則使用預設模板
     const displayContent = article?.content || `
@@ -105,7 +105,6 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
                 <header className="mb-12 text-center max-w-3xl mx-auto">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-900/30 text-blue-400 text-xs font-bold mb-4 border border-blue-800">
                         <Activity size={14} /> 利弗摩爾動能掃描
-                        {article?.isAiGenerated && <span className="ml-2 px-1 bg-purple-900/50 text-purple-300 rounded text-[10px]">AI Analysis</span>}
                     </div>
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
                         {displayTitle}

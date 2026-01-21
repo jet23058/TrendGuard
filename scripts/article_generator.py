@@ -176,15 +176,16 @@ def generate_daily_article(scan_results: dict) -> dict:
     {top_stocks_str}
     
     **Requirements:**
-    1. **Title**: Create a HIGHLY ENGAGING, "clickbait" style title in Traditional Chinese.
-       - **CRITICAL**: Do NOT use the same title structure every day. 
-       - **Constraint**: The title MUST include specific details from today's data, such as **"{strongest_sector}" (Sector Name)**, **"{top_stock_name}" (Stock Name)**, or the number **"{total}"**.
-       - **Variety**: Randomly choose one of the following angles for the title:
-         - *Angle A (Urgency)*: "Emergency! {strongest_sector} sector is igniting! {total} stocks found."
-         - *Angle B (Curiosity)*: "Why is smart money chasing {top_stock_name}? The data reveals..."
-         - *Angle C (FOMO)*: "Missed the low? These {total} stocks are hitting new highs today!"
-         - *Angle D (Direct)*: "{strongest_sector} leads the charge! {top_stock_name} breakout confirmed."
-       - Use 1-2 Emojis (e.g., 🚀, 🔥, 💰, ⚠️) to make it pop.
+    1. **Title**: Create a natural, professional, and "human-like" financial news headline in Traditional Chinese.
+       - **Avoid** robotic phrases like "Calculation Result" (運算結果) or overly sensational "clickbait" styles like "Emergency!" (緊急) or "Multi-head ignition!" (多頭點火).
+       - **Style**: Mimic a senior market analyst giving a daily summary. It should be insightful but not exaggerated.
+       - **Content**: Incorporate key market themes from the data: **"{strongest_sector}"**, **"{top_stock_name}"**, or the count **"{total}"** if significant.
+       - **Examples of good tone**:
+         - "資金湧入{strongest_sector}，{top_stock_name}領軍突圍"
+         - "台股動能掃描：{total}檔個股呈現強勢，{strongest_sector}成焦點"
+         - "{strongest_sector}接棒上攻，{top_stock_name}持續創高表現亮眼"
+         - "多方氣勢延續，{strongest_sector}與{top_stock_name}表現強勁"
+       - Use 0-1 Emojis max, keep it clean.
 
     2. **Content**: 
        - Start with a "Market Pulse" section summarizing the general sentiment.
@@ -203,7 +204,7 @@ def generate_daily_article(scan_results: dict) -> dict:
         # Parse Title and Content from AI response
         # Assume first line is title if it starts with #
         lines = ai_content.strip().split('\n')
-        title = f"{date_str} 盤勢分析 (AI EXCLUSIVE)"
+        title = f"{date_str} 盤勢深度解析"
         content = ai_content
         
         # Simple heuristic to extract title if provided
@@ -218,7 +219,7 @@ def generate_daily_article(scan_results: dict) -> dict:
         market_md = get_market_summary(scan_results)
         stock_md, stock_highlights = get_stock_analysis(scan_results) # Use old helper
         
-        title = f"{date_str} 盤勢分析運算結果"
+        title = f"{date_str} 市場動能分析報告"
         content = f"{market_md}\n---\n{sector_info}\n---\n{stock_md}"
 
     
