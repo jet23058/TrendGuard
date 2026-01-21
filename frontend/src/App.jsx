@@ -1153,6 +1153,9 @@ export default function App() {
     let maxDays = 0;
     
     data.stocks.forEach(stock => {
+      // 必須同時符合漲幅條件，才列入統計
+      if (minChangePct > 0 && (stock.changePct || 0) < minChangePct) return;
+
       const days = stock.consecutiveRed || 0;
       if (days < 2) return; // 只統計 2 天以上
       counts[days] = (counts[days] || 0) + 1;
@@ -1181,7 +1184,7 @@ export default function App() {
     }
     
     return stats;
-  }, [data, isExactMatch]); // 依賴 isExactMatch 更新
+  }, [data, isExactMatch, minChangePct]); // 加入 minChangePct 依賴
 
   // 按產業分組，庫存所在產業優先，並套用 minRedK 篩選
   const groupedByIndustry = useMemo(() => {
