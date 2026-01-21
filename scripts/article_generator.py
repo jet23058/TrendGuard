@@ -118,6 +118,23 @@ try:
 except ImportError:
     HAS_GEMINI = False
 
+def load_humanizer_rules() -> str:
+    """Load humanizer rules from local markdown file"""
+    try:
+        rules_path = Path("scripts/humanizer-zh-tw/SKILL.md")
+        if rules_path.exists():
+            with open(rules_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                # Extract the core rules section to keep prompt concise
+                # finding the start of the actual content
+                start_marker = "# Humanizer-zh-TW: 去除 AI 寫作痕跡"
+                if start_marker in content:
+                    return content[content.find(start_marker):]
+                return content
+    except Exception as e:
+        print(f"⚠️ Could not load humanizer rules: {e}")
+    return ""
+
 def ask_gemini(prompt: str, model_name=None) -> str:
     """Invokes Gemini API to generate text using new google.genai SDK."""
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -162,9 +179,13 @@ def generate_daily_article(scan_results: dict) -> dict:
     strongest_sector = top_sectors[0] if top_sectors else "多頭"
     
     # 2. Construct Prompt for Gemini
+    humanizer_rules = load_humanizer_rules()
+    
     prompt = f"""
+    {humanizer_rules}
+    
     You are a professional stock market analyst for the Taiwan stock market (台股).
-    Write a daily market analysis article based on the following data.
+    Your task is to write a daily market analysis article based on the provided data, STRICTLY following the "Humanizer" rules above to ensure the text sounds natural and human-written.
     
     **Data:**
     - Date: {date_str}
@@ -192,6 +213,8 @@ def generate_daily_article(scan_results: dict) -> dict:
        - "Sector Focus": Discuss the active sectors.
        - "Spotlight": Pick the best 1-2 stocks from the list and analyze them briefly (pretend to analyze technicals based on the data provided).
        - Tone: Professional yet exciting, encouraging but notifying risks.
+       - **COMPLIANCE**: STRICTLY AVOID terms like "Buy Signal", "Stop Loss", "Take Profit", "Target Price". Use neutral terms like "Momentum detected", "Risk level", "Condition met".
+    
     3. **Format**: Return the result in pure Markdown. Use bolding and lists.
     4. **Language**: Traditional Chinese (繁體中文).
     """
