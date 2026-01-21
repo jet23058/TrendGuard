@@ -1,7 +1,7 @@
-firebase-admin==6.5.0
+firebase-admin>=6.5.0
 google-generativeai
-yfinance>=0.2.36
-pandas>=2.0.0
-pandas_ta>=0.3.14b0
-plotly>=5.18.0
-numpy>=1.24.0
+yfinance
+pandas
+pandas_ta
+plotly
+numpy
