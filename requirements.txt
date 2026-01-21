@@ -1,7 +1,0 @@
-firebase-admin>=6.5.0
-google-generativeai
-yfinance
-pandas
-pandas_ta
-plotly
-numpy
