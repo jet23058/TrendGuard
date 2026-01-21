@@ -936,6 +936,7 @@ export default function App() {
   const [stockHistoryMap, setStockHistoryMap] = useState({}); // { ticker: [date1, date2, ...] }
   const [minRedK, setMinRedK] = useState(2); // Filter: minimum consecutive red K (default 2 = show all)
   const [isExactMatch, setIsExactMatch] = useState(false); // New state for exact match toggle
+  const [minChangePct, setMinChangePct] = useState(0); // 強勢股過濾 (>= 5%)
 
   // 監聽登入狀態與資料同步
   useEffect(() => {
@@ -1186,10 +1187,18 @@ export default function App() {
   const groupedByIndustry = useMemo(() => {
     if (!data?.stocks) return {};
 
-    // 先根據 minRedK 篩選
+    // 先根據 minRedK 和 minChangePct 篩選
     const filteredStocks = data.stocks.filter(stock => {
       const days = stock.consecutiveRed || 0;
-      return isExactMatch ? days === minRedK : days >= minRedK;
+      const pct = stock.changePct || 0;
+      
+      // 1. 連紅 K 條件
+      const redKMatch = isExactMatch ? days === minRedK : days >= minRedK;
+      
+      // 2. 漲幅條件 (如果設定了 minChangePct > 0)
+      const changeMatch = minChangePct > 0 ? pct >= minChangePct : true;
+      
+      return redKMatch && changeMatch;
     });
 
     const groups = {};
@@ -1335,6 +1344,19 @@ export default function App() {
             </h3>
             
             <div className="flex items-center gap-3">
+               {/* 強勢股過濾 (>= 5%) */}
+               <label className="flex items-center gap-2 cursor-pointer bg-gray-800 px-3 py-1 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors select-none">
+                  <input 
+                    type="checkbox" 
+                    checked={minChangePct > 0} 
+                    onChange={(e) => setMinChangePct(e.target.checked ? 5 : 0)}
+                    className="w-4 h-4 rounded text-red-600 focus:ring-red-500 bg-gray-900 border-gray-600"
+                  />
+                  <span className={`text-xs font-bold ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                    🔥 強勢過濾 (漲幅 &gt; 5%)
+                  </span>
+               </label>
+
                {/* 模式切換開關 */}
                <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">
                 <button
@@ -1351,9 +1373,9 @@ export default function App() {
                 </button>
               </div>
 
-              {minRedK > 2 && (
+              {(minRedK > 2 || minChangePct > 0) && (
                 <button
-                  onClick={() => setMinRedK(2)}
+                  onClick={() => { setMinRedK(2); setMinChangePct(0); }}
                   className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-1"
                 >
                   <RefreshCw size={12} /> 重置
