@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [2026-01-10]
+## [2026-01-21]
 
 ### Added
 - [Feat] **Daily Articles Waterfall View**: New `/articles` page with a masonry-style waterfall layout for browsing historical reports (`frontend/src/pages/ArticleList.jsx`).
@@ -11,6 +11,7 @@ All notable changes to this project will be documented in this file.
 - [Feat] **Rich Article Page**: New `/report/:date` page displaying markdown content alongside interactive stock cards (`frontend/src/pages/DailyReport.jsx`).
 - [UI] **Shared Header Component**: Extracted navigation and auth controls to a reusable `Header` component with active state indication (`frontend/src/components/Header.jsx`).
 - [UI] **Interactive Charts Restored**: Restored MA/KD toggle and detailed tooltips in `StockCardMini` component (`frontend/src/components/StockCardMini.jsx`).
+- [UI] **Stock Card Optimization**: Aligned "Disposition/Warning" and "Held" tags directly below the stock name for better visual hierarchy (`frontend/src/components/StockCardMini.jsx`).
 
 ### Changed
 - [Refactor] **Navigation Architecture**: Implemented `react-router-dom` for multi-page navigation (Dashboard / Daily Articles).
@@ -18,7 +19,7 @@ All notable changes to this project will be documented in this file.
 - [Refactor] **Component Extraction**: Refactored `App.jsx` by extracting `IndustryGroup`, `StockCardMini`, and `Header` into separate files.
 - [Data] **Data Structure Separation**: Separated `history/` (snapshot data) and `articles/` (AI text content) in `public/data` for cleaner data management.
 
-
+## [2026-01-10]
 
 ### Added
 - [Feat] React frontend with Vite + TailwindCSS (frontend/)

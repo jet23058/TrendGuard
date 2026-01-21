@@ -178,36 +178,43 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
     return (
         <div className={`bg-gray-800 rounded-xl border shadow-lg flex-shrink-0 w-72 h-[460px] flex flex-col relative ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
             <div className="p-3 border-b border-gray-700 bg-gray-900/50 rounded-t-xl">
-                <div className="flex justify-between items-center mb-1">
-                    <div className="flex items-center gap-2">
-                        <a href={yahooUrl} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded transition-colors cursor-pointer no-underline">
-                            {ticker} ↗
-                        </a>
-                        <h3 className="text-sm font-bold text-white truncate max-w-[80px]">{name}</h3>
-                        <button
-                            onClick={() => setIsCalendarOpen(true)}
-                            className="p-1 hover:bg-gray-700 rounded transition-colors"
-                            title="查看上榜紀錄"
-                        >
-                            <BarChart2 size={14} className="text-gray-400 hover:text-blue-400" />
-                        </button>
-                        {alert && (
-                            <div className="group relative z-10">
-                                <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
-                                    {alert.badge}
-                                </span>
-                                {/* Tooltip */}
-                                <div className="absolute left-0 top-full mt-1 w-48 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
-                                    <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
-                                        {alert.info}
+                <div className="flex justify-between items-start gap-2">
+                    <div className="flex flex-col gap-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                            <a href={yahooUrl} target="_blank" rel="noopener noreferrer" className="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-2 py-0.5 rounded transition-colors cursor-pointer no-underline flex-shrink-0">
+                                {ticker} ↗
+                            </a>
+                            <h3 className="text-sm font-bold text-white truncate max-w-[80px]">{name}</h3>
+                            <button
+                                onClick={() => setIsCalendarOpen(true)}
+                                className="p-1 hover:bg-gray-700 rounded transition-colors flex-shrink-0"
+                                title="查看上榜紀錄"
+                            >
+                                <BarChart2 size={14} className="text-gray-400 hover:text-blue-400" />
+                            </button>
+                        </div>
+                        {/* 標籤區：處置/警示 + 持有 */}
+                        {(alert || isInPortfolio) && (
+                            <div className="flex items-center gap-2">
+                                {alert && (
+                                    <div className="group relative z-10">
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
+                                            {alert.badge}
+                                        </span>
+                                        {/* Tooltip */}
+                                        <div className="absolute left-0 top-full mt-1 w-48 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
+                                            <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
+                                                {alert.info}
+                                            </div>
+                                            <div className="text-gray-400 leading-relaxed">{alert.detail}</div>
+                                        </div>
                                     </div>
-                                    <div className="text-gray-400 leading-relaxed">{alert.detail}</div>
-                                </div>
+                                )}
+                                {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
                             </div>
                         )}
-                        {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
                     </div>
-                    <div className={`text-right ${isUp ? 'text-red-400' : 'text-green-400'}`}>
+                    <div className={`text-right flex-shrink-0 ${isUp ? 'text-red-400' : 'text-green-400'}`}>
                         <div className="text-lg font-bold font-mono">{currentPrice?.toFixed(2)}</div>
                         <div className="text-xs font-medium flex items-center justify-end gap-1">
                             {isUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}

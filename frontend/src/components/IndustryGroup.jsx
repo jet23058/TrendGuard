@@ -34,7 +34,7 @@ const IndustryGroup = ({ sector, stocks, portfolioTickers = [], portfolio = [], 
                     )}
                 </h3>
             </div>
-            <div className="flex overflow-x-auto pb-4 gap-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
+            <div className="flex overflow-x-auto overflow-y-hidden pb-4 gap-4 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent">
                 {sortedStocks.map(stock => {
                     // 找出該股票的庫存資訊
                     const item = portfolio.find(p => p.ticker === stock.ticker);
