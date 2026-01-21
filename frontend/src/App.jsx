@@ -935,6 +935,7 @@ export default function App() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [stockHistoryMap, setStockHistoryMap] = useState({}); // { ticker: [date1, date2, ...] }
   const [minRedK, setMinRedK] = useState(2); // Filter: minimum consecutive red K (default 2 = show all)
+  const [isExactMatch, setIsExactMatch] = useState(false); // New state for exact match toggle
 
   // 監聽登入狀態與資料同步
   useEffect(() => {
@@ -1142,14 +1143,54 @@ export default function App() {
   const portfolioTickers = useMemo(() => portfolio.map(p => p.ticker), [portfolio]);
   const scanResultTickers = useMemo(() => data?.stocks?.map(s => s.ticker) || [], [data]);
 
+  // 統計各連紅天數的累積數量 (用於篩選器 UI)
+  const redKStats = useMemo(() => {
+    if (!data?.stocks) return [];
+    
+    // 1. 找出所有出現過的連紅天數
+    const counts = {};
+    let maxDays = 0;
+    
+    data.stocks.forEach(stock => {
+      const days = stock.consecutiveRed || 0;
+      if (days < 2) return; // 只統計 2 天以上
+      counts[days] = (counts[days] || 0) + 1;
+      if (days > maxDays) maxDays = days;
+    });
+
+    // 2. 計算每個閾值的數量 (根據模式切換計算邏輯)
+    const stats = [];
+    
+    for (let d = 2; d <= maxDays; d++) {
+      let count = 0;
+      
+      if (isExactMatch) {
+        // 精確模式：只計算 == d 的數量
+        count = counts[d] || 0;
+      } else {
+        // 至少模式：計算 >= d 的數量
+        for (let k = d; k <= maxDays; k++) {
+          count += (counts[k] || 0);
+        }
+      }
+      
+      if (count > 0) {
+        stats.push({ days: d, count });
+      }
+    }
+    
+    return stats;
+  }, [data, isExactMatch]); // 依賴 isExactMatch 更新
+
   // 按產業分組，庫存所在產業優先，並套用 minRedK 篩選
   const groupedByIndustry = useMemo(() => {
     if (!data?.stocks) return {};
 
     // 先根據 minRedK 篩選
-    const filteredStocks = data.stocks.filter(stock =>
-      (stock.consecutiveRed || 0) >= minRedK
-    );
+    const filteredStocks = data.stocks.filter(stock => {
+      const days = stock.consecutiveRed || 0;
+      return isExactMatch ? days === minRedK : days >= minRedK;
+    });
 
     const groups = {};
     filteredStocks.forEach(stock => {
@@ -1285,33 +1326,80 @@ export default function App() {
           <p className="text-blue-200 text-sm">📊 <strong>篩選條件：</strong>{data?.criteria?.description}</p>
         </div>
 
-        {/* 連續紅K篩選器 */}
-        <div className="bg-gray-900 border border-gray-700 p-4 rounded-xl flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-3">
-            <span className="text-gray-400 text-sm">連續紅K ≥</span>
-            <input
-              type="number"
-              min="2"
-              max="20"
-              value={minRedK}
-              onChange={(e) => setMinRedK(Math.max(2, parseInt(e.target.value) || 2))}
-              className="w-16 bg-gray-800 border border-gray-600 text-white text-center rounded px-2 py-1 text-sm focus:border-blue-500 focus:outline-none"
-            />
+        {/* 連續紅K篩選器 (新版) */}
+        <div className="bg-gray-900 border border-gray-700 p-4 rounded-xl space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-gray-300 font-bold flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-red-500" />
+              動能篩選：連續收紅天數
+            </h3>
+            
+            <div className="flex items-center gap-3">
+               {/* 模式切換開關 */}
+               <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">
+                <button
+                  onClick={() => setIsExactMatch(false)}
+                  className={`px-3 py-1 rounded transition-colors ${!isExactMatch ? 'bg-gray-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
+                >
+                  至少 (≥)
+                </button>
+                <button
+                  onClick={() => setIsExactMatch(true)}
+                  className={`px-3 py-1 rounded transition-colors ${isExactMatch ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
+                >
+                  剛好 (==)
+                </button>
+              </div>
+
+              {minRedK > 2 && (
+                <button
+                  onClick={() => setMinRedK(2)}
+                  className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-1"
+                >
+                  <RefreshCw size={12} /> 重置
+                </button>
+              )}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-gray-500 text-sm">
-              篩選結果：<span className="text-blue-400 font-bold">{Object.values(groupedByIndustry).flat().length}</span> 檔
-              {minRedK > 2 && <span className="text-gray-600 ml-1">(原 {data?.stocks?.length || 0} 檔)</span>}
+
+          <div className="flex flex-wrap gap-2">
+            {redKStats.map((stat) => (
+              <button
+                key={stat.days}
+                onClick={() => setMinRedK(stat.days)}
+                className={`
+                  relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border
+                  flex flex-col items-center min-w-[80px]
+                  ${minRedK === stat.days
+                    ? 'bg-red-600/20 border-red-500 text-red-300 shadow-[0_0_15px_rgba(220,38,38,0.3)]'
+                    : 'bg-gray-800 border-gray-700 text-gray-400 hover:bg-gray-700 hover:border-gray-600'
+                  }
+                `}
+              >
+                <span className={`text-base font-bold font-mono mb-0.5 ${minRedK === stat.days ? 'text-white' : ''}`}>
+                  {stat.days}<span className="text-xs ml-0.5">{isExactMatch ? '' : '+'}</span>
+                </span>
+                <span className="text-[10px] opacity-80">
+                  {stat.count} 檔
+                </span>
+                
+                {/* Active Indicator Line */}
+                {minRedK === stat.days && (
+                  <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-red-500 rounded-b-lg mx-2"></div>
+                )}
+              </button>
+            ))}
+            {redKStats.length === 0 && <div className="text-sm text-gray-500 py-2">無符合條件的資料</div>}
+          </div>
+          
+          <div className="text-xs text-gray-500 flex items-center gap-1 mt-1 pl-1">
+            <Info size={12} />
+            <span>
+              {isExactMatch 
+                ? '目前模式：只顯示「剛好」連續 N 天收紅的股票' 
+                : '目前模式：顯示「至少」連續 N 天收紅的股票 (包含更多天數)'}
             </span>
           </div>
-          {minRedK > 2 && (
-            <button
-              onClick={() => setMinRedK(2)}
-              className="ml-auto text-xs bg-gray-800 hover:bg-gray-700 text-gray-300 px-3 py-1 rounded border border-gray-600 transition-colors"
-            >
-              重置篩選
-            </button>
-          )}
         </div>
 
         {/* Daily Changes Summary */}
