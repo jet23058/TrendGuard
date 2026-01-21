@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=3001",
-    "dev:all": "concurrently \"npm run dev\" \"python3 ../backend/server.py\"",
+    "dev:all": "concurrently \"npm run dev\" \"/opt/homebrew/anaconda3/bin/python3 ../backend/server.py\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
