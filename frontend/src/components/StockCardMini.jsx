@@ -199,7 +199,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                 {alert && (
                                     <div className="group relative z-10">
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
-                                            {alert.badge}
+                                            {alert.type === 'disposition' ? '🚫 禁當沖' : alert.badge}
                                         </span>
                                         {/* Tooltip */}
                                         <div className="absolute left-0 top-full mt-1 w-48 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
