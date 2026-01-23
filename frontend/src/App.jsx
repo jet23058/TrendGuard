@@ -1344,13 +1344,13 @@ export default function App() {
 
         {/* 連續紅K篩選器 (新版) */}
         <div className="bg-gray-900 border border-gray-700 p-4 rounded-xl space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <h3 className="text-gray-300 font-bold flex items-center gap-2">
               <TrendingUp className="w-5 h-5 text-red-500" />
               動能篩選：連續收紅天數
             </h3>
             
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
                {/* 強勢股過濾 (自訂漲幅) */}
                <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-colors ${minChangePct > 0 ? 'bg-gray-800 border-red-500/50' : 'bg-gray-800 border-gray-700'}`}>
                   <span className={`text-xs font-bold whitespace-nowrap ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
