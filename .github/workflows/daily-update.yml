@@ -41,6 +41,14 @@ jobs:
         run: |
           pip install yfinance pandas pytest twstock lxml requests google-genai
       
+      - name: Fetch previous data
+        run: |
+          # 嘗試從 data 分支下載昨天的資料，以便計算續漲/剔除
+          # 如果下載失敗 (例如第一次執行)，則會在 script 中自動處理為全空
+          mkdir -p frontend/public/data
+          echo "⬇️ Fetching previous scan results from data branch..."
+          curl -f -o frontend/public/data/daily_scan_results.json "https://raw.githubusercontent.com/${{ github.repository }}/data/daily_scan_results.json" || echo "⚠️ Previous data not found, starting fresh."
+
       - name: Run tests first
         run: |
           # 測試環境下仍使用 TEST_MODE
