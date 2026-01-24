@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { TrendingUp, TrendingDown, BarChart2 } from 'lucide-react';
 import {
     ComposedChart,
@@ -12,6 +12,36 @@ import {
     ReferenceLine
 } from 'recharts';
 import StockHistoryCalendar from './StockHistoryCalendar';
+
+// --- Hook: 監聽元素是否進入視窗 ---
+const useInView = (options = {}) => {
+    const [isInView, setIsInView] = useState(false);
+    const ref = useRef(null);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsInView(true);
+                if (options.triggerOnce) {
+                    observer.disconnect();
+                }
+            }
+        }, {
+            rootMargin: '100px', // 預設提早 100px 觸發
+            ...options
+        });
+
+        if (ref.current) {
+            observer.observe(ref.current);
+        }
+
+        return () => {
+            observer.disconnect();
+        };
+    }, []); // Empty dependency array for stability
+
+    return [ref, isInView];
+};
 
 // --- 1. K線圖繪製元件 ---
 const CandleStickShape = (props) => {
@@ -145,6 +175,9 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
     const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
     const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    
+    // Lazy Load Chart: 提早 200px 載入，只觸發一次
+    const [chartRef, chartInView] = useInView({ triggerOnce: true, rootMargin: '200px' });
 
     const chartData = useMemo(() => {
         if (!ohlc || ohlc.length === 0) return [];
@@ -270,8 +303,9 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
             {
                 chartData.length > 0 && (
                     <div className="flex-1 w-full px-2 pb-2 min-h-0 relative flex flex-col">
-                        <div className="flex-1 w-full min-h-0">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div ref={chartRef} className="flex-1 w-full min-h-0">
+                            {chartInView ? (
+                                <ResponsiveContainer width="100%" height="100%">
                                 <ComposedChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 5 }}>
                                     <CartesianGrid stroke="#374151" strokeDasharray="3 3" vertical={false} />
                                     <XAxis dataKey="date" hide />
@@ -316,6 +350,11 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                     )}
                                 </ComposedChart>
                             </ResponsiveContainer>
+                            ) : (
+                                <div className="w-full h-full bg-gray-700/10 animate-pulse rounded flex items-center justify-center">
+                                    <BarChart2 className="text-gray-700 w-8 h-8 opacity-20" />
+                                </div>
+                            )}
                         </div>
                         {/* 圖例 */}
                         <div className="flex justify-center gap-3 text-[10px] mt-1 shrink-0">
