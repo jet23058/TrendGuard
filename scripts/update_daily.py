@@ -191,6 +191,63 @@ def fetch_market_alerts():
 
     return alerts
 
+def fetch_allowed_day_trade_targets():
+    """取得所有可現股當沖的股票代碼 (上市+上櫃)"""
+    allowed = set()
+    
+    # 1. TWSE (上市)
+    try:
+        # TWTB4U: 當日沖銷交易標的及成交量值
+        # 若不帶日期，預設回傳最近交易日
+        url = "https://www.twse.com.tw/exchangeReport/TWTB4U?response=json"
+        r = requests.get(url, timeout=10)
+        data = r.json()
+        if 'tables' in data:
+            for t in data['tables']:
+                # 尋找包含標的清單的表格 (通常是第二個，欄位含'證券代號')
+                if 'fields' in t and '證券代號' in t['fields']:
+                    if len(t.get('data', [])) > 100: # 簡單檢核資料量
+                        for row in t['data']:
+                            allowed.add(row[0]) # 代號
+                        print(f"已取得上市當沖標的: {len(t['data'])} 檔")
+    except Exception as e:
+        print(f"Error fetching TWSE day trade list: {e}")
+
+    # 2. TPEX (上櫃)
+    try:
+        # TPEX 需要指定日期，嘗試回推最近 5 天直到抓到資料
+        found = False
+        base_date = datetime.now()
+        
+        for i in range(5):
+            d = base_date - timedelta(days=i)
+            roc_year = d.year - 1911
+            date_str = f"{roc_year}/{d.month:02d}/{d.day:02d}"
+            
+            url = f"https://www.tpex.org.tw/web/stock/trading/intraday_stat/intraday_trading_stat_result.php?l=zh-tw&o=json&d={date_str}"
+            try:
+                r = requests.get(url, timeout=5)
+                data = r.json()
+                if 'tables' in data:
+                    for t in data['tables']:
+                         if 'fields' in t and '證券代號' in t['fields']:
+                            count = len(t.get('data', []))
+                            if count > 50: # 簡單檢核
+                                for row in t['data']:
+                                    allowed.add(row[0])
+                                print(f"已取得上櫃當沖標的 ({date_str}): {count} 檔")
+                                found = True
+                                break
+                    if found: break
+            except:
+                continue
+                
+    except Exception as e:
+        print(f"Error fetching TPEX day trade list: {e}")
+        
+    print(f"總計可當沖標的: {len(allowed)} 檔")
+    return allowed
+
 # --- 設定 ---
 LOOKBACK_DAYS = 20  # 突破幾日新高
 TEST_MODE = os.environ.get('TEST_MODE', 'true').lower() == 'true'  # GitHub Actions 設為 false
@@ -264,7 +321,7 @@ def get_all_tw_targets() -> list:
     return targets
 
 
-def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) -> tuple[Optional[dict], Optional[float]]:
+def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, allowed_day_trade_targets: Optional[set] = None) -> tuple[Optional[dict], Optional[float]]:
     """
     檢查是否符合利弗摩爾突破條件
     
@@ -395,12 +452,24 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None) ->
              signal_text = f"⚠️ {alert_data.get('badge', '注意')}股 - {signal_text}"
              priority_score += 10 # 稍微提高權重
         
+        # 計算是否可當沖
+        cant_day_trade = False
+        # 1. 不在當沖清單中 (僅在清單有抓到時才判斷)
+        if allowed_day_trade_targets is not None and len(allowed_day_trade_targets) > 0:
+             if code not in allowed_day_trade_targets:
+                 cant_day_trade = True
+        
+        # 2. 處置股 (通常不可當沖)
+        if alert_data and alert_data.get('type') == 'disposition':
+             cant_day_trade = True
+
         full_data = {
             "ticker": code,
             "name": name,
             "sector": sector,
             "currentPrice": round(current_price, 2),
             "changePct": round(change_pct, 2),
+            "canDayTrade": not cant_day_trade,
             "prevHigh": round(prev_high, 2),
             "consecutiveRed": consecutive_red,
             "stopLoss": round(stop_loss, 2),
@@ -627,6 +696,9 @@ def main():
     market_alerts = fetch_market_alerts()
     print(f"取得市場警示資料: {len(market_alerts)} 筆")
     
+    # 取得可當沖標的清單
+    allowed_day_trade_targets = fetch_allowed_day_trade_targets()
+    
     results = []
     total = len(target_list)
     
@@ -643,7 +715,7 @@ def main():
             print(f"\r進度: {i}/{total}...", end="", flush=True)
         
         # Unpack tuple (data, change_pct)
-        data, change_pct = check_livermore_criteria(code, market_alerts)
+        data, change_pct = check_livermore_criteria(code, market_alerts, allowed_day_trade_targets)
         
         # 統計市場漲跌 (只要有抓到資料就算)
         if change_pct is not None:

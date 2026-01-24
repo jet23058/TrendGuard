@@ -193,8 +193,8 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                 <BarChart2 size={14} className="text-gray-400 hover:text-blue-400" />
                             </button>
                         </div>
-                        {/* 標籤區：處置/警示 + 持有 */}
-                        {(alert || isInPortfolio) && (
+                        {/* 標籤區：處置/警示 + 持有 + 禁當沖 */}
+                        {(alert || isInPortfolio || stock.canDayTrade === false) && (
                             <div className="flex items-center gap-2">
                                 {alert && (
                                     <div className="group relative z-10">
@@ -210,6 +210,13 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                         </div>
                                     </div>
                                 )}
+                                
+                                {stock.canDayTrade === false && (
+                                    <span className="text-[10px] bg-red-900 text-red-200 border border-red-700 px-1.5 py-0.5 rounded cursor-help" title="此股票不在當沖標的清單中，或正處於處置狀態">
+                                        🚫 禁當沖
+                                    </span>
+                                )}
+
                                 {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
                             </div>
                         )}
