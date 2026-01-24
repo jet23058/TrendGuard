@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-01-24]
+
+### Added
+- [Feat] **Day Trade Restriction Check**: Backend now fetches the official day trading allowlist from TWSE/TPEX APIs. Stocks not on the list or under disposition are marked with a red "🚫 禁當沖" label in the dashboard (`scripts/update_daily.py`, `frontend/src/components/StockCardMini.jsx`).
+- [Docs] **Project Plan**: Added `PROJECT_PLAN.md` detailing system architecture, current features, and roadmap.
+
+### Fixed
+- [Fix] **CI/CD Data Continuity**: Fixed issue where "Continued" and "Removed" lists were empty by ensuring the workflow fetches the previous day's data from the `data` branch before scanning (`.github/workflows/daily-update.yml`).
+
+### Performance
+- [Perf] **Lazy Chart Rendering**: Implemented `IntersectionObserver` in `StockCardMini` to only render Recharts components when they enter the viewport, significantly improving scroll performance (`frontend/src/components/StockCardMini.jsx`).
+
+### Changed
+- [Assets] **Favicon Update**: Updated website favicon and added `apple-touch-icon` for better mobile experience (`frontend/public/`).
+
 ## [2026-01-22]
 
 ### Added
