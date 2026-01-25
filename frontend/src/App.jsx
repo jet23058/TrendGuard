@@ -1560,8 +1560,8 @@ export default function App() {
 
           <div className="border-t border-gray-800 pt-8 text-center">
             <div className="flex justify-center gap-6 text-xs text-gray-500 mb-4">
-              <a href="#" className="hover:text-gray-300">隱私權政策 (Privacy Policy)</a>
-              <a href="#" className="hover:text-gray-300">使用條款 (Terms of Service)</a>
+              <Link to="/privacy" className="hover:text-gray-300">隱私權政策 (Privacy Policy)</Link>
+              <Link to="/terms" className="hover:text-gray-300">使用條款 (Terms of Service)</Link>
               <a href="#" className="hover:text-gray-300">免責聲明</a>
               <a href="#" className="hover:text-gray-300">聯絡我們</a>
             </div>

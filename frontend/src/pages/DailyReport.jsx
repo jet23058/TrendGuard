@@ -147,6 +147,10 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
             {/* Footer */}
             <footer className="border-t border-gray-800 bg-gray-900 py-12 text-center text-gray-600 text-xs">
                 <div className="max-w-2xl mx-auto px-4 space-y-4">
+                    <div className="flex justify-center gap-6 mb-4">
+                        <Link to="/privacy" className="hover:text-gray-400">隱私權政策</Link>
+                        <Link to="/terms" className="hover:text-gray-400">使用條款</Link>
+                    </div>
                     <p className="leading-relaxed">
                         本報告內容（包括但不限於 AI 生成之分析文字）僅供技術研究參考，<br />
                         並不保證精確性或完整性。投資人應獨立判斷。

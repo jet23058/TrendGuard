@@ -6,6 +6,8 @@ import App from './App.jsx'
 import DailyReport from './pages/DailyReport.jsx'
 import ArticleList from './pages/ArticleList.jsx'
 import KnowledgeHub from './pages/KnowledgeHub.jsx'
+import PrivacyPolicy from './pages/PrivacyPolicy.jsx'
+import TermsOfService from './pages/TermsOfService.jsx'
 
 // AdSense Injection
 const adSenseId = import.meta.env.VITE_ADSENSE_ID;
@@ -32,6 +34,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/dashboard" element={<App />} />
         <Route path="/report/:date" element={<DailyReport />} />
         <Route path="/knowledge" element={<KnowledgeHub />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
+        <Route path="/terms" element={<TermsOfService />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,
