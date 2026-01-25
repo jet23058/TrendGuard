@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://trend-guard.cloudjet.work/sitemap.xml
