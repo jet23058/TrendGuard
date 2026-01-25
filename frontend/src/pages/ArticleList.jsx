@@ -69,10 +69,10 @@ const ArticleList = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 text-gray-300 font-sans pb-10">
+        <div className="min-h-screen bg-gray-950 text-gray-300 font-sans flex flex-col">
             <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
 
-            <div className="max-w-7xl mx-auto px-4 pt-10">
+            <div className="max-w-7xl mx-auto px-4 pt-10 flex-grow w-full">
                 <header className="mb-10 text-center border-b border-gray-800 pb-10">
                     <h1 className="text-3xl font-bold text-white mb-2 flex items-center justify-center gap-2">
                         <FileText className="text-blue-500" /> 每日盤勢重點
@@ -119,6 +119,17 @@ const ArticleList = () => {
                     </div>
                 )}
             </div>
+
+            {/* Footer */}
+            <footer className="border-t border-gray-800 bg-gray-900 py-12 text-center text-gray-600 text-xs mt-12">
+                <div className="max-w-2xl mx-auto px-4 space-y-4">
+                    <div className="flex justify-center gap-6 mb-4">
+                        <Link to="/privacy" className="hover:text-gray-400">隱私權政策</Link>
+                        <Link to="/terms" className="hover:text-gray-400">使用條款</Link>
+                    </div>
+                    <p>&copy; {new Date().getFullYear()} TrendGuard. All rights reserved.</p>
+                </div>
+            </footer>
         </div>
     );
 };
