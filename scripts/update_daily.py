@@ -370,12 +370,19 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         past_data = df['High'].iloc[-(LOOKBACK_DAYS+1):-1]
         prev_high = float(past_data.max())
         
-        # 計算連續紅 K 天數 (含一字線漲停 c == o)
+        # 計算連續紅 K 天數
+        # 修正: 排除「無量一字線」 (Open==Close 且 成交量 < 100張/100,000股)
         consecutive_red = 0
         for i in range(len(df)-1, -1, -1):
             c = float(df['Close'].iloc[i])
             o = float(df['Open'].iloc[i])
-            if c >= o:  # 收盤 >= 開盤，含一字線漲停
+            v = int(df['Volume'].iloc[i])
+            
+            # 判斷是否為無量一字線 (量少於 100 張)
+            # 注意: yfinance volume 單位為股
+            is_flat_low_vol = (c == o) and (v < 100000)
+            
+            if c >= o and not is_flat_low_vol:  # 收盤 >= 開盤，且非無量一字線
                 consecutive_red += 1
             else:
                 break

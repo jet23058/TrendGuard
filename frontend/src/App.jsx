@@ -249,89 +249,180 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
   const fileInputRef = useRef(null);
+  const [ocrDebugText, setOcrDebugText] = useState(''); // 顯示 OCR 原始文字供除錯
+
+  // 圖片預處理：灰階化 + 對比度增強
+  const preprocessImage = (file) => {
+    return new Promise((resolve) => {
+      const img = document.createElement('img');
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+
+      img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        // 繪製原圖
+        ctx.drawImage(img, 0, 0);
+
+        // 取得像素資料
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // 灰階化 + 對比度增強
+        for (let i = 0; i < data.length; i += 4) {
+          // 灰階化
+          const gray = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+
+          // 對比度增強（二值化）- 閾值 128
+          const enhanced = gray > 128 ? 255 : 0;
+
+          data[i] = enhanced;     // R
+          data[i + 1] = enhanced; // G
+          data[i + 2] = enhanced; // B
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // 轉換為 Blob
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      };
+
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
+  // 解析 OCR 文字，提取股票資訊（改進版）
+  const parseOcrText = (text) => {
+    const results = [];
+
+    // 用於追蹤已找到的股票代碼（去重）
+    const seenCodes = new Set();
+
+    // 改進的正則表達式：專門匹配台灣股票代碼
+    // - 一般股票：4 位數字（如 2330、3008）
+    // - ETF：00 開頭 + 3-4 位數字（如 0050、00878、006208）
+    // - 上櫃股票：4 位數字（如 6770）
+    const codePatterns = [
+      /\b(00\d{3,4})\b/g,           // ETF: 0050, 00878, 006208
+      /\b([1-9]\d{3})\b/g,          // 一般股票: 2330, 3008, 6770
+    ];
+
+    // 從所有股票清單建立快速查找 Set
+    const validCodes = new Set(allTwStocks.map(s => s.ticker));
+
+    // 嘗試用每個模式匹配
+    for (const pattern of codePatterns) {
+      let match;
+      while ((match = pattern.exec(text)) !== null) {
+        const code = match[1];
+
+        // 跳過已處理的代碼
+        if (seenCodes.has(code)) continue;
+
+        // 只接受在台股清單中的代碼（提高準確度）
+        if (!validCodes.has(code)) continue;
+
+        seenCodes.add(code);
+
+        // 從完整股票清單中查找名稱
+        const stockInfo = allTwStocks.find(s => s.ticker === code);
+        const name = stockInfo ? stockInfo.name : '';
+
+        results.push({
+          ticker: code,
+          name: name,
+          shares: 0,  // 預設為 0，讓使用者手動填寫
+          cost: 0     // 預設為 0，讓使用者手動填寫
+        });
+      }
+    }
+
+    return results;
+  };
 
   const handleImageUpload = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsProcessing(true);
-    setOcrProgress(0);
+    setOcrProgress(5);
+    setOcrDebugText('');
 
-    const foundStocks = [];
+    try {
+      const allResults = [];
+      const allOcrTexts = [];
+      const totalFiles = files.length;
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const result = await Tesseract.recognize(file, 'chi_tra+eng', {
-          logger: m => {
+      // 逐一處理每張圖片
+      for (let i = 0; i < totalFiles; i++) {
+        const file = files[i];
+        const progressBase = (i / totalFiles) * 70;
+
+        setOcrProgress(Math.round(progressBase + 5));
+
+        // 圖片預處理
+        const processedImage = await preprocessImage(file);
+        setOcrProgress(Math.round(progressBase + 15));
+
+        // 使用 Tesseract.js 進行 OCR（只使用英文+數字，因為我們只需要抓代碼）
+        const result = await Tesseract.recognize(processedImage, 'eng', {
+          logger: (m) => {
             if (m.status === 'recognizing text') {
-              setOcrProgress(Math.round((i / files.length + m.progress / files.length) * 100));
+              const fileProgress = (m.progress || 0) * 50 / totalFiles;
+              setOcrProgress(Math.round(progressBase + 15 + fileProgress));
             }
           }
         });
 
-        const text = result.data.text;
-        console.log('OCR Result:', text);
+        // 儲存原始 OCR 文字供除錯
+        allOcrTexts.push(`=== 圖 ${i + 1} ===\n${result.data.text}`);
 
-        // 清理文字並分割成行
-        const lines = text.split('\n').map(l => l.replace(/\s+/g, ' ').trim()).filter(l => l);
-        console.log('Lines:', lines);
-
-        // 搜尋股票代碼 (4-6位數字)
-        const codeMatches = text.match(/\b\d{4,6}\b/g) || [];
-        codeMatches.forEach(code => {
-          const stock = allTwStocks.find(s => s.ticker === code);
-          if (stock && !foundStocks.find(f => f.ticker === code)) {
-            foundStocks.push({ ...stock, cost: 0, shares: 0 });
-          }
-        });
-
-        // 搜尋股票名稱 - 使用模糊匹配
-        allTwStocks.forEach(stock => {
-          // 完整名稱匹配
-          if (text.includes(stock.name)) {
-            if (!foundStocks.find(f => f.ticker === stock.ticker)) {
-              foundStocks.push({ ...stock, cost: 0, shares: 0 });
-            }
-          }
-          // 部分名稱匹配 (至少2個字)
-          else if (stock.name.length >= 2) {
-            const shortName = stock.name.substring(0, 2);
-            if (text.includes(shortName)) {
-              // 驗證後面沒有其他文字干擾
-              const regex = new RegExp(shortName + '[電科金]?');
-              if (regex.test(text) && !foundStocks.find(f => f.ticker === stock.ticker)) {
-                foundStocks.push({ ...stock, cost: 0, shares: 0 });
-              }
-            }
-          }
-        });
-
-        // 嘗試提取數字來猜測成本和股數
-        // 券商 APP 格式通常是：股票名 價格 股數 獲利
-        const numberPattern = /(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g;
-        const numbers = text.match(numberPattern) || [];
-        console.log('Numbers found:', numbers);
-
-      } catch (err) {
-        console.error('OCR Error:', err);
+        // 解析 OCR 文字
+        const parsedItems = parseOcrText(result.data.text);
+        allResults.push(...parsedItems);
       }
-    }
 
-    if (foundStocks.length > 0) {
-      setImportList(prev => {
-        const existingTickers = new Set(prev.map(p => p.ticker));
-        const newItems = foundStocks.filter(f => !existingTickers.has(f.ticker));
-        return [...prev, ...newItems];
-      });
-      alert(`成功辨識 ${foundStocks.length} 檔股票！\n\n${foundStocks.map(s => `${s.ticker} ${s.name}`).join('\n')}\n\n請手動填入成本和股數。`);
-    } else {
-      alert('未能辨識出任何股票代碼。\n\n提示：請確保圖片清晰，或嘗試手動輸入。');
-    }
+      setOcrProgress(90);
+      setOcrDebugText(allOcrTexts.join('\n\n'));
 
-    setIsProcessing(false);
-    setOcrProgress(0);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+      // 去重合併（多張圖可能有重複的股票）
+      const uniqueResults = [];
+      const seenTickers = new Set();
+
+      for (const item of allResults) {
+        if (item.ticker && !seenTickers.has(item.ticker)) {
+          seenTickers.add(item.ticker);
+          uniqueResults.push(item);
+        }
+      }
+
+      setOcrProgress(100);
+
+      if (uniqueResults.length > 0) {
+        setImportList(prev => {
+          const existingTickers = new Set(prev.map(p => p.ticker));
+          const newItems = uniqueResults.filter(item => !existingTickers.has(item.ticker));
+          return [...prev, ...newItems];
+        });
+
+        // 顯示辨識結果摘要
+        const recognized = uniqueResults.map(r => `${r.ticker} ${r.name}`).join('\n');
+        alert(`成功辨識 ${uniqueResults.length} 檔股票！\n\n${recognized}\n\n注意：股數與成本請手動填寫。`);
+      } else {
+        alert('未能辨識出有效的股票代碼。\n\n可能原因：\n1. 截圖解析度不足\n2. 文字模糊或被遮擋\n\n建議使用「CSV 匯入」或「手動輸入」功能。');
+      }
+
+    } catch (err) {
+      console.error("OCR Failed:", err);
+      alert(`辨識失敗: ${err.message}\n\n請確認圖片格式正確。`);
+    } finally {
+      setIsProcessing(false);
+      setOcrProgress(0);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   // CSV 文字貼上處理
@@ -446,6 +537,24 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
                 </>
               )}
             </label>
+
+            {/* OCR 除錯資訊 */}
+            {ocrDebugText && (
+              <div className="mt-3">
+                <details className="text-xs">
+                  <summary className="text-gray-500 cursor-pointer hover:text-gray-300">
+                    🔍 查看 OCR 原始辨識文字 (除錯用)
+                  </summary>
+                  <pre className="mt-2 p-2 bg-gray-950 rounded text-gray-400 max-h-32 overflow-auto whitespace-pre-wrap text-[10px]">
+                    {ocrDebugText}
+                  </pre>
+                </details>
+              </div>
+            )}
+
+            <p className="mt-3 text-[10px] text-gray-500">
+              ⚠️ 注意：OCR 辨識準確度有限，股數與成本請手動確認。建議使用 CSV 匯入獲得更準確的結果。
+            </p>
           </div>
 
           {/* CSV 匯入區塊 */}
@@ -1056,7 +1165,7 @@ export default function App() {
         if (indexRes.ok) {
           const indexData = await indexRes.json();
           const last30Days = indexData.slice(0, 30); // Limit to last 30 days
-          
+
           // 1. 讀取快取
           const CACHE_KEY = 'trendguard_history_cache_v1';
           let cache = {};
@@ -1147,15 +1256,15 @@ export default function App() {
   // 統計各連紅天數的累積數量 (用於篩選器 UI)
   const redKStats = useMemo(() => {
     if (!data?.stocks) return [];
-    
+
     // 1. 找出所有出現過的連紅天數
     const counts = {};
     let maxDays = 0;
-    
+
     data.stocks.forEach(stock => {
       // 確保 pct 為數值，若無資料預設為 0
       const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
-      
+
       // 必須同時符合漲幅條件，才列入統計
       if (minChangePct > 0 && pct < minChangePct) return;
 
@@ -1167,10 +1276,10 @@ export default function App() {
 
     // 2. 計算每個閾值的數量 (根據模式切換計算邏輯)
     const stats = [];
-    
+
     for (let d = 2; d <= maxDays; d++) {
       let count = 0;
-      
+
       if (isExactMatch) {
         // 精確模式：只計算 == d 的數量
         count = counts[d] || 0;
@@ -1180,12 +1289,12 @@ export default function App() {
           count += (counts[k] || 0);
         }
       }
-      
+
       if (count > 0) {
         stats.push({ days: d, count });
       }
     }
-    
+
     return stats;
   }, [data, isExactMatch, minChangePct]); // 加入 minChangePct 依賴
 
@@ -1198,13 +1307,13 @@ export default function App() {
       const days = stock.consecutiveRed || 0;
       // 確保 pct 為數值
       const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
-      
+
       // 1. 連紅 K 條件
       const redKMatch = isExactMatch ? days === minRedK : days >= minRedK;
-      
+
       // 2. 漲幅條件 (如果設定了 minChangePct > 0)
       const changeMatch = minChangePct > 0 ? pct >= minChangePct : true;
-      
+
       return redKMatch && changeMatch;
     });
 
@@ -1349,49 +1458,49 @@ export default function App() {
               <TrendingUp className="w-5 h-5 text-red-500" />
               動能篩選：連續收紅天數
             </h3>
-            
-            <div className="flex flex-wrap items-center gap-2 md:gap-3">
-               {/* 強勢股過濾 (自訂漲幅) */}
-               <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-colors ${minChangePct > 0 ? 'bg-gray-800 border-red-500/50' : 'bg-gray-800 border-gray-700'}`}>
-                  <span className={`text-xs font-bold whitespace-nowrap ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                    🔥 強勢過濾 &gt;
-                  </span>
-                  <div className="relative flex items-center">
-                    <input 
-                      type="number" 
-                      min="0" 
-                      max="20"
-                      step="0.5"
-                      value={minChangePct === 0 ? '' : minChangePct} 
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '') {
-                          setMinChangePct(0);
-                        } else {
-                          const num = parseFloat(val);
-                          setMinChangePct(isNaN(num) ? 0 : num);
-                        }
-                      }}
-                      placeholder="0"
-                      className="w-10 bg-transparent text-center text-sm font-mono text-white focus:outline-none focus:border-b focus:border-red-500 placeholder-gray-600 appearance-none"
-                    />
-                    <span className="text-xs text-gray-500 ml-0.5">%</span>
-                    
-                    {/* 清除按鈕 */}
-                    {minChangePct > 0 && (
-                      <button 
-                        onClick={() => setMinChangePct(0)}
-                        className="ml-2 text-gray-500 hover:text-white"
-                        title="清除過濾"
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
-                  </div>
-               </div>
 
-               {/* 模式切換開關 */}
-               <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">
+            <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              {/* 強勢股過濾 (自訂漲幅) */}
+              <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-colors ${minChangePct > 0 ? 'bg-gray-800 border-red-500/50' : 'bg-gray-800 border-gray-700'}`}>
+                <span className={`text-xs font-bold whitespace-nowrap ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                  🔥 強勢過濾 &gt;
+                </span>
+                <div className="relative flex items-center">
+                  <input
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.5"
+                    value={minChangePct === 0 ? '' : minChangePct}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setMinChangePct(0);
+                      } else {
+                        const num = parseFloat(val);
+                        setMinChangePct(isNaN(num) ? 0 : num);
+                      }
+                    }}
+                    placeholder="0"
+                    className="w-10 bg-transparent text-center text-sm font-mono text-white focus:outline-none focus:border-b focus:border-red-500 placeholder-gray-600 appearance-none"
+                  />
+                  <span className="text-xs text-gray-500 ml-0.5">%</span>
+
+                  {/* 清除按鈕 */}
+                  {minChangePct > 0 && (
+                    <button
+                      onClick={() => setMinChangePct(0)}
+                      className="ml-2 text-gray-500 hover:text-white"
+                      title="清除過濾"
+                    >
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* 模式切換開關 */}
+              <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">
                 <button
                   onClick={() => setIsExactMatch(false)}
                   className={`px-3 py-1 rounded transition-colors ${!isExactMatch ? 'bg-gray-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
@@ -1437,7 +1546,7 @@ export default function App() {
                 <span className="text-[10px] opacity-80">
                   {stat.count} 檔
                 </span>
-                
+
                 {/* Active Indicator Line */}
                 {minRedK === stat.days && (
                   <div className="absolute -bottom-px left-0 right-0 h-0.5 bg-red-500 rounded-b-lg mx-2"></div>
@@ -1446,12 +1555,12 @@ export default function App() {
             ))}
             {redKStats.length === 0 && <div className="text-sm text-gray-500 py-2">無符合條件的資料</div>}
           </div>
-          
+
           <div className="text-xs text-gray-500 flex items-center gap-1 mt-1 pl-1">
             <Info size={12} />
             <span>
-              {isExactMatch 
-                ? '目前模式：只顯示「剛好」連續 N 天收紅的股票' 
+              {isExactMatch
+                ? '目前模式：只顯示「剛好」連續 N 天收紅的股票'
                 : '目前模式：顯示「至少」連續 N 天收紅的股票 (包含更多天數)'}
             </span>
           </div>
