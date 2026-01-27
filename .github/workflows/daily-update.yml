@@ -2,8 +2,8 @@ name: Daily Stock Update
 
 on:
   schedule:
-    # 1. 每日台灣時間 14:30 (UTC 06:30) 執行: 完整掃描 (Full Scan)
-    - cron: '30 6 * * 1-5'
+    # 1. 每日台灣時間 15:30 (UTC 07:30) 執行: 完整掃描 (Full Scan)
+    - cron: '30 7 * * 1-5'
     # 2. 每日台灣時間 18:30 (UTC 10:30) 執行: 更新警示 (Alert Update Only)
     # - cron: '30 10 * * 1-5'
   workflow_dispatch:  # 允許手動觸發
