@@ -367,12 +367,15 @@ def get_all_tw_targets() -> list:
         return TEST_STOCKS
     
     targets = []
-    print("正在整理台股清單...")
+    print("正在整理台股清單 (含股票與商品型 ETF)...")
     for code, info in twstock.codes.items():
-        if info.type == "股票" and info.market in ["上市", "上櫃"]:
-            targets.append(code)
+        # 原本只抓 info.type == "股票"
+        # 修改：加入 ETF 類型，以便包含黃金、白銀、原油等商品型標的
+        if info.market in ["上市", "上櫃"]:
+            if info.type == "股票" or info.type == "ETF":
+                targets.append(code)
     
-    print(f"共 {len(targets)} 檔股票待掃描")
+    print(f"共 {len(targets)} 檔標的待掃描")
     return targets
 
 
