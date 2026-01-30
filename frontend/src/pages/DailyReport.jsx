@@ -77,6 +77,11 @@ const DailyReport = () => {
     const marketSentiment = bullCount > 20 ? "多頭氣盛" : bullCount > 10 ? "多方轉強" : "區間震盪";
     const displayTitle = article?.title || `台股${marketSentiment}，${newCount} 檔焦點個股動能轉強`;
 
+    // Calculate Market Breadth for UI
+    const stats = data.marketStats || { up: 0, down: 0, flat: 0, total_scanned: 0 };
+    const upRatio = stats.total_scanned > 0 ? (stats.up / stats.total_scanned) * 100 : 0;
+    const downRatio = stats.total_scanned > 0 ? (stats.down / stats.total_scanned) * 100 : 0;
+
     // 優先使用 AI 生成的內容，否則使用預設模板
     const displayContent = article?.content || `
 ## 昨日盤勢小結
@@ -109,6 +114,24 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
                     <h1 className="text-3xl md:text-5xl font-bold text-white mb-8 leading-tight">
                         {displayTitle}
                     </h1>
+
+                    {/* Market Sentiment Bar */}
+                    <div className="max-w-md mx-auto mb-10 bg-gray-900/50 p-4 rounded-xl border border-gray-800">
+                        <div className="flex justify-between text-xs mb-2 font-bold">
+                            <span className="text-red-400">上漲 {stats.up}</span>
+                            <span className="text-gray-500">平盤 {stats.flat}</span>
+                            <span className="text-green-400">下跌 {stats.down}</span>
+                        </div>
+                        <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden flex">
+                            <div className="h-full bg-red-500 transition-all" style={{ width: `${upRatio}%` }}></div>
+                            <div className="h-full bg-gray-600 transition-all" style={{ width: `${100 - upRatio - downRatio}%` }}></div>
+                            <div className="h-full bg-green-500 transition-all" style={{ width: `${downRatio}%` }}></div>
+                        </div>
+                        <div className="mt-3 text-[10px] text-gray-500 italic text-center">
+                            數據基於全市場 {stats.total_scanned} 檔標的掃描結果
+                        </div>
+                    </div>
+
                     <div className="flex items-center justify-center gap-6 text-sm text-gray-400">
                         <span className="flex items-center gap-2"><Calendar size={16} /> {date}</span>
                         <span className="flex items-center gap-2"><TrendingUp size={16} /> 多頭標的：<b className="text-white">{bullCount}</b> 檔</span>
