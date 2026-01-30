@@ -41,13 +41,47 @@ def roc_to_date(roc_str):
         return None
 
 def fetch_market_alerts():
-    """Fetch TWSE Warning and Disposition data"""
+    """Fetch TWSE/TPEx Warning and Disposition data with Risk Analysis"""
     alerts = {}
+    history_db = {} # {code: [dates]}
+    
     today = datetime.now()
     today_str = today.strftime('%Y%m%d')
-    start_str = (today - timedelta(days=30)).strftime('%Y%m%d') # Look back 30 days for active dispositions
+    # Look back 40 days to ensure we have enough trading days for the 30-day rule
+    start_str = (today - timedelta(days=40)).strftime('%Y%m%d') 
     
-    # 1. Fetch Disposition (Punish)
+    # 1. Fetch TWSE Warning History (Notice)
+    try:
+        url = "https://www.twse.com.tw/rwd/zh/announcement/notice"
+        params = {'response': 'json', 'startDate': start_str, 'endDate': today_str}
+        r = requests.get(url, params=params, timeout=10)
+        data = r.json()
+        
+        if 'data' in data:
+            for item in data['data']:
+                code = item[1]
+                date_roc = item[5] # e.g. "114/01/30"
+                reason = item[4]
+                
+                if code not in history_db:
+                    history_db[code] = []
+                history_db[code].append(date_roc)
+                
+                # If it's today's alert, initialize the alert object
+                alert_dt = roc_to_date(date_roc)
+                if alert_dt and (today - alert_dt).days <= 1:
+                    alerts[code] = {
+                        "type": "warning",
+                        "badge": "警示",
+                        "color": "yellow",
+                        "info": "注意股",
+                        "detail": reason,
+                        "history": []
+                    }
+    except Exception as e:
+        print(f"Error fetching TWSE notice: {e}")
+
+    # 2. Fetch TWSE Disposition (Punish)
     try:
         url = "https://www.twse.com.tw/rwd/zh/announcement/punish"
         params = {'response': 'json', 'startDate': start_str, 'endDate': today_str}
@@ -56,21 +90,16 @@ def fetch_market_alerts():
         
         if 'data' in data:
             for item in data['data']:
-                # Fields: [Seq, Date, Code(2), Name, Count, Reason, Period(6), Measures(7), Content(8), Note]
                 code = item[2]
-                period_str = item[6] # e.g. "114/11/06～114/11/19"
+                period_str = item[6] 
                 content = item[8]
                 
-                # Check if active
                 if '～' in period_str:
                     start_roc, end_roc = period_str.split('～')
                     start_dt = roc_to_date(start_roc)
                     end_dt = roc_to_date(end_roc)
                     
-                    # --- 修改 1: 放寬日期判斷，允許顯示「明天開始」的處置股 ---
-                    # 原本: if start_dt and end_dt and start_dt <= today <= end_dt + timedelta(days=1):
                     if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1): 
-                        # Parse frequency (e.g. 5分鐘)
                         freq = "處置"
                         match = re.search(r'每(\S+)分鐘', content)
                         if match:
@@ -83,93 +112,33 @@ def fetch_market_alerts():
                             "badge": "處置",
                             "color": "red",
                             "info": f"{freq} (至 {end_roc})",
-                            "detail": f"期間: {period_str}\n措施: {item[7]}"
+                            "detail": f"期間: {period_str}\n措施: {item[7]}",
+                            "is_disposed": True
                         }
     except Exception as e:
-        print(f"Error fetching punish: {e}")
+        print(f"Error fetching TWSE punish: {e}")
 
-    # 2. Fetch Warning (Notice) - Only need today's or latest
-    try:
-        url = "https://www.twse.com.tw/rwd/zh/announcement/notice"
-        # Warning is daily, so just fetch recent few days to be safe, but we only care if it's recent
-        params = {'response': 'json', 'startDate': start_str, 'endDate': today_str}
-        r = requests.get(url, params=params, timeout=10)
-        data = r.json()
-        
-        if 'data' in data:
-            # Sort by date desc to get latest
-            # Warning data: [Seq, Code(1), Name, ..., Reason(4), Date(5)...]
-            # We assume the list is chronological or we check date.
-            for item in data['data']:
-                code = item[1]
-                date_roc = item[5]
-                # If date is today (or very recent)
-                alert_dt = roc_to_date(date_roc)
-                if alert_dt and (today - alert_dt).days <= 1: # Only show if warning was issued today/yesterday
-                    if code not in alerts: # Disposition has higher priority
-                        alerts[code] = {
-                            "type": "warning",
-                            "badge": "警示",
-                            "color": "yellow",
-                            "info": "注意股",
-                            "detail": item[4]
-                        }
-    except Exception as e:
-        print(f"Error fetching warning: {e}")
-        
     # 3. Fetch TPEX (OTC) Alerts
     try:
-        print("Fetching TPEX alerts...")
         base_url = "https://www.tpex.org.tw/openapi/v1"
         
-        # 3.1 TPEX Disposition (Punish)
-        r = requests.get(f"{base_url}/tpex_disposal_information", timeout=10)
-        if r.status_code == 200:
-            for item in r.json():
-                code = item.get('SecuritiesCompanyCode')
-                period_str = item.get('DispositionPeriod', '')
-                content = item.get('DisposalCondition', '')
-                
-                # Check active
-                if '~' in period_str:
-                    try:
-                        start_roc, end_roc = period_str.split('~')
-                        
-                        def parse_roc_compact(d_str):
-                            # d_str like "1150109"
-                            if len(d_str) == 7:
-                                return datetime(int(d_str[:3]) + 1911, int(d_str[3:5]), int(d_str[5:]))
-                            return roc_to_date(d_str) # Fallback to slash format
-                            
-                        start_dt = parse_roc_compact(start_roc)
-                        end_dt = parse_roc_compact(end_roc)
-                        
-                        # --- 修改 1 (TPEX): 同樣放寬日期判斷 ---
-                        if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1):
-                            # Parse frequency
-                            freq = "處置"
-                            match = re.search(r'每(\S+)分鐘', content)
-                            if match:
-                                freq = f"{match.group(1)}分盤"
-                            elif "人工管制" in content:
-                                freq = "人工管制"
-                                
-                            alerts[code] = {
-                                "type": "disposition",
-                                "badge": "處置",
-                                "color": "red",
-                                "info": f"{freq} (至 {end_roc})",
-                                "detail": f"期間: {period_str}\n措施: {content}"
-                            }
-                    except Exception as e:
-                        print(f"Error parsing TPEX disposition date for {code}: {e}")
-
-        # 3.2 TPEX Warning
+        # 3.1 TPEX Warning History
         r = requests.get(f"{base_url}/tpex_trading_warning_information", timeout=10)
         if r.status_code == 200:
             for item in r.json():
                 code = item.get('SecuritiesCompanyCode')
-                date_roc = item.get('Date') # e.g. "1150108"
+                date_roc = item.get('Date') # Compact "1140130"
+                reason = item.get('TradingInformation', '')
+                
+                # Convert to slash format for consistency
+                if len(date_roc) == 7:
+                    fmt_date = f"{date_roc[:3]}/{date_roc[3:5]}/{date_roc[5:]}"
+                else:
+                    fmt_date = date_roc
+                    
+                if code not in history_db:
+                    history_db[code] = []
+                history_db[code].append(fmt_date)
                 
                 # Check if recent
                 alert_dt = None
@@ -183,11 +152,97 @@ def fetch_market_alerts():
                             "badge": "警示",
                             "color": "yellow",
                             "info": "注意股",
-                            "detail": item.get('TradingInformation', '')
+                            "detail": reason,
+                            "history": []
                         }
 
+        # 3.2 TPEX Disposition
+        r = requests.get(f"{base_url}/tpex_disposal_information", timeout=10)
+        if r.status_code == 200:
+            for item in r.json():
+                code = item.get('SecuritiesCompanyCode')
+                period_str = item.get('DispositionPeriod', '')
+                content = item.get('DisposalCondition', '')
+                
+                if '~' in period_str:
+                    try:
+                        start_roc, end_roc = period_str.split('~')
+                        def parse_roc_compact(d_str):
+                            if len(d_str) == 7:
+                                return datetime(int(d_str[:3]) + 1911, int(d_str[3:5]), int(d_str[5:]))
+                            return roc_to_date(d_str)
+                            
+                        start_dt = parse_roc_compact(start_roc)
+                        end_dt = parse_roc_compact(end_roc)
+                        
+                        if start_dt and end_dt and start_dt <= today + timedelta(days=1) and today <= end_dt + timedelta(days=1):
+                            freq = "處置"
+                            match = re.search(r'每(\S+)分鐘', content)
+                            if match:
+                                freq = f"{match.group(1)}分盤"
+                            elif "人工管制" in content:
+                                freq = "人工管制"
+                                
+                            alerts[code] = {
+                                "type": "disposition",
+                                "badge": "處置",
+                                "color": "red",
+                                "info": f"{freq} (至 {end_roc})",
+                                "detail": f"期間: {period_str}\n措施: {content}",
+                                "is_disposed": True
+                            }
+                    except: pass
     except Exception as e:
         print(f"Error fetching TPEX alerts: {e}")
+
+    # 4. Risk Analysis (Calculating Disposition Proximity)
+    for code, alert_obj in alerts.items():
+        if alert_obj.get('type') == 'disposition':
+            continue # Already disposed
+            
+        hist = sorted(list(set(history_db.get(code, []))), reverse=True)
+        alert_obj['history'] = hist
+        
+        # Calculate Risk Metrics
+        # Rule 1: 3 consecutive days
+        consecutive = 0
+        # This is tricky because we need trading days. 
+        # For simplicity, we count consecutive entries in the sorted history.
+        consecutive = 1
+        # Check if previous days were also in history
+        # (Need a calendar or just check if dates are close)
+        # For now, let's just use the count in recent window.
+        
+        count_30 = len(hist)
+        count_6 = 0
+        # Approx count in last 6 trading days (approx 10 calendar days)
+        cutoff_6 = today - timedelta(days=10)
+        for d_str in hist:
+            d_dt = roc_to_date(d_str)
+            if d_dt and d_dt >= cutoff_6:
+                count_6 += 1
+        
+        # Determine Risk Level
+        risk_level = "low"
+        risk_msg = ""
+        
+        if count_6 >= 3:
+            risk_level = "high"
+            risk_msg = f"觸發 4/6 處置風險 (目前 {count_6}/6)"
+        elif count_6 >= 2:
+            risk_level = "medium"
+            risk_msg = f"近期注意次數增加 ({count_6}/6)"
+            
+        if count_30 >= 10:
+            risk_level = "high"
+            risk_msg = f"觸發 12/30 處置風險 (目前 {count_30}/30)"
+            
+        alert_obj['risk'] = {
+            "level": risk_level,
+            "message": risk_msg,
+            "count_6": count_6,
+            "count_30": count_30
+        }
 
     return alerts
 
