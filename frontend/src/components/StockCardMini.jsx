@@ -273,6 +273,12 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                 )}
 
                                 {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
+                                
+                                {stock.volumeRatio > 1.5 && (
+                                    <span className="text-[10px] bg-purple-900 text-purple-200 border border-purple-700 px-1.5 py-0.5 rounded cursor-help" title={`今日成交量為 5 日均量的 ${stock.volumeRatio} 倍`}>
+                                        量增 {stock.volumeRatio}x
+                                    </span>
+                                )}
                             </div>
                         )}
                     </div>

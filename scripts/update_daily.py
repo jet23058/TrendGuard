@@ -485,6 +485,8 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         
         # 計算 5 日均量
         df['vol_ma5'] = df['Volume'].rolling(window=5).mean()
+        vol_ma5 = float(df['vol_ma5'].iloc[-1])
+        volume_ratio = float(today['Volume']) / vol_ma5 if vol_ma5 > 0 else 1.0
         
         # 取得 K 線數據 (最近 30 天)
         ohlc_data = []
@@ -541,6 +543,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             "k": latest_k,
             "d": latest_d,
             "volume": int(today['Volume']),
+            "volumeRatio": round(volume_ratio, 2),
             "signal": {
                 "type": "breakout", # 統一為 breakout，因為現在都必須符合技術條件
                 "text": f"{signal_text}。技術支撐位 {round(stop_loss, 1)}",
