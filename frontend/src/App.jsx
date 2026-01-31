@@ -28,7 +28,6 @@ import {
   MinusCircle,
   Info // 新增 Info 圖示
 } from 'lucide-react';
-import Tesseract from 'tesseract.js';
 
 import StockCardMini from './components/StockCardMini';
 import SimpleMarkdown from './components/SimpleMarkdown';
@@ -352,72 +351,53 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
     setOcrDebugText('');
 
     try {
-      const allResults = [];
-      const allOcrTexts = [];
-      const totalFiles = files.length;
-
-      // 逐一處理每張圖片
-      for (let i = 0; i < totalFiles; i++) {
+      const imagesData = [];
+      
+      // 1. Convert all files to Base64
+      for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const progressBase = (i / totalFiles) * 70;
-
-        setOcrProgress(Math.round(progressBase + 5));
-
-        // 圖片預處理
-        const processedImage = await preprocessImage(file);
-        setOcrProgress(Math.round(progressBase + 15));
-
-        // 使用 Tesseract.js 進行 OCR（只使用英文+數字，因為我們只需要抓代碼）
-        const result = await Tesseract.recognize(processedImage, 'eng', {
-          logger: (m) => {
-            if (m.status === 'recognizing text') {
-              const fileProgress = (m.progress || 0) * 50 / totalFiles;
-              setOcrProgress(Math.round(progressBase + 15 + fileProgress));
-            }
-          }
+        const base64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result.split(',')[1]);
+          reader.readAsDataURL(file);
         });
-
-        // 儲存原始 OCR 文字供除錯
-        allOcrTexts.push(`=== 圖 ${i + 1} ===\n${result.data.text}`);
-
-        // 解析 OCR 文字
-        const parsedItems = parseOcrText(result.data.text);
-        allResults.push(...parsedItems);
+        imagesData.push({
+          data: base64,
+          mime_type: file.type
+        });
       }
+
+      setOcrProgress(30);
+
+      // 2. Call Backend OCR API
+      const response = await fetch('/api/ocr', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ images: imagesData })
+      });
+
+      if (!response.ok) throw new Error('伺服器辨識失敗');
+
+      const uniqueResults = await response.json();
 
       setOcrProgress(90);
-      setOcrDebugText(allOcrTexts.join('\n\n'));
 
-      // 去重合併（多張圖可能有重複的股票）
-      const uniqueResults = [];
-      const seenTickers = new Set();
-
-      for (const item of allResults) {
-        if (item.ticker && !seenTickers.has(item.ticker)) {
-          seenTickers.add(item.ticker);
-          uniqueResults.push(item);
-        }
-      }
-
-      setOcrProgress(100);
-
-      if (uniqueResults.length > 0) {
+      if (uniqueResults && uniqueResults.length > 0) {
         setImportList(prev => {
           const existingTickers = new Set(prev.map(p => p.ticker));
           const newItems = uniqueResults.filter(item => !existingTickers.has(item.ticker));
           return [...prev, ...newItems];
         });
 
-        // 顯示辨識結果摘要
-        const recognized = uniqueResults.map(r => `${r.ticker} ${r.name}`).join('\n');
-        alert(`成功辨識 ${uniqueResults.length} 檔股票！\n\n${recognized}\n\n注意：股數與成本請手動填寫。`);
+        const recognized = uniqueResults.map(r => `${r.ticker} ${r.name || ''}`).join('\n');
+        alert(`成功辨識 ${uniqueResults.length} 檔股票！\n\n${recognized}\n\n注意：股數與成本已嘗試自動抓取，請務必再次確認。`);
       } else {
-        alert('未能辨識出有效的股票代碼。\n\n可能原因：\n1. 截圖解析度不足\n2. 文字模糊或被遮擋\n\n建議使用「CSV 匯入」或「手動輸入」功能。');
+        alert('未能辨識出有效的股票資訊。\n\n建議使用「CSV 匯入」或「手動輸入」。');
       }
 
     } catch (err) {
       console.error("OCR Failed:", err);
-      alert(`辨識失敗: ${err.message}\n\n請確認圖片格式正確。`);
+      alert(`辨識失敗: ${err.message}`);
     } finally {
       setIsProcessing(false);
       setOcrProgress(0);
