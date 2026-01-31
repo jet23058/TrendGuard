@@ -68,9 +68,21 @@ def parse_text_for_stocks(text):
             })
     return results
 
-# OCR Endpoint using local Tesseract
 @app.route('/api/ocr', methods=['POST'])
 def ocr_images():
+    # Use GEMINI_KEY from environment
+    api_key = os.environ.get("GEMINI_KEY")
+    if not api_key:
+        # Fallback to GOOGLE_API_KEY
+        api_key = os.environ.get("GOOGLE_API_KEY")
+        
+    if not api_key:
+        print("Error: GEMINI_KEY not set")
+        return jsonify({"error": "Server missing API Key"}), 500
+        
+    genai.configure(api_key=api_key)
+    
+    # 接收 JSON (Base64 Images)
     req_data = request.json
     if not req_data or 'images' not in req_data:
         return jsonify({"error": "No images provided"}), 400
@@ -79,51 +91,68 @@ def ocr_images():
     if not files:
         return jsonify({"error": "Empty image list"}), 400
         
-    print(f"收到 {len(files)} 張圖片進行在地 OCR...")
+    print(f"收到 {len(files)} 張圖片進行 Gemini OCR...")
     
-    all_extracted_stocks = []
+    image_parts = []
+    import base64
     
     for img_obj in files:
         try:
+            # Decode Base64
             img_bytes = base64.b64decode(img_obj['data'])
-            nparr = np.frombuffer(img_bytes, np.uint8)
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            if img is None: continue
-            
-            # Preprocessing
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-            gray = cv2.bilateralFilter(gray, 9, 75, 75)
-            thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
-            
-            # OCR
-            text = pytesseract.image_to_string(thresh, lang='chi_tra+eng', config='--oem 3 --psm 6')
-            
-            # Parsing
-            stocks = parse_text_for_stocks(text)
-            all_extracted_stocks.extend(stocks)
+            image_parts.append({
+                "mime_type": img_obj['mime_type'],
+                "data": img_bytes
+            })
         except Exception as e:
-            print(f"Processing error: {e}")
-            continue
-
-    # Deduplicate
-    unique_stocks = {}
-    for s in all_extracted_stocks:
-        ticker = s['ticker']
-        if ticker not in unique_stocks:
-            unique_stocks[ticker] = s
-        else:
-            if not unique_stocks[ticker]['name'] and s['name']:
-                unique_stocks[ticker]['name'] = s['name']
-            if unique_stocks[ticker]['shares'] == 0 and s['shares'] > 0:
-                unique_stocks[ticker]['shares'] = s['shares']
-            if unique_stocks[ticker]['cost'] == 0 and s['cost'] > 0:
-                unique_stocks[ticker]['cost'] = s['cost']
-                
-    result = list(unique_stocks.values())
-    print(f"在地 OCR 成功，解析出 {len(result)} 筆資料")
-    return jsonify(result)
+            print(f"Image decode error: {e}")
+            return jsonify({"error": f"Image decode failed: {e}"}), 400
+        
+    prompt = """
+    你是一個台灣股市券商 App 截圖的解析專家。
+    使用者上傳了一組庫存截圖（可能包含多張，且內容可能有重疊）。
+    
+    請執行以下任務：
+    1. **提取資訊**：找出每一列的「股票代碼」、「股票名稱」、「庫存股數」、「平均成本」。
+    2. **去重合併**：因為截圖是連續的，上下兩張圖可能會顯示同一檔股票。請依據「股票代碼」去除重複項目，保留一份即可。
+    3. **容錯處理**：
+       - 股票代碼通常是 4 碼數字。
+       - 股數與成本請轉換為純數字（去除逗號）。
+       - 如果有無法辨識的欄位，請盡量推斷或標記 null。
+    
+    請直接回傳一個 **純 JSON 陣列**，不要包含任何 Markdown 格式 (如 ```json ... ```)。
+    格式範例：
+    [
+      {"ticker": "2330", "name": "台積電", "shares": 2000, "cost": 502.5},
+      {"ticker": "0050", "name": "元大台灣50", "shares": 1500, "cost": 120.1}
+    ]
+    """
+    
+    try:
+        # Use Gemini 1.5 Flash for best speed/cost ratio
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        
+        # Generate
+        response = model.generate_content([prompt, *image_parts])
+        raw_text = response.text
+        
+        # Clean up Markdown formatting
+        cleaned_text = raw_text.strip()
+        if cleaned_text.startswith("```json"):
+            cleaned_text = cleaned_text[7:]
+        elif cleaned_text.startswith("```"):
+            cleaned_text = cleaned_text[3:]
+        if cleaned_text.endswith("```"):
+            cleaned_text = cleaned_text[:-3]
+            
+        result_json = json.loads(cleaned_text.strip())
+        print(f"Gemini OCR 成功，解析出 {len(result_json)} 筆資料")
+        
+        return jsonify(result_json)
+        
+    except Exception as e:
+        print(f"OCR Failed: {e}")
+        return jsonify({"error": str(e)}), 500
 
 def get_stock_name(ticker_code):
     """Get Chinese name using twstock if available"""
