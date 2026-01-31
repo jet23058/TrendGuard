@@ -2,7 +2,12 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import base64
-import google.generativeai as genai
+import re
+import numpy as np
+import cv2
+from PIL import Image
+import pytesseract
+import io
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -13,18 +18,7 @@ class handler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_POST(self):
-        # 1. Check API Key
-        api_key = os.environ.get("GOOGLE_API_KEY")
-        if not api_key:
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": "Server missing GOOGLE_API_KEY"}).encode())
-            return
-            
-        genai.configure(api_key=api_key)
-        
-        # 2. Read Body
+        # 1. Read Body
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             if content_length == 0:
@@ -37,63 +31,58 @@ class handler(BaseHTTPRequestHandler):
             if not files:
                 raise ValueError("No images provided")
                 
-            image_parts = []
+            all_extracted_stocks = []
+            
             for img_obj in files:
                 img_bytes = base64.b64decode(img_obj['data'])
-                image_parts.append({
-                    "mime_type": img_obj['mime_type'],
-                    "data": img_bytes
-                })
+                # Convert bytes to numpy array for OpenCV
+                nparr = np.frombuffer(img_bytes, np.uint8)
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
                 
-        except Exception as e:
-            self.send_response(400)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode())
-            return
-
-        # 3. Call Gemini
-        prompt = """
-        你是一個台灣股市券商 App 截圖的解析專家。
-        使用者上傳了一組庫存截圖（可能包含多張，且內容可能有重疊）。
-        
-        請執行以下任務：
-        1. **提取資訊**：找出每一列的「股票代碼」、「股票名稱」、「庫存股數」、「平均成本」。
-        2. **去重合併**：因為截圖是連續的，上下兩張圖可能會顯示同一檔股票。請依據「股票代碼」去除重複項目，保留一份即可。
-        3. **容錯處理**：
-           - 股票代碼通常是 4 碼數字。
-           - 股數與成本請轉換為純數字（去除逗號）。
-           - 如果有無法辨識的欄位，請盡量推斷或標記 null。
-        
-        請直接回傳一個 **純 JSON 陣列**，不要包含任何 Markdown 格式 (如 ```json ... ```)。
-        格式範例：
-        [
-          {"code": "2330", "name": "台積電", "shares": 2000, "cost": 502.5},
-          {"code": "0050", "name": "元大台灣50", "shares": 1500, "cost": 120.1}
-        ]
-        """
-        
-        try:
-            model = genai.GenerativeModel("gemini-1.5-flash")
-            response = model.generate_content([prompt, *image_parts])
-            raw_text = response.text
+                if img is None:
+                    continue
+                
+                # --- Preprocessing ---
+                # 1. Grayscale
+                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                # 2. Rescaling (DPI increase simulation)
+                gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+                # 3. Bilateral Filter (Noise reduction keeping edges)
+                gray = cv2.bilateralFilter(gray, 9, 75, 75)
+                # 4. Adaptive Thresholding
+                thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
+                
+                # --- OCR Execution ---
+                # Use both Traditional Chinese and English
+                custom_config = r'--oem 3 --psm 6'
+                text = pytesseract.image_to_string(thresh, lang='chi_tra+eng', config=custom_config)
+                
+                # --- Data Extraction (Regex) ---
+                stocks = self.parse_text_for_stocks(text)
+                all_extracted_stocks.extend(stocks)
+                
+            # Deduplicate by code
+            unique_stocks = {}
+            for s in all_extracted_stocks:
+                code = s['code']
+                if code not in unique_stocks:
+                    unique_stocks[code] = s
+                else:
+                    # Update if current has more info
+                    if not unique_stocks[code]['name'] and s['name']:
+                        unique_stocks[code]['name'] = s['name']
+                    if unique_stocks[code]['shares'] == 0 and s['shares'] > 0:
+                        unique_stocks[code]['shares'] = s['shares']
+                    if unique_stocks[code]['cost'] == 0 and s['cost'] > 0:
+                        unique_stocks[code]['cost'] = s['cost']
             
-            # Clean up Markdown
-            cleaned_text = raw_text.strip()
-            if cleaned_text.startswith("```json"):
-                cleaned_text = cleaned_text[7:]
-            if cleaned_text.startswith("```"):
-                cleaned_text = cleaned_text[3:]
-            if cleaned_text.endswith("```"):
-                cleaned_text = cleaned_text[:-3]
-                
-            result_json = json.loads(cleaned_text.strip())
+            final_result = list(unique_stocks.values())
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps(result_json).encode())
+            self.wfile.write(json.dumps(final_result, ensure_ascii=False).encode())
             
         except Exception as e:
             self.send_response(500)
@@ -101,3 +90,59 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(json.dumps({"error": str(e)}).encode())
+
+    def parse_text_for_stocks(self, text):
+        """
+        Parses raw OCR text to find Taiwan stock patterns.
+        Heuristic: Look for 4-digit codes and associated numbers.
+        """
+        results = []
+        lines = text.split('\n')
+        
+        # Pattern for 4-digit stock code (usually at start of row or followed by name)
+        code_pattern = re.compile(r'\b([1-9]\d{3}|00\d{2,3})\b')
+        
+        for line in lines:
+            line = line.strip()
+            if not line: continue
+            
+            codes = code_pattern.findall(line)
+            if not codes: continue
+            
+            for code in codes:
+                # Basic cleanup of line for this code
+                # Try to extract name: usually follows the code or is near it
+                # Logic: Find code in line, check string next to it
+                name = ""
+                # Simple heuristic: any CJK characters in the line
+                cjk_match = re.search(r'[\u4e00-\u9fa5]{2,}', line)
+                if cjk_match:
+                    name = cjk_match.group(0)
+                
+                # Try to find numbers (shares and cost)
+                # Removing non-numeric/period/comma
+                numbers = re.findall(r'[\d,]+\.?\d*', line)
+                # Filter out the code itself from numbers
+                numbers = [n.replace(',', '') for n in numbers if n.replace(',', '') != code]
+                
+                shares = 0
+                cost = 0.0
+                
+                # Usually shares is a large integer, cost is a decimal or smaller number
+                for n in numbers:
+                    try:
+                        val = float(n)
+                        if val > 1000: # Heuristic for shares
+                            shares = int(val)
+                        elif 0 < val < 2000: # Heuristic for cost
+                            cost = val
+                    except: continue
+                
+                results.append({
+                    "code": code,
+                    "name": name,
+                    "shares": shares,
+                    "cost": cost
+                })
+        
+        return results
