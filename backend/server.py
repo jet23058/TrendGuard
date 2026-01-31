@@ -129,8 +129,8 @@ def ocr_images():
     """
     
     try:
-        # Use Gemini 1.5 Flash for best speed/cost ratio
-        model = genai.GenerativeModel("gemini-1.5-flash")
+        # 升級至更強大的 Gemini 2.0 Flash 模型以提升辨識精準度
+        model = genai.GenerativeModel("gemini-2.0-flash")
         
         # Generate
         response = model.generate_content([prompt, *image_parts])
