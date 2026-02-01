@@ -241,7 +241,8 @@ const ImportModal = ({ isOpen, onClose, onImport, recommendedStocks = [] }) => {
 
   const handleConfirm = () => {
     onImport(importList, shouldOverwrite);
-    onClose();
+    // onClose(); // 保持彈窗開啟以供連續輸入
+    setImportList([]); // 清空列表，避免重複匯入
   };
 
   // OCR 圖片處理
