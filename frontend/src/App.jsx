@@ -695,7 +695,15 @@ const DailyChangesSection = ({ changes, portfolio }) => {
               return (
                 <div key={item.ticker} className={`flex justify-between items-center text-sm p-2 rounded transition-colors ${isHeld ? 'bg-orange-900/40 border border-orange-700/50' : 'bg-gray-900/50 hover:bg-gray-800'}`}>
                   <div className="flex items-center gap-2">
-                    <span className={`font-mono font-bold ${colorClass}`}>{item.ticker}</span>
+                    <a
+                      href={`https://tw.stock.yahoo.com/quote/${item.ticker}.TW/technical-analysis`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`font-mono font-bold hover:underline ${colorClass}`}
+                      title="查看技術分析"
+                    >
+                      {item.ticker}
+                    </a>
                     <span className="text-gray-300 truncate max-w-[80px]">{item.name}</span>
                     {isHeld && (
                       <span className="px-1.5 py-0.5 bg-orange-600 text-white text-[10px] rounded font-bold">
