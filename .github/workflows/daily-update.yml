@@ -40,7 +40,9 @@ jobs:
       
       - name: Install dependencies
         run: |
-          pip install FinMind pandas pytest twstock lxml requests google-genai
+      - name: Install dependencies
+        run: |
+          pip install FinMind pandas pytest twstock lxml requests google-genai tqdm
       
       - name: Fetch previous data
         run: |
