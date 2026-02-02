@@ -1,8 +1,8 @@
 {
   "date": "2026-02-02",
-  "updatedAt": "2026-02-02T08:09:41.103547",
-  "quoteTime": "2026-02-02T08:09:41.103547",
-  "alertUpdateTime": "2026-02-02T08:09:41.103547",
+  "updatedAt": "2026-02-02T09:05:48.105328",
+  "quoteTime": "2026-02-02T09:05:48.105328",
+  "alertUpdateTime": "2026-02-02T09:05:48.105328",
   "scanType": "livermore_breakout",
   "criteria": {
     "lookbackDays": 20,
@@ -17264,9 +17264,9 @@
   ],
   "marketStats": {
     "up": 538,
-    "down": 1344,
+    "down": 1342,
     "flat": 168,
-    "total_scanned": 2050
+    "total_scanned": 2048
   },
   "summary": {
     "total": 39,
