@@ -1,11 +1,18 @@
 from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
-import yfinance as yf
+import os
+from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 
-# Force Vercel Redeploy
+# FinMind migration
+try:
+    from FinMind.data import DataLoader
+    HAS_FINMIND = True
+except ImportError:
+    HAS_FINMIND = False
+
 # Try to import twstock for Chinese names
 try:
     import twstock
@@ -13,23 +20,79 @@ try:
 except ImportError:
     HAS_TWSTOCK = False
 
+# Initialize FinMind DataLoader
+_finmind_loader = None
+
+def get_finmind_loader():
+    global _finmind_loader
+    if not HAS_FINMIND:
+        raise ImportError("FinMind module is not available in Vercel environment.")
+        
+    if _finmind_loader is None:
+        _finmind_loader = DataLoader()
+        token = os.environ.get("FINMIND_API_TOKEN")
+        if token:
+            _finmind_loader.login_by_token(api_token=token)
+    return _finmind_loader
+
 def get_stock_name(ticker_code):
     """Get Chinese name using twstock if available"""
     if HAS_TWSTOCK and ticker_code in twstock.codes:
         return twstock.codes[ticker_code].name
     
-    # Fallback to yfinance or just return ticker
+    # Fallback to FinMind
     try:
-        t = yf.Ticker(f"{ticker_code}.TW")
-        info = t.info
-        return info.get('longName', info.get('shortName', ticker_code))
+        loader = get_finmind_loader()
+        info_df = loader.taiwan_stock_info()
+        if info_df is not None and not info_df.empty:
+            row = info_df[info_df['stock_id'] == ticker_code]
+            if not row.empty:
+                return row.iloc[0].get('stock_name', ticker_code)
+        return ticker_code
     except:
         return ticker_code
 
-def get_stock_history(ticker):
-    """Helper to fetch stock history"""
-    stock = yf.Ticker(ticker)
-    return stock, stock.history(period="6mo")
+def get_stock_history(ticker_code):
+    """Helper to fetch stock history using FinMind"""
+    try:
+        loader = get_finmind_loader()
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        start_date = (datetime.now() - timedelta(days=200)).strftime('%Y-%m-%d')
+        
+        # Clean ticker
+        code = ticker_code.replace('.TW', '').replace('.TWO', '')
+        
+        df = loader.taiwan_stock_daily(
+            stock_id=code,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        if df is None or df.empty:
+            return None, pd.DataFrame()
+            
+        # Standardize columns to match logic
+        df = df.rename(columns={
+            'date': 'Date',
+            'open': 'Open',
+            'max': 'High',
+            'min': 'Low',
+            'close': 'Close',
+            'Trading_Volume': 'Volume'
+        })
+        
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date').sort_index()
+        
+        # Convert types
+        cols = ['Open', 'High', 'Low', 'Close']
+        df[cols] = df[cols].astype(float)
+        df['Volume'] = df['Volume'].astype(int)
+        
+        return None, df
+    except Exception as e:
+        print(f"FinMind error: {e}")
+        return None, pd.DataFrame()
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -43,20 +106,12 @@ class handler(BaseHTTPRequestHandler):
             return
 
         try:
-            # 1. Determine Suffix (.TW or .TWO)
+            # 1. Clean ticker
             ticker_code = ticker.replace('.TW', '').replace('.TWO', '')
             
-            # Default logic
-            ticker_tw = f"{ticker_code}.TW"
-            stock, df = get_stock_history(ticker_tw)
+            # Fetch using FinMind
+            _, df = get_stock_history(ticker_code)
             
-            # If empty, try .TWO
-            if df.empty:
-                ticker_two = f"{ticker_code}.TWO"
-                stock, df = get_stock_history(ticker_two)
-                if not df.empty:
-                    ticker_tw = ticker_two # Confirm it's .TWO
-
             if df.empty:
                 self.send_response(404)
                 self.end_headers()
@@ -88,14 +143,17 @@ class handler(BaseHTTPRequestHandler):
             for i in range(len(df)-1, -1, -1):
                 c = float(df['Close'].iloc[i])
                 o = float(df['Open'].iloc[i])
-                if c > o:
+                v = int(df['Volume'].iloc[i])
+                
+                # FinMind volume is in Lots (張)
+                is_flat_low_vol = (c == o) and (v < 100)
+                
+                if c >= o and not is_flat_low_vol:
                     consecutive_red += 1
                 else:
                     break
             
             # Stop Loss Calculation
-            # Tech stop = Low of breakout day (assumed today for simplicity or recent low)
-            # Money stop = 10%
             tech_stop = float(latest['Low'])
             money_stop = current_price * 0.90
             stop_loss = max(tech_stop, money_stop)
