@@ -2,12 +2,7 @@ from http.server import BaseHTTPRequestHandler
 import json
 import os
 import base64
-import re
-import numpy as np
-import cv2
-from PIL import Image
-import pytesseract
-import io
+import google.generativeai as genai
 
 class handler(BaseHTTPRequestHandler):
     def do_OPTIONS(self):
@@ -22,127 +17,100 @@ class handler(BaseHTTPRequestHandler):
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             if content_length == 0:
-                raise ValueError("Empty body")
+                self.send_error(400, "Empty body")
+                return
                 
             body = self.rfile.read(content_length)
             req_data = json.loads(body)
             files = req_data.get('images', [])
             
             if not files:
-                raise ValueError("No images provided")
-                
-            all_extracted_stocks = []
+                self.send_error(400, "No images provided")
+                return
+
+            # 2. Setup Gemini
+            api_key = os.environ.get("GEMINI_KEY") or os.environ.get("GOOGLE_API_KEY")
+            if not api_key:
+                print("Error: GEMINI_KEY not set")
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Server missing API Key"}).encode())
+                return
+
+            genai.configure(api_key=api_key)
             
+            # 3. Prepare Images
+            image_parts = []
             for img_obj in files:
-                img_bytes = base64.b64decode(img_obj['data'])
-                # Convert bytes to numpy array for OpenCV
-                nparr = np.frombuffer(img_bytes, np.uint8)
-                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-                
-                if img is None:
+                try:
+                    img_bytes = base64.b64decode(img_obj['data'])
+                    image_parts.append({
+                        "mime_type": img_obj.get('mime_type', 'image/jpeg'),
+                        "data": img_bytes
+                    })
+                except Exception as e:
+                    print(f"Image decode error: {e}")
                     continue
-                
-                # --- Preprocessing ---
-                # 1. Grayscale
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                # 2. Rescaling (DPI increase simulation)
-                gray = cv2.resize(gray, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
-                # 3. Bilateral Filter (Noise reduction keeping edges)
-                gray = cv2.bilateralFilter(gray, 9, 75, 75)
-                # 4. Adaptive Thresholding
-                thresh = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 31, 2)
-                
-                # --- OCR Execution ---
-                # Use both Traditional Chinese and English
-                custom_config = r'--oem 3 --psm 6'
-                text = pytesseract.image_to_string(thresh, lang='chi_tra+eng', config=custom_config)
-                
-                # --- Data Extraction (Regex) ---
-                stocks = self.parse_text_for_stocks(text)
-                all_extracted_stocks.extend(stocks)
-                
-            # Deduplicate by code
-            unique_stocks = {}
-            for s in all_extracted_stocks:
-                code = s['code']
-                if code not in unique_stocks:
-                    unique_stocks[code] = s
-                else:
-                    # Update if current has more info
-                    if not unique_stocks[code]['name'] and s['name']:
-                        unique_stocks[code]['name'] = s['name']
-                    if unique_stocks[code]['shares'] == 0 and s['shares'] > 0:
-                        unique_stocks[code]['shares'] = s['shares']
-                    if unique_stocks[code]['cost'] == 0 and s['cost'] > 0:
-                        unique_stocks[code]['cost'] = s['cost']
+
+            if not image_parts:
+                self.send_error(400, "Valid images not found")
+                return
+
+            # 4. Prompt (Consistent with backend/server.py)
+            prompt = """
+            你是一個台灣股市券商 App 截圖的解析專家。
+            使用者上傳了一組庫存截圖（可能包含多張，且內容可能有重疊）。
             
-            final_result = list(unique_stocks.values())
+            請執行以下任務：
+            1. **提取資訊**：找出每一列的「股票代碼」、「股票名稱」、「庫存股數」、「平均成本」。
+            2. **去重合併**：因為截圖是連續的，上下兩張圖可能會顯示同一檔股票。請依據「股票代碼」去除重複項目，保留一份即可。
+            3. **容錯處理**：
+               - 股票代碼通常是 4 碼數字。
+               - 股數與成本請轉換為純數字（去除逗號）。
+               - 如果有無法辨識的欄位，請盡量推斷或標記 null。
             
+            請直接回傳一個 **純 JSON 陣列**，不要包含任何 Markdown 格式 (如 ```json ... ```)。
+            格式範例：
+            [
+              {"ticker": "2330", "name": "台積電", "shares": 2000, "cost": 502.5},
+              {"ticker": "0050", "name": "元大台灣50", "shares": 1500, "cost": 120.1}
+            ]
+            """
+
+            # 5. Call Gemini
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content([prompt, *image_parts])
+            raw_text = response.text
+            
+            # Clean up Markdown formatting
+            cleaned_text = raw_text.strip()
+            if cleaned_text.startswith("```json"):
+                cleaned_text = cleaned_text[7:]
+            elif cleaned_text.startswith("```"):
+                cleaned_text = cleaned_text[3:]
+            if cleaned_text.endswith("```"):
+                cleaned_text = cleaned_text[:-3]
+                
+            result_json = json.loads(cleaned_text.strip())
+            
+            # 6. Response
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps(final_result, ensure_ascii=False).encode())
+            self.wfile.write(json.dumps(result_json, ensure_ascii=False).encode())
             
         except Exception as e:
+            print(f"OCR Error: {e}")
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
             self.wfile.write(json.dumps({"error": str(e)}).encode())
 
-    def parse_text_for_stocks(self, text):
-        """
-        Parses raw OCR text to find Taiwan stock patterns.
-        Heuristic: Look for 4-digit codes and associated numbers.
-        """
-        results = []
-        lines = text.split('\n')
-        
-        # Pattern for 4-digit stock code (usually at start of row or followed by name)
-        code_pattern = re.compile(r'\b([1-9]\d{3}|00\d{2,3})\b')
-        
-        for line in lines:
-            line = line.strip()
-            if not line: continue
-            
-            codes = code_pattern.findall(line)
-            if not codes: continue
-            
-            for code in codes:
-                # Basic cleanup of line for this code
-                # Try to extract name: usually follows the code or is near it
-                # Logic: Find code in line, check string next to it
-                name = ""
-                # Simple heuristic: any CJK characters in the line
-                cjk_match = re.search(r'[\u4e00-\u9fa5]{2,}', line)
-                if cjk_match:
-                    name = cjk_match.group(0)
-                
-                # Try to find numbers (shares and cost)
-                # Removing non-numeric/period/comma
-                numbers = re.findall(r'[\d,]+\.?\d*', line)
-                # Filter out the code itself from numbers
-                numbers = [n.replace(',', '') for n in numbers if n.replace(',', '') != code]
-                
-                shares = 0
-                cost = 0.0
-                
-                # Usually shares is a large integer, cost is a decimal or smaller number
-                for n in numbers:
-                    try:
-                        val = float(n)
-                        if val > 1000: # Heuristic for shares
-                            shares = int(val)
-                        elif 0 < val < 2000: # Heuristic for cost
-                            cost = val
-                    except: continue
-                
-                results.append({
-                    "code": code,
-                    "name": name,
-                    "shares": shares,
-                    "cost": cost
-                })
-        
-        return results
+    def send_error(self, code, message):
+        self.send_response(code)
+        self.send_header('Content-type', 'application/json')
+        self.send_header('Access-Control-Allow-Origin', '*')
+        self.end_headers()
+        self.wfile.write(json.dumps({"error": message}).encode())
