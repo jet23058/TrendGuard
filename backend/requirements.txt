@@ -1,6 +1,6 @@
 flask==3.0.0
 flask-cors==4.0.0
-yfinance>=0.2.66
+FinMind>=1.6.0
 pandas>=2.0.0
 numpy>=1.24.0
 requests>=2.31.0
@@ -9,3 +9,4 @@ lxml>=4.9.0
 pytesseract>=0.3.10
 opencv-python-headless>=4.8.0
 Pillow>=10.0.0
+google-generativeai>=0.3.0

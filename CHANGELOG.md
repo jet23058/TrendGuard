@@ -7,6 +7,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - [Fix] **Missing Dependency**: Added `tqdm` to GitHub Actions dependencies. FinMind requires tqdm but it wasn't explicitly installed, causing test failures (`.github/workflows/daily-update.yml`).
 - [Fix] **Switch Data Source from yfinance to FinMind**: Replaced yfinance with FinMind API for Taiwan stock data. yfinance was missing data for certain trading days (e.g., 1/30), causing incomplete OHLC data in scan results. FinMind provides more reliable and complete Taiwan stock data (`scripts/update_daily.py`, `.github/workflows/daily-update.yml`).
+- [Refactor] **Backend API Migration**: Updated `backend/server.py` to use FinMind instead of yfinance for the `/api/stock` endpoint, ensuring consistent data source for manual portfolio synchronization and chart viewing. Also simplified suffix handling logic.
 - [Fix] **Cache-busting for Data Fetching**: Added cache-busting parameter (`?v=timestamp`) to frontend fetch requests for `daily_scan_results.json`, `articles_index.json`, and article files. This resolves the issue where GitHub Raw CDN caching caused stale data to be displayed, making users see outdated scan results even though the backend updates were running correctly (`frontend/src/App.jsx`).
 - [Fix] **Delayed Schedule for Data Availability**: Changed GitHub Actions cron schedule from 15:30 to 17:00 Taiwan time (UTC 07:30 → 09:00). This ensures FinMind has enough time to update with the latest closing prices (`.github/workflows/daily-update.yml`).
 

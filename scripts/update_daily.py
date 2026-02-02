@@ -28,6 +28,10 @@ def get_finmind_loader():
     global _finmind_loader
     if _finmind_loader is None:
         _finmind_loader = DataLoader()
+        token = os.environ.get("FINMIND_API_TOKEN")
+        if token:
+            _finmind_loader.login_by_token(api_token=token)
+            print("✅ FinMind logged in with token")
     return _finmind_loader
 
 try:
