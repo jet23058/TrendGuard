@@ -4,12 +4,14 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-yfinance = "*"
+FinMind = "*"
 pandas = "*"
 numpy = "*"
 requests = "*"
 twstock = "*"
 lxml = "*"
+tqdm = "*"
+google-generativeai = "*"
 
 [requires]
 python_version = "3.9"
