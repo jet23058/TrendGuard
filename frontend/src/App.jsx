@@ -1130,7 +1130,10 @@ export default function App() {
         ? '/data'
         : 'https://raw.githubusercontent.com/jet23058/TrendGuard/data';
 
-      const response = await fetch(`${DATA_BASE_URL}/daily_scan_results.json`);
+      // Cache-busting: 使用 5 分鐘區間的時間戳，避免 GitHub Raw CDN 快取問題
+      const cacheBuster = Math.floor(Date.now() / (5 * 60 * 1000));
+
+      const response = await fetch(`${DATA_BASE_URL}/daily_scan_results.json?v=${cacheBuster}`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
       setData(result);
@@ -1138,7 +1141,7 @@ export default function App() {
       // Fetch Article if date exists
       if (result.date) {
         try {
-          const articleRes = await fetch(`${DATA_BASE_URL}/articles/${result.date}.json`);
+          const articleRes = await fetch(`${DATA_BASE_URL}/articles/${result.date}.json?v=${cacheBuster}`);
           if (articleRes.ok) {
             setArticle(await articleRes.json());
           }
@@ -1149,7 +1152,7 @@ export default function App() {
 
       // Fetch stock history with LocalStorage Caching
       try {
-        const indexRes = await fetch(`${DATA_BASE_URL}/articles_index.json`);
+        const indexRes = await fetch(`${DATA_BASE_URL}/articles_index.json?v=${cacheBuster}`);
         if (indexRes.ok) {
           const indexData = await indexRes.json();
           const last30Days = indexData.slice(0, 30); // Limit to last 30 days

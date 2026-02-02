@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-02]
+
+### Fixed
+- [Fix] **Cache-busting for Data Fetching**: Added cache-busting parameter (`?v=timestamp`) to frontend fetch requests for `daily_scan_results.json`, `articles_index.json`, and article files. This resolves the issue where GitHub Raw CDN caching caused stale data to be displayed, making users see outdated scan results even though the backend updates were running correctly (`frontend/src/App.jsx`).
+
 ## [2026-01-24]
 
 ### Added
