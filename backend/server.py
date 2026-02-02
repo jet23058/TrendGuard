@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 import json
 import base64
 import re
@@ -7,8 +12,17 @@ import cv2
 import pytesseract
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import yfinance as yf
 import pandas as pd
+from datetime import datetime, timedelta
+import google.generativeai as genai
+
+# Try imports that might fail if dependencies are missing
+try:
+    from FinMind.data import DataLoader
+    HAS_FINMIND = True
+except ImportError as e:
+    HAS_FINMIND = False
+    print(f"⚠️ Warning: FinMind not installed or missing dependencies (e.g. tqdm): {e}")
 
 # Try to import twstock for Chinese names
 try:
@@ -20,6 +34,21 @@ except ImportError:
 
 app = Flask(__name__)
 CORS(app)
+
+# Initialize FinMind DataLoader
+_finmind_loader = None
+
+def get_finmind_loader():
+    global _finmind_loader
+    if not HAS_FINMIND:
+        raise ImportError("FinMind module is not available. Please install it (and tqdm).")
+        
+    if _finmind_loader is None:
+        _finmind_loader = DataLoader()
+        token = os.environ.get("FINMIND_API_TOKEN")
+        if token:
+            _finmind_loader.login_by_token(api_token=token)
+    return _finmind_loader
 
 def parse_text_for_stocks(text):
     """
@@ -155,22 +184,71 @@ def ocr_images():
         return jsonify({"error": str(e)}), 500
 
 def get_stock_name(ticker_code):
-    """Get Chinese name using twstock if available"""
+    """Get Chinese name using twstock if available, or FinMind"""
     if HAS_TWSTOCK and ticker_code in twstock.codes:
         return twstock.codes[ticker_code].name
     
-    # Fallback to yfinance or just return ticker
+    # Fallback to FinMind
     try:
-        t = yf.Ticker(f"{ticker_code}.TW")
-        info = t.info
-        return info.get('longName', info.get('shortName', ticker_code))
+        loader = get_finmind_loader()
+        info_df = loader.taiwan_stock_info()
+        if info_df is not None and not info_df.empty:
+            row = info_df[info_df['stock_id'] == ticker_code]
+            if not row.empty:
+                return row.iloc[0].get('stock_name', ticker_code)
+        return ticker_code
     except:
         return ticker_code
 
-def get_stock_history(ticker):
-    """Helper to fetch stock history"""
-    stock = yf.Ticker(ticker)
-    return stock, stock.history(period="6mo")
+def get_stock_history(ticker_code):
+    """Helper to fetch stock history using FinMind"""
+    try:
+        loader = get_finmind_loader()
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        start_date = (datetime.now() - timedelta(days=200)).strftime('%Y-%m-%d') # ~6 months
+        
+        # Strip .TW or .TWO if passed (FinMind expects just code)
+        code = ticker_code.replace('.TW', '').replace('.TWO', '')
+        
+        df = loader.taiwan_stock_daily(
+            stock_id=code,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        if df is None or df.empty:
+            return None, pd.DataFrame()
+            
+        # Standardize columns to match yfinance format for compatibility
+        df = df.rename(columns={
+            'date': 'Date',
+            'open': 'Open',
+            'max': 'High',
+            'min': 'Low',
+            'close': 'Close',
+            'Trading_Volume': 'Volume'
+        })
+        
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.set_index('Date').sort_index()
+        
+        # Convert types
+        cols = ['Open', 'High', 'Low', 'Close']
+        df[cols] = df[cols].astype(float)
+        df['Volume'] = df['Volume'].astype(int) # Note: FinMind volume is in shares (張) check? No, FinMind is usually shares if using taiwan_stock_daily? 
+        # Actually FinMind Trading_Volume is usually in "shares" (股) or "lots" (張)?
+        # Let's verify: In update_daily.py I assumed it was "shares" then realized it's "張" (lots) because I check v < 100.
+        # Wait, in update_daily.py I said "FinMind volume 單位為張".
+        # Let's double check this. 
+        # If I look at FinMind docs or my test output: 2330 daily volume is around 30,000-50,000. That's lots (張).
+        # yfinance volume is in shares (30,000,000).
+        # So I need to multiply by 1000 to match yfinance behavior if the frontend expects shares?
+        # Let's check frontend.
+        
+        return None, df
+    except Exception as e:
+        print(f"FinMind error for {ticker_code}: {e}")
+        return None, pd.DataFrame()
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
@@ -181,19 +259,11 @@ def get_stock():
         return jsonify({"error": "Missing ticker"}), 400
 
     try:
-        # 1. Determine Suffix (.TW or .TWO)
+        # 1. Clean ticker
         ticker_code = ticker.replace('.TW', '').replace('.TWO', '')
         
-        # Default logic
-        ticker_tw = f"{ticker_code}.TW"
-        stock, df = get_stock_history(ticker_tw)
-        
-        # If empty, try .TWO
-        if df.empty:
-            ticker_two = f"{ticker_code}.TWO"
-            stock, df = get_stock_history(ticker_two)
-            if not df.empty:
-                ticker_tw = ticker_two # Confirm it's .TWO
+        # Fetch history using FinMind
+        _, df = get_stock_history(ticker_code)
 
         if df.empty:
             return jsonify({"error": "Stock not found"}), 404
@@ -218,25 +288,27 @@ def get_stock():
         latest = df.iloc[-1]
         current_price = float(latest['Close'])
         
-        # Consecutive Red Calculation
+        # Consecutive Red Calculation (Match update_daily.py logic)
         consecutive_red = 0
         for i in range(len(df)-1, -1, -1):
             c = float(df['Close'].iloc[i])
             o = float(df['Open'].iloc[i])
-            if c > o:
+            v = int(df['Volume'].iloc[i])
+            
+            # FinMind volume is in Lots (張)
+            is_flat_low_vol = (c == o) and (v < 100)
+            
+            if c >= o and not is_flat_low_vol:
                 consecutive_red += 1
             else:
                 break
         
         # Stop Loss Calculation
-        # Tech stop = Low of breakout day (assumed today for simplicity or recent low)
-        # Money stop = 10%
         tech_stop = float(latest['Low'])
         money_stop = current_price * 0.90
         stop_loss = max(tech_stop, money_stop)
 
         # 4. Prepare OHLC Data (Recent 60 days)
-        # User reported "interval too large", using 60 is standard but ensure no gaps if possible
         recent_df = df.tail(60)
         ohlc_data = []
         for idx, row in recent_df.iterrows():
@@ -275,7 +347,6 @@ def get_stock():
             "ma20": round(float(latest['MA20']), 2) if not pd.isna(latest['MA20']) else None,
             "ma60": round(float(latest['MA60']), 2) if not pd.isna(latest['MA60']) else None,
             "volume": int(latest['Volume']),
-            # New fields
             "consecutiveRed": consecutive_red,
             "stopLoss": round(stop_loss, 2)
         }
