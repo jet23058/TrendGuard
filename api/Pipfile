@@ -4,13 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-FinMind = "*"
-pandas = "*"
-numpy = "*"
 requests = "*"
-twstock = "*"
-lxml = "*"
-tqdm = "*"
 google-generativeai = "*"
 
 [requires]
