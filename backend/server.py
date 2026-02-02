@@ -1,4 +1,9 @@
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 import json
 import base64
 import re
@@ -9,8 +14,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 from datetime import datetime, timedelta
-from FinMind.data import DataLoader
 import google.generativeai as genai
+
+# Try imports that might fail if dependencies are missing
+try:
+    from FinMind.data import DataLoader
+    HAS_FINMIND = True
+except ImportError as e:
+    HAS_FINMIND = False
+    print(f"⚠️ Warning: FinMind not installed or missing dependencies (e.g. tqdm): {e}")
 
 # Try to import twstock for Chinese names
 try:
@@ -28,6 +40,9 @@ _finmind_loader = None
 
 def get_finmind_loader():
     global _finmind_loader
+    if not HAS_FINMIND:
+        raise ImportError("FinMind module is not available. Please install it (and tqdm).")
+        
     if _finmind_loader is None:
         _finmind_loader = DataLoader()
         token = os.environ.get("FINMIND_API_TOKEN")
