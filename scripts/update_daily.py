@@ -15,8 +15,20 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import yfinance as yf
 import pandas as pd
+
+# FinMind API for Taiwan stock data (more reliable than yfinance)
+from FinMind.data import DataLoader
+
+# Initialize FinMind DataLoader (singleton)
+_finmind_loader = None
+
+def get_finmind_loader():
+    """Get or create FinMind DataLoader singleton"""
+    global _finmind_loader
+    if _finmind_loader is None:
+        _finmind_loader = DataLoader()
+    return _finmind_loader
 
 try:
     import twstock
@@ -25,7 +37,7 @@ try:
     HAS_TWSTOCK = True
 except ImportError:
     HAS_TWSTOCK = False
-    print("Warning: twstock not installed, using yfinance for stock names")
+    print("Warning: twstock not installed, using FinMind for stock names")
 
 import re
 import requests
@@ -340,15 +352,17 @@ def get_stock_name(code: str) -> tuple:
         info = twstock.codes[code]
         return info.name, info.group if hasattr(info, 'group') else "其他"
     
-    # Fallback: 使用 yfinance
+    # Fallback: 使用 FinMind 取得股票資訊
     try:
-        ticker = f"{code}.TW"
-        yf_info = yf.Ticker(ticker).info
-        name = yf_info.get('longName', yf_info.get('shortName', code))
-        # 處理英文名稱過長
-        if len(name) > 15:
-            name = name[:12] + "..."
-        return name, "其他"
+        loader = get_finmind_loader()
+        info_df = loader.taiwan_stock_info()
+        if info_df is not None and len(info_df) > 0:
+            stock_info = info_df[info_df['stock_id'] == code]
+            if len(stock_info) > 0:
+                name = stock_info.iloc[0].get('stock_name', code)
+                industry = stock_info.iloc[0].get('industry_category', '其他')
+                return name, industry if industry else "其他"
+        return code, "其他"
     except Exception:
         return code, "其他"
 
@@ -391,21 +405,33 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
     try:
         # Check alerts first
         alert_data = market_alerts.get(code) if market_alerts else None
-        # 決定後綴
-        suffix = ".TW"
-        if HAS_TWSTOCK and code in twstock.codes:
-            if twstock.codes[code].market == "上櫃":
-                suffix = ".TWO"
         
-        ticker = f"{code}{suffix}"
-        df = yf.download(ticker, period="6mo", progress=False)
+        # 使用 FinMind API 取得股票資料
+        loader = get_finmind_loader()
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        start_date = (datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')  # 約 6 個月
         
-        if len(df) < LOOKBACK_DAYS + 2:
+        raw_df = loader.taiwan_stock_daily(
+            stock_id=code,
+            start_date=start_date,
+            end_date=end_date
+        )
+        
+        if raw_df is None or len(raw_df) < LOOKBACK_DAYS + 2:
             return None, None
         
-        # 處理 MultiIndex columns
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.droplevel(1)
+        # FinMind 返回的欄位名稱與 yfinance 不同，需要轉換
+        # FinMind: date, stock_id, Trading_Volume, Trading_money, open, max, min, close, spread, Trading_turnover
+        df = raw_df.copy()
+        df = df.rename(columns={
+            'open': 'Open',
+            'max': 'High',
+            'min': 'Low',
+            'close': 'Close',
+            'Trading_Volume': 'Volume'
+        })
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.set_index('date').sort_index()
         
         # 計算均線
         df['MA5'] = df['Close'].rolling(window=5).mean()
@@ -429,7 +455,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         prev_high = float(past_data.max())
         
         # 計算連續紅 K 天數
-        # 修正: 排除「無量一字線」 (Open==Close 且 成交量 < 100張/100,000股)
+        # 修正: 排除「無量一字線」 (Open==Close 且 成交量 < 100張)
         consecutive_red = 0
         for i in range(len(df)-1, -1, -1):
             c = float(df['Close'].iloc[i])
@@ -437,8 +463,8 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             v = int(df['Volume'].iloc[i])
             
             # 判斷是否為無量一字線 (量少於 100 張)
-            # 注意: yfinance volume 單位為股
-            is_flat_low_vol = (c == o) and (v < 100000)
+            # 注意: FinMind volume 單位為張
+            is_flat_low_vol = (c == o) and (v < 100)
             
             if c >= o and not is_flat_low_vol:  # 收盤 >= 開盤，且非無量一字線
                 consecutive_red += 1
