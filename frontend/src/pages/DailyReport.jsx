@@ -20,15 +20,18 @@ const DailyReport = () => {
                 : '/data';
 
             try {
+                // Add cache busting timestamp
+                const cacheBuster = `?t=${new Date().getTime()}`;
+
                 // 1. Fetch Core Data (Scan Results)
-                const histRes = await fetch(`${BASE_URL}/history/${date}.json`);
+                const histRes = await fetch(`${BASE_URL}/history/${date}.json${cacheBuster}`);
                 if (histRes.ok) {
                     const scanData = await histRes.json();
                     setData(scanData);
                 }
 
                 // 2. Fetch Rich Article (AI Content)
-                const articleRes = await fetch(`${BASE_URL}/articles/${date}.json`);
+                const articleRes = await fetch(`${BASE_URL}/articles/${date}.json${cacheBuster}`);
                 if (articleRes.ok) {
                     const articleData = await articleRes.json();
                     setArticle(articleData);
