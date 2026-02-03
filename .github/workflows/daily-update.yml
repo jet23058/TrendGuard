@@ -19,6 +19,8 @@ on:
         - full_scan
         - update_alerts
         - generate_article
+  pull_request: # PR 時觸發測試 (但不更新資料)
+    branches: [ "main" ]
 
 jobs:
   update:
@@ -40,11 +42,10 @@ jobs:
       
       - name: Install dependencies
         run: |
-      - name: Install dependencies
-        run: |
           pip install FinMind pandas pytest twstock lxml requests google-genai tqdm
       
       - name: Fetch previous data
+        if: github.event_name != 'pull_request'
         run: |
           # 嘗試從 data 分支下載昨天的資料，以便計算續漲/剔除
           # 如果下載失敗 (例如第一次執行)，則會在 script 中自動處理為全空
@@ -59,11 +60,13 @@ jobs:
           python -m pytest tests/test_update_daily.py -v
       
       - name: Run daily update script
+        if: github.event_name != 'pull_request'
         env:
           TEST_MODE: 'false'  # 啟用完整掃描
           TASK_TYPE: ${{ github.event.inputs.task_type || 'auto' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          FINMIND_API_TOKEN: ${{ secrets.FINMIND_API_TOKEN }}
         run: |
           # 取得當前 UTC 小時
           CURRENT_HOUR=$(date -u +%H)
@@ -111,6 +114,7 @@ jobs:
           fi
       
       - name: Verify output file exists
+        if: github.event_name != 'pull_request'
         run: |
           if [ -f "frontend/public/data/daily_scan_results.json" ]; then
             echo "✅ Output file generated successfully"
@@ -121,6 +125,7 @@ jobs:
           fi
       
       - name: Deploy to Data Branch
+        if: github.event_name != 'pull_request'
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
