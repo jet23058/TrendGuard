@@ -12,6 +12,9 @@
 import json
 import os
 import sys
+import concurrent.futures
+import time
+import threading
 from datetime import datetime
 from pathlib import Path
 
@@ -363,22 +366,23 @@ def get_all_tw_targets() -> list:
     return targets
 
 # -----------------------------------------------
-# Article Generation Integration (延遲匯入以避免循環參照)
+# Article Generation Integration
 # -----------------------------------------------
-def run_article_generation(output_data):
-    """執行文章產生流程"""
+try:
+    from article_generator import generate_daily_article, save_to_json, generate_articles_index
+except ModuleNotFoundError:
+    from scripts.article_generator import generate_daily_article, save_to_json, generate_articles_index
+
+def process_single_stock(code, market_alerts, allowed_day_trade_targets):
+    """Worker function for parallel processing"""
     try:
-        try:
-            from article_generator import generate_daily_article, save_to_json
-        except (ImportError, ModuleNotFoundError):
-            from scripts.article_generator import generate_daily_article, save_to_json
-            
-        print("正在產生盤勢分析文章...")
-        article = generate_daily_article(output_data)
-        save_to_json(article)
-        print("✅ 已產生每日分析文章並儲存")
+        # Small delay to prevent burst rate limit
+        time.sleep(0.1) 
+        data, change_pct = check_livermore_criteria(code, market_alerts, allowed_day_trade_targets)
+        return code, data, change_pct
     except Exception as e:
-        print(f"⚠️ 文章產生失敗 (不影響主流程): {e}")
+        print(f"Error processing {code}: {e}")
+        return code, None, None
 
 def main():
     """主程式"""
@@ -388,9 +392,11 @@ def main():
     parser.add_argument('--generate-article-only', action='store_true', help='Generate article from existing data only')
     args = parser.parse_args()
 
-    # ... (Alerts update logic remains same) ...
+    # Check arguments
     if args.update_alerts:
         data = update_existing_alerts()
+        
+        # Merge article generation for alert updates
         try:
             print("正在更新盤勢分析文章 (含警示資訊)...")
             article = generate_daily_article(data)
@@ -398,19 +404,22 @@ def main():
             print("✅ 已更新每日分析文章並儲存")
         except Exception as e:
             print(f"⚠️ 文章更新失敗: {e}")
+            
         return
 
-    # ... (Generate article logic remains same) ...
+    # Check Manual Article Trigger
     if args.generate_article_only:
-        # ... (implementation same as before) ...
         print("🚀 Manual Trigger: Generating Article Only")
         output_file = OUTPUT_DIR / "daily_scan_results.json"
+        
         if not output_file.exists():
             print(f"❌ Error: {output_file} not found. Cannot generate article.")
             sys.exit(1)
+            
         try:
             with open(output_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
+            
             article = generate_daily_article(data)
             if save_to_json(article):
                 print("✅ Manual article generation and save completed successfully.")
@@ -580,67 +589,11 @@ def main():
 
 
 
-def generate_articles_index():
-    """Appends new articles to the existing index JSON file."""
-    articles_dir = OUTPUT_DIR / "articles"
-    index_file = OUTPUT_DIR / "articles_index.json"
-    
-    if not articles_dir.exists():
-        print("⚠️ No articles directory found.")
-        return
-
-    # 1. Try to load existing index from data branch (GitHub)
-    existing_index = []
-    try:
-        import urllib.request
-        url = "https://raw.githubusercontent.com/jet23058/TrendGuard/data/articles_index.json"
-        with urllib.request.urlopen(url, timeout=10) as response:
-            existing_index = json.loads(response.read().decode('utf-8'))
-            print(f"📥 Loaded existing index with {len(existing_index)} articles")
-    except Exception as e:
-        print(f"⚠️ Could not fetch existing index (will create new): {e}")
-    
-    # 2. Build a set of existing dates for deduplication
-    existing_dates = {item['date'] for item in existing_index}
-    
-    # 3. Scan local articles directory for new articles
-    new_articles = []
-    for file_path in sorted(articles_dir.glob("*.json"), reverse=True):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                article_date = data.get("date", file_path.stem)
-                
-                # Skip if already in index
-                if article_date in existing_dates:
-                    continue
-                    
-                summary_data = {
-                    "date": article_date,
-                    "title": data.get("title", "無標題"),
-                    "isAiGenerated": data.get("isAiGenerated", False),
-                    "preview": data.get("content", "")[:100].replace('#', '').strip() + "..." 
-                }
-                new_articles.append(summary_data)
-                print(f"➕ Adding new article: {article_date}")
-        except Exception as e:
-            print(f"⚠️ Failed to read article {file_path.name}: {e}")
-
-    # 4. Merge and sort (newest first)
-    merged_index = new_articles + existing_index
-    merged_index.sort(key=lambda x: x['date'], reverse=True)
-    
-    # 5. Write updated index file
-    try:
-        with open(index_file, 'w', encoding='utf-8') as f:
-            json.dump(merged_index, f, ensure_ascii=False, indent=2)
-        print(f"✅ Articles index updated: {index_file} ({len(merged_index)} total articles)")
-    except Exception as e:
-        print(f"❌ Failed to write articles index: {e}")
-
-
 if __name__ == "__main__":
     main()
     # Always regenerate index after main process
-    generate_articles_index()
+    try:
+        generate_articles_index()
+    except Exception as e:
+        print(f"Index generation failed: {e}")
 
