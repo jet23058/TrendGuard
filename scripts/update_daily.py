@@ -319,30 +319,66 @@ def fetch_allowed_day_trade_targets():
     print(f"總計可當沖標的: {len(allowed)} 檔")
     return allowed
 
-import concurrent.futures
-import time
-import threading
+from typing import Optional
 
-# --- 設定 ---
-LOOKBACK_DAYS = 20  # 突破幾日新高
-TEST_MODE = os.environ.get('TEST_MODE', 'true').lower() == 'true'  # GitHub Actions 設為 false
-OUTPUT_DIR = Path("frontend/public/data")
-MAX_WORKERS = int(os.environ.get('MAX_WORKERS', 5)) # Parallel workers
-
-# ... (TEST_STOCKS list remains same) ...
-
-# ... (Helper functions remain same) ...
-
-def process_single_stock(code, market_alerts, allowed_day_trade_targets):
-    """Worker function for parallel processing"""
+def get_stock_name(code: str) -> tuple:
+    """取得股票中文名稱與產業別"""
+    if HAS_TWSTOCK and code in twstock.codes:
+        info = twstock.codes[code]
+        return info.name, info.group if hasattr(info, 'group') else "其他"
+    
+    # Fallback: 使用 FinMind
     try:
-        # Small delay to prevent burst rate limit
-        time.sleep(0.1) 
-        data, change_pct = check_livermore_criteria(code, market_alerts, allowed_day_trade_targets)
-        return code, data, change_pct
+        loader = get_finmind_loader()
+        df = loader.TaiwanStockInfo()
+        stock_info = df[df['stock_id'] == code]
+        if not stock_info.empty:
+            return stock_info.iloc[0]['stock_name'], stock_info.iloc[0]['industry_category']
+    except Exception:
+        pass
+    return code, "其他"
+
+
+def get_all_tw_targets() -> list:
+    """取得要掃描的股票清單"""
+    if TEST_MODE:
+        # 去除重複的股票代碼
+        unique_stocks = sorted(list(set(TEST_STOCKS)))
+        print(f"[測試模式] 僅掃描 {len(unique_stocks)} 檔測試股票...")
+        return unique_stocks
+    
+    # 完整掃描模式
+    if not HAS_TWSTOCK:
+        print("twstock 未安裝，使用測試清單")
+        return TEST_STOCKS
+    
+    targets = []
+    print("正在整理台股清單 (含股票與商品型 ETF)...")
+    for code, info in twstock.codes.items():
+        if info.market in ["上市", "上櫃"]:
+            if info.type == "股票" or info.type == "ETF":
+                targets.append(code)
+    
+    print(f"共 {len(targets)} 檔標的待掃描")
+    return targets
+
+# -----------------------------------------------
+# Article Generation Integration (延遲匯入以避免循環參照)
+# -----------------------------------------------
+def run_article_generation(output_data):
+    """執行文章產生流程"""
+    try:
+        try:
+            from article_generator import generate_daily_article, save_to_json
+        except (ImportError, ModuleNotFoundError):
+            from scripts.article_generator import generate_daily_article, save_to_json
+            
+        print("正在產生盤勢分析文章...")
+        article = generate_daily_article(output_data)
+        save_to_json(article)
+        print("✅ 已產生每日分析文章並儲存")
     except Exception as e:
-        print(f"Error processing {code}: {e}")
-        return code, None, None
+        print(f"⚠️ 文章產生失敗 (不影響主流程): {e}")
 
 def main():
     """主程式"""
