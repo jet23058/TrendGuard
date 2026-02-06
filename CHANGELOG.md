@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-06]
+
+### Added
+- [Feat] **Market Rank Filter**: Added a frontend filter to view Top 100/500/1000 market cap stocks (`frontend/src/App.jsx`).
+- [Feat] **Market Cap Data Source**: Added scheduled crawler for TAIFEX market cap ranking (`scripts/fetch_market_cap_rank.py`, `.github/workflows/update-market-rank.yml`).
+- [Feat] **Parallel Scanning**: Implemented multi-threaded scanning in daily update script for 10x speedup (`scripts/update_daily.py`).
+- [Feat] **Anonymous Optimization**: Daily script now intelligently prioritizes top market cap stocks when running without a FinMind token to maximize utility within rate limits.
+
+### Fixed
+- [Fix] **Vercel Deployment**: Resolved 250MB size limit by rewriting `api/stock.py` to use lightweight `requests` instead of heavy data libraries.
+- [Fix] **CI/CD Pipeline**: Enabled tests on Pull Requests and fixed circular dependencies causing import errors.
+
+### Changed
+- [Refactor] **Data Source Migration**: Fully migrated from `yfinance` to `FinMind` for better data reliability.
+- [Refactor] **Market Rank Architecture**: Moved ranking logic to frontend to decouple data fetching from presentation.
+
 ## [2026-02-02]
 
 ### Fixed

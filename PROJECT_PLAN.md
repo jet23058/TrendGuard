@@ -64,8 +64,8 @@
 ### 階段一：效能與穩定性優化 (進行中 🟡)
 - [x] **圖表效能優化**: 實作 IntersectionObserver 延遲載入圖表。
 - [x] **資料精確度**: 串接證交所 API 獲取精確的「可當沖」清單。
-- [ ] **資料瘦身**: 優化 JSON 結構，減少歷史數據傳輸量 (目前傳輸 60 天，前端僅需顯示部分)。
-- [ ] **錯誤處理**: 強化後端爬蟲對偶發性連線錯誤的重試機制。
+- [x] **資料瘦身**: Vercel API 重構為輕量化版本 (移除 Pandas/FinMind 依賴)，大幅縮減部署體積。
+- [x] **錯誤處理**: 強化 FinMind API 流量限制處理、平行掃描例外捕獲與 CI 測試覆蓋。
 
 ### 階段二：使用者體驗與個人化 (短期目標)
 - [ ] **自訂篩選條件**: 讓使用者在前端調整篩選參數 (如：成交量門檻、漲幅限制)。
@@ -92,10 +92,10 @@
 | **Framework** | React 18 (Vite) | 使用者介面建構 |
 | **Styling** | Tailwind CSS | UI 樣式設計 |
 | **Charts** | Recharts | 股票 K 線圖與技術指標繪製 |
-| **Data Source** | yfinance, TWSE API | 金融數據來源 |
+| **Data Source** | FinMind, TWSE API, TAIFEX | 金融數據來源 |
 | **Automation** | GitHub Actions | 每日排程自動化 |
 | **Hosting** | Vercel | 網站託管與 Serverless API |
 
 ---
 
-*Last Updated: 2026-01-24*
+*Last Updated: 2026-02-06*

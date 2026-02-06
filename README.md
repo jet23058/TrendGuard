@@ -8,6 +8,7 @@
 - **動能掃描** - 自動篩選強勢股
   - 📊 **連續紅K篩選**：支援「至少 N 天」與「剛好 N 天」的精確篩選，快速鎖定動能股。
   - 🔥 **強勢股過濾**：可自訂過濾門檻（如漲幅 > 5%），剔除緩漲或動能不足的標的。
+  - 🏆 **市值排行**：提供 Top 100/500 大型股篩選，專注於權值股操作。
   - 🟢 **異動偵測**：自動比對每日清單，標示新進榜（NEW）與被剔除的股票。
   - 🏭 **產業熱點**：自動將股票依產業分類，一眼看穿主流族群。
 
@@ -41,7 +42,7 @@ cd frontend
 npm install
 
 # 後端 (Python API)
-pip install flask flask-cors yfinance pandas numpy
+pip install flask flask-cors FinMind pandas numpy google-generativeai python-dotenv
 ```
 
 ### 2. 啟動開發環境
@@ -61,11 +62,11 @@ python backend/server.py
 
 前端會自動透過 Proxy 連線至後端，無需安裝 Vercel CLI。
 
-瀏覽器開啟：**http://localhost:5174**
+瀏覽器開啟：**http://localhost:5173** (預設)
 
 ## 🤖 GitHub Actions 自動更新
 
-專案包含每日自動更新腳本，會在台灣時間每天 18:00 (收盤後) 執行：
+專案包含每日自動更新腳本，會在台灣時間每天 17:00 (收盤後) 執行：
 
 ### 手動執行
 ```bash
@@ -80,7 +81,7 @@ python scripts/update_daily.py
 ## 📖 使用方式
 
 1. **查看動能股** - 首頁自動列出今日符合「突破關鍵點」的強勢股。
-2. **篩選標的** - 使用頂部的「連續紅K」篩選器，切換「至少」或「剛好」模式尋找特定型態。
+2. **篩選標的** - 使用頂部的「連續紅K」與「市值排行」篩選器，精確鎖定目標。
 3. **管理庫存** - 點擊「匯入庫存」按鈕，使用截圖或手動輸入建立您的觀察清單。
 4. **閱讀報告** - 每日更新 AI 生成的市場分析文章，掌握盤勢脈動。
 
@@ -110,3 +111,4 @@ TrendGuard/
 ## 📄 License
 
 MIT
+
