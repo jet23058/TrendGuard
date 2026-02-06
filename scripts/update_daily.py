@@ -50,6 +50,10 @@ import re
 import requests
 from datetime import timedelta
 
+
+
+
+
 def roc_to_date(roc_str):
     """Convert ROC date string (e.g., '114/01/05') to datetime object"""
     try:
@@ -354,10 +358,13 @@ TEST_STOCKS = [
 from typing import Optional
 
 def get_stock_name(code: str) -> tuple:
-    """取得股票中文名稱與產業別"""
+    """取得股票中文名稱、產業別與市場別"""
+    market = "上市" # Default
+    
     if HAS_TWSTOCK and code in twstock.codes:
         info = twstock.codes[code]
-        return info.name, info.group if hasattr(info, 'group') else "其他"
+        market = info.market
+        return info.name, info.group if hasattr(info, 'group') else "其他", market
     
     # Fallback: 使用 FinMind
     try:
@@ -365,10 +372,12 @@ def get_stock_name(code: str) -> tuple:
         df = loader.TaiwanStockInfo()
         stock_info = df[df['stock_id'] == code]
         if not stock_info.empty:
-            return stock_info.iloc[0]['stock_name'], stock_info.iloc[0]['industry_category']
+            # FinMind doesn't explicitly separate Listed/OTC in simple info sometimes, 
+            # but usually it's there. For now default to '上市' or guess.
+            return stock_info.iloc[0]['stock_name'], stock_info.iloc[0]['industry_category'], market
     except Exception:
         pass
-    return code, "其他"
+    return code, "其他", market
 
 
 def get_all_tw_targets() -> list:
@@ -494,8 +503,8 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         money_stop = current_price * 0.90
         stop_loss = max(tech_stop, money_stop)
         
-        # 取得中文名稱
-        name, sector = get_stock_name(code)
+        # 取得中文名稱、產業、市場
+        name, sector, market = get_stock_name(code)
         
         # 計算 KD 指標 (9, 3, 3)
         k_period = 9
@@ -536,9 +545,24 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         latest_k = round(float(df['K'].iloc[-1]), 1) if not pd.isna(df['K'].iloc[-1]) else 50
         latest_d = round(float(df['D'].iloc[-1]), 1) if not pd.isna(df['D'].iloc[-1]) else 50
         
+        # [NEW] 計算波動率 (判斷箱型整理)
+        # 取近 20 日收盤價計算變異係數 (CV = std / mean)
+        last_20_closes = df['Close'].tail(20)
+        volatility = last_20_closes.std() / last_20_closes.mean()
+        is_box_breakout = volatility < 0.05  # 波動率小於 5% 視為盤整
+        
         # 動態調整 Signal 文字
-        signal_text = f"🔥 股價創 {LOOKBACK_DAYS} 日新高，均線呈現多頭排列"
+        signal_text = f"🔥 股價創 {LOOKBACK_DAYS} 日新高"
         priority_score = 90 + consecutive_red
+        
+        # Tags List for Frontend
+        tags = []
+        if is_box_breakout:
+            tags.append("盤整突破")
+            signal_text = f"🚀 突破箱型整理 (低波動) + 創高"
+            priority_score += 5
+            
+        signal_text += f"，均線多頭"
         
         if has_alert:
              # 如果是警示股且符合技術條件，加註警語
@@ -560,6 +584,8 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             "ticker": code,
             "name": name,
             "sector": sector,
+            "market": market, # 新增市場別
+            "tags": tags,     # 新增標籤
             "currentPrice": round(current_price, 2),
             "changePct": round(change_pct, 2),
             "canDayTrade": not cant_day_trade,
@@ -797,13 +823,36 @@ def main():
     
     # 警告：無 Token 時掃描大量股票風險
     token = os.environ.get("FINMIND_API_TOKEN")
+    
+    # [NEW] Anonymous Optimization: Prioritize and Limit
     if not token and total > 600:
-        print(f"⚠️ 警告: 未設定 FINMIND_API_TOKEN，掃描 {total} 檔股票可能會觸發 API 限制 (600次/hr)。")
-        print("   建議設定 Token 以獲得 3000次/hr 額度，或僅使用測試模式。")
+        print(f"⚠️ 未設定 Token，啟用「匿名安全模式」")
+        print(f"   將限制掃描前 550 檔熱門股票，以避免觸發 API 限制 (600次/hr)。")
+        
+        # Load ranks to prioritize
+        rank_file = OUTPUT_DIR / "market_cap_rank.json"
+        ranks = {}
+        if rank_file.exists():
+            try:
+                with open(rank_file, 'r', encoding='utf-8') as f:
+                    ranks = json.load(f).get("ranks", {})
+            except: pass
+            
+        # Sort: Ranked stocks first (low rank number), then others
+        target_list.sort(key=lambda x: ranks.get(x, 99999))
+        
+        # Slice
+        target_list = target_list[:550]
+        total = len(target_list)
+        print(f"   ✅ 已篩選前 {total} 檔高市值股票進行掃描。")
+    elif not token:
+        print(f"⚠️ 警告: 未設定 Token，但股票數量 {total} 在限制範圍內，繼續執行。")
     
     # 取得市場警示 (處置/注意)
     market_alerts = fetch_market_alerts()
     print(f"取得市場警示資料: {len(market_alerts)} 筆")
+    
+
     
     # 取得可當沖標的清單
     allowed_day_trade_targets = fetch_allowed_day_trade_targets()
@@ -856,7 +905,9 @@ def main():
     print(f"市場統計: 上漲 {market_stats['up']} / 下跌 {market_stats['down']} / 平盤 {market_stats['flat']}")
     print(f"符合條件: {len(results)} 檔\n")
     
-    # 按連紅天數排序 (越多越強)
+
+    
+    # Restore sort by priority (Signal Strength)
     results.sort(key=lambda x: x['signal']['priority'], reverse=True)
     
     # 計算差異

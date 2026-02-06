@@ -1020,6 +1020,7 @@ const ArticleBanner = ({ article }) => {
 // --- 7. 主程式 ---
 export default function App() {
   const [data, setData] = useState(null);
+  const [marketRanks, setMarketRanks] = useState({}); // [NEW] Store rank map
   const [article, setArticle] = useState(null); // 新增文章狀態
   // Removed selectedArticle state
   // 用於控制 Modal 顯示
@@ -1034,6 +1035,24 @@ export default function App() {
   const [minRedK, setMinRedK] = useState(2); // Filter: minimum consecutive red K (default 2 = show all)
   const [isExactMatch, setIsExactMatch] = useState(false); // New state for exact match toggle
   const [minChangePct, setMinChangePct] = useState(0); // 強勢股過濾 (>= 5%)
+  const [maxMarketRank, setMaxMarketRank] = useState(500); // 市值/成交量排行過濾 (Top N)
+
+  // [NEW] Processed Stocks with Rank injected
+  const processedStocks = useMemo(() => {
+    if (!data?.stocks) return [];
+    return data.stocks.map(stock => {
+        const rank = marketRanks[stock.ticker] || 9999;
+        const newTags = [...(stock.tags || [])];
+        if (rank <= 100 && !newTags.includes("市值前100")) {
+            newTags.push("市值前100");
+        }
+        return {
+            ...stock,
+            marketRank: rank,
+            tags: newTags
+        };
+    });
+  }, [data, marketRanks]);
 
   // 監聽登入狀態與資料同步
   useEffect(() => {
@@ -1137,6 +1156,17 @@ export default function App() {
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const result = await response.json();
       setData(result);
+
+      // [NEW] Fetch Market Ranks
+      try {
+        const rankRes = await fetch(`${DATA_BASE_URL}/market_cap_rank.json?v=${cacheBuster}`);
+        if (rankRes.ok) {
+          const rankData = await rankRes.json();
+          setMarketRanks(rankData.ranks || {});
+        }
+      } catch (err) {
+        console.warn("Failed to load market ranks");
+      }
 
       // Fetch Article if date exists
       if (result.date) {
@@ -1242,17 +1272,17 @@ export default function App() {
   };
 
   const portfolioTickers = useMemo(() => portfolio.map(p => p.ticker), [portfolio]);
-  const scanResultTickers = useMemo(() => data?.stocks?.map(s => s.ticker) || [], [data]);
+  const scanResultTickers = useMemo(() => processedStocks.map(s => s.ticker), [processedStocks]);
 
   // 統計各連紅天數的累積數量 (用於篩選器 UI)
   const redKStats = useMemo(() => {
-    if (!data?.stocks) return [];
+    if (processedStocks.length === 0) return [];
 
     // 1. 找出所有出現過的連紅天數
     const counts = {};
     let maxDays = 0;
 
-    data.stocks.forEach(stock => {
+    processedStocks.forEach(stock => {
       // 確保 pct 為數值，若無資料預設為 0
       const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
 
@@ -1287,14 +1317,14 @@ export default function App() {
     }
 
     return stats;
-  }, [data, isExactMatch, minChangePct]); // 加入 minChangePct 依賴
+  }, [processedStocks, isExactMatch, minChangePct]); // 加入 minChangePct 依賴
 
   // 按產業分組，庫存所在產業優先，並套用 minRedK 篩選
   const groupedByIndustry = useMemo(() => {
-    if (!data?.stocks) return {};
+    if (processedStocks.length === 0) return {};
 
     // 先根據 minRedK 和 minChangePct 篩選
-    const filteredStocks = data.stocks.filter(stock => {
+    const filteredStocks = processedStocks.filter(stock => {
       const days = stock.consecutiveRed || 0;
       // 確保 pct 為數值
       const pct = typeof stock.changePct === 'number' ? stock.changePct : parseFloat(stock.changePct) || 0;
@@ -1305,7 +1335,14 @@ export default function App() {
       // 2. 漲幅條件 (如果設定了 minChangePct > 0)
       const changeMatch = minChangePct > 0 ? pct >= minChangePct : true;
 
-      return redKMatch && changeMatch;
+      // 3. 市值/成交量排行條件
+      // 若無 marketRank 資料，視為符合 (避免舊資料被隱藏)，除非 maxMarketRank < 2000
+      // 或者：若無 rank，通常是成交量低或新股。
+      // 策略：若無 rank，且 maxMarketRank < 2000，則剔除。
+      const rank = stock.marketRank || 9999;
+      const rankMatch = rank <= maxMarketRank;
+
+      return redKMatch && changeMatch && rankMatch;
     });
 
     const groups = {};
@@ -1326,14 +1363,14 @@ export default function App() {
     });
 
     return entries.reduce((acc, [k, v]) => { acc[k] = v; return acc; }, {});
-  }, [data, portfolioTickers, minRedK, minChangePct, isExactMatch]);
+  }, [processedStocks, portfolioTickers, minRedK, minChangePct, isExactMatch, maxMarketRank]);
 
   const stats = useMemo(() => ({
-    total: data?.stocks?.length || 0,
+    total: processedStocks.length || 0,
     industries: Object.keys(groupedByIndustry).length,
-    buySignals: data?.stocks?.filter(s => s.signal?.type === 'breakout').length || 0,
+    buySignals: processedStocks.filter(s => s.signal?.type === 'breakout').length || 0,
     portfolioCount: portfolio.length
-  }), [data, groupedByIndustry, portfolio]);
+  }), [processedStocks, groupedByIndustry, portfolio]);
 
   const [displayTimes, setDisplayTimes] = useState({ scan: 'N/A', alert: 'N/A' });
 
@@ -1451,6 +1488,19 @@ export default function App() {
             </h3>
 
             <div className="flex flex-wrap items-center gap-2 md:gap-3">
+              {/* 市值排行過濾 */}
+              <div className="bg-gray-800 p-1 rounded-lg flex text-xs font-medium border border-gray-700">
+                {[100, 500, 1000, 10000].map(val => (
+                  <button
+                    key={val}
+                    onClick={() => setMaxMarketRank(val)}
+                    className={`px-3 py-1 rounded transition-colors ${maxMarketRank === val ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-400 hover:text-gray-200'}`}
+                  >
+                    {val === 10000 ? '全部' : `Top ${val}`}
+                  </button>
+                ))}
+              </div>
+
               {/* 強勢股過濾 (自訂漲幅) */}
               <div className={`flex items-center gap-2 px-3 py-1 rounded-lg border transition-colors ${minChangePct > 0 ? 'bg-gray-800 border-red-500/50' : 'bg-gray-800 border-gray-700'}`}>
                 <span className={`text-xs font-bold whitespace-nowrap ${minChangePct > 0 ? 'text-red-400' : 'text-gray-400'}`}>
@@ -1506,9 +1556,9 @@ export default function App() {
                 </button>
               </div>
 
-              {(minRedK > 2 || minChangePct > 0) && (
+              {(minRedK > 2 || minChangePct > 0 || maxMarketRank !== 500) && (
                 <button
-                  onClick={() => { setMinRedK(2); setMinChangePct(0); }}
+                  onClick={() => { setMinRedK(2); setMinChangePct(0); setMaxMarketRank(500); }}
                   className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-1"
                 >
                   <RefreshCw size={12} /> 重置

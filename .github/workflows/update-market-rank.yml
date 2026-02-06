@@ -1,0 +1,70 @@
+name: Update Market Cap Rank
+
+on:
+  schedule:
+    # Run at 22:00 Taiwan Time (14:00 UTC) on days 28-31
+    # Then checking if it is the last day of the month
+    - cron: '0 14 28-31 * *'
+  workflow_dispatch:
+
+jobs:
+  update-rank:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Check if last day of month
+        id: check_date
+        run: |
+          # If triggered manually, run anyway
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "is_last_day=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Check if tomorrow is day 01
+          if [ "$(date -d "+1 day" +%d)" == "01" ]; then
+            echo "It is the last day of the month."
+            echo "is_last_day=true" >> $GITHUB_OUTPUT
+          else
+            echo "Not the last day of the month. Skipping."
+            echo "is_last_day=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Set up Python
+        if: steps.check_date.outputs.is_last_day == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        if: steps.check_date.outputs.is_last_day == 'true'
+        run: |
+          pip install requests lxml
+      
+      - name: Fetch Market Cap Rank
+        if: steps.check_date.outputs.is_last_day == 'true'
+        run: |
+          python scripts/fetch_market_cap_rank.py
+      
+      - name: Verify output
+        if: steps.check_date.outputs.is_last_day == 'true'
+        run: |
+          ls -l frontend/public/data/market_cap_rank.json
+      
+      - name: Deploy to Data Branch
+        if: steps.check_date.outputs.is_last_day == 'true'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/public/data
+          publish_branch: data
+          keep_files: true  # Important: Keep existing daily data files
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: '📅 Monthly market cap rank update'

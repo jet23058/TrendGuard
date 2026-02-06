@@ -170,7 +170,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 // --- 精簡版股票卡片 (Rich Version Restored) ---
 const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] }) => {
-    const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc, alert } = stock;
+    const { ticker, name, currentPrice, changePct, consecutiveRed, stopLoss, ohlc, alert, market, tags } = stock;
     const isUp = changePct >= 0;
     const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
     const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
@@ -226,55 +226,70 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                                 <BarChart2 size={14} className="text-gray-400 hover:text-blue-400" />
                             </button>
                         </div>
-                        {/* 標籤區：處置/警示 + 持有 + 禁當沖 */}
-                        {(alert || isInPortfolio || stock.canDayTrade === false) && (
-                            <div className="flex flex-wrap items-center gap-2">
-                                {alert && (
-                                    <div className="group relative z-10">
-                                        <div className="flex items-center gap-1">
-                                            <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
-                                                {alert.badge}
+                        {/* 標籤區：處置/警示 + 持有 + 禁當沖 + 市場 + Tags */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Market Badge (上市/上櫃) */}
+                            {market && (
+                                <span className="text-[10px] bg-gray-700 text-gray-300 border border-gray-600 px-1.5 py-0.5 rounded">
+                                    {market}
+                                </span>
+                            )}
+                            
+                            {/* Alert Badge */}
+                            {alert && (
+                                <div className="group relative z-10">
+                                    <div className="flex items-center gap-1">
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded cursor-help ${alert.color === 'red' ? 'bg-red-900 text-red-200 border border-red-700' : 'bg-yellow-900 text-yellow-200 border border-yellow-700'}`}>
+                                            {alert.badge}
+                                        </span>
+                                        {alert.risk && alert.risk.level !== 'low' && (
+                                            <span className={`text-[9px] px-1 rounded-sm ${alert.risk.level === 'high' ? 'bg-red-500 text-white animate-pulse' : 'bg-orange-500 text-white'}`}>
+                                                風險 {alert.risk.level === 'high' ? '高' : '中'}
                                             </span>
-                                            {alert.risk && alert.risk.level !== 'low' && (
-                                                <span className={`text-[9px] px-1 rounded-sm ${alert.risk.level === 'high' ? 'bg-red-500 text-white animate-pulse' : 'bg-orange-500 text-white'}`}>
-                                                    風險 {alert.risk.level === 'high' ? '高' : '中'}
-                                                </span>
-                                            )}
-                                        </div>
-                                        {/* Tooltip */}
-                                        <div className="absolute left-0 top-full mt-1 w-56 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
-                                            <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
-                                                {alert.info}
-                                            </div>
-                                            {alert.risk && alert.risk.message && (
-                                                <div className="mb-2 p-1.5 bg-gray-900 rounded border border-gray-800 text-orange-300 font-bold">
-                                                    ⚠️ {alert.risk.message}
-                                                </div>
-                                            )}
-                                            <div className="text-gray-400 leading-relaxed mb-2">{alert.detail}</div>
-                                            {alert.history && alert.history.length > 0 && (
-                                                <div className="border-t border-gray-800 pt-1 mt-1">
-                                                    <div className="text-[10px] text-gray-500 mb-1">近期注意紀錄：</div>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {alert.history.slice(0, 5).map(h => (
-                                                            <span key={h} className="text-[9px] bg-gray-800 px-1 rounded text-gray-400">{h}</span>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </div>
+                                        )}
                                     </div>
-                                )}
-                                
-                                {stock.canDayTrade === false && (
-                                    <span className="text-[10px] bg-red-900 text-red-200 border border-red-700 px-1.5 py-0.5 rounded cursor-help" title="此股票不在當沖標的清單中，或正處於處置狀態">
-                                        🚫 禁當沖
-                                    </span>
-                                )}
+                                    {/* Tooltip */}
+                                    <div className="absolute left-0 top-full mt-1 w-56 p-2 bg-gray-950 border border-gray-700 rounded shadow-xl text-xs z-50 invisible group-hover:visible whitespace-pre-wrap text-left">
+                                        <div className={`font-bold mb-1 ${alert.color === 'red' ? 'text-red-400' : 'text-yellow-400'}`}>
+                                            {alert.info}
+                                        </div>
+                                        {alert.risk && alert.risk.message && (
+                                            <div className="mb-2 p-1.5 bg-gray-900 rounded border border-gray-800 text-orange-300 font-bold">
+                                                ⚠️ {alert.risk.message}
+                                            </div>
+                                        )}
+                                        <div className="text-gray-400 leading-relaxed mb-2">{alert.detail}</div>
+                                        {alert.history && alert.history.length > 0 && (
+                                            <div className="border-t border-gray-800 pt-1 mt-1">
+                                                <div className="text-[10px] text-gray-500 mb-1">近期注意紀錄：</div>
+                                                <div className="flex flex-wrap gap-1">
+                                                    {alert.history.slice(0, 5).map(h => (
+                                                        <span key={h} className="text-[9px] bg-gray-800 px-1 rounded text-gray-400">{h}</span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {/* Can Day Trade */}
+                            {stock.canDayTrade === false && (
+                                <span className="text-[10px] bg-red-900 text-red-200 border border-red-700 px-1.5 py-0.5 rounded cursor-help" title="此股票不在當沖標的清單中，或正處於處置狀態">
+                                    🚫 禁當沖
+                                </span>
+                            )}
 
-                                {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
-                            </div>
-                        )}
+                            {/* Portfolio */}
+                            {isInPortfolio && <span className="text-[10px] bg-yellow-600 text-yellow-100 px-1.5 py-0.5 rounded">持有</span>}
+                            
+                            {/* Special Tags (e.g. Box Breakout) */}
+                            {tags && tags.map(tag => (
+                                <span key={tag} className="text-[10px] bg-indigo-900 text-indigo-200 border border-indigo-700 px-1.5 py-0.5 rounded">
+                                    {tag}
+                                </span>
+                            ))}
+                        </div>
                     </div>
                     <div className={`text-right flex-shrink-0 ${isUp ? 'text-red-400' : 'text-green-400'}`}>
                         <div className="text-lg font-bold font-mono">{currentPrice?.toFixed(2)}</div>

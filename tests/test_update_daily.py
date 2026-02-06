@@ -20,15 +20,15 @@ class TestGetStockName:
     """Tests for stock name retrieval"""
     
     def test_returns_tuple(self):
-        """Should return a tuple of (name, sector)"""
+        """Should return a tuple of (name, sector, market)"""
         result = get_stock_name("2330")
         assert isinstance(result, tuple)
-        assert len(result) == 2
+        assert len(result) == 3
     
     def test_returns_code_as_fallback(self):
         """Should return code as name if lookup fails"""
         result = get_stock_name("9999999")
-        name, sector = result
+        name, sector, market = result
         # Should at least return something
         assert name is not None
 
