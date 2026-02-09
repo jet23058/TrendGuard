@@ -95,18 +95,19 @@ jobs:
              python scripts/article_generator.py
              
           elif [ "$TASK_TYPE" == "auto" ]; then
-             # Original Auto Logic
-             if [ "$CURRENT_HOUR" -ge 10 ]; then
-                echo "🔔 Scheduled (Auto): Market Alerts Update (18:30 TW)"
+             # Auto Logic: Default to Full Scan unless very late (e.g. > 20:00 TW / 12:00 UTC)
+             # This prevents execution delay (e.g. 09:00 -> 10:09) from accidentally triggering 'Alert Only' mode
+             if [ "$CURRENT_HOUR" -ge 12 ]; then
+                echo "🔔 Scheduled (Auto): Market Alerts Update (Late Run)"
                 python scripts/update_daily.py --update-alerts
              else
-                echo "🔍 Scheduled (Auto): Full Stock Scan (13:30 TW)"
+                echo "🔍 Scheduled (Auto): Full Stock Scan"
                 python scripts/update_daily.py
              fi
              
           else
              echo "⚠️ Unknown task type: $TASK_TYPE, defaulting to Auto logic"
-             if [ "$CURRENT_HOUR" -ge 10 ]; then
+             if [ "$CURRENT_HOUR" -ge 12 ]; then
                 python scripts/update_daily.py --update-alerts
              else
                 python scripts/update_daily.py
