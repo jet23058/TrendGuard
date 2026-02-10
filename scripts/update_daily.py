@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
 """
-利弗摩爾強勢突破掃描器
-每日 14:30 執行，篩選符合條件的強勢股
-
 篩選條件：
 1. 股價站上所有均線 (MA5, MA10, MA20, MA60)
 2. 連續兩日紅 K (收盤 > 開盤)
@@ -455,6 +452,9 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         
         current_price = float(today['Close'])
         prev_close = float(yesterday['Close'])
+
+        # [DEBUG] 新增：印出每檔股票的掃描狀態，便於除錯
+        print(f"[DEBUG] {code} Date:{df.index[-1].strftime('%Y-%m-%d')} Close:{current_price} Open:{today['Open']} Vol:{today['Volume']}")
         
         # 漲跌幅 (即便不符合條件也要回傳，用於市場統計)
         change_pct = ((current_price - prev_close) / prev_close) * 100
@@ -990,4 +990,3 @@ if __name__ == "__main__":
         generate_articles_index()
     except Exception as e:
         print(f"Index generation failed: {e}")
-
