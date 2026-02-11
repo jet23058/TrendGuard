@@ -438,7 +438,24 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         # 使用 FinMind API 取得股票資料
         loader = get_finmind_loader()
         end_date = datetime.now().strftime('%Y-%m-%d')
-        start_date = (datetime.now() - timedelta(days=180)).strftime('%Y-%m-%d')  # 約 6 個月
+        
+        # 根據 Provider 動態調整歷史資料天數
+        # TWSE Provider 需要逐月請求，所以縮短天數避免太多請求
+        # FinMind Provider 一次請求即可，所以可以拿較多資料
+        if USE_FACADE:
+            # 使用 Facade 時，查詢 provider 類型
+            facade = get_stock_facade()
+            if facade.get_provider_name() == 'twse':
+                # TWSE: 只抓 90 天（約 3 個月），減少 API 請求
+                lookback_days = 90
+            else:
+                # FinMind: 抓 180 天（約 6 個月）
+                lookback_days = 180
+        else:
+            # 傳統 FinMind: 抓 180 天
+            lookback_days = 180
+        
+        start_date = (datetime.now() - timedelta(days=lookback_days)).strftime('%Y-%m-%d')
         
         raw_df = loader.taiwan_stock_daily(
             stock_id=code,
