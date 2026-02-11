@@ -5,13 +5,13 @@ All notable changes to this project will be documented in this file.
 ## [2026-02-11] - Performance Optimization
 
 ### Changed
-- [Perf] **Optimized TWSE Provider**: Reduced historical data lookback from 180 days to 90 days when using TWSE provider, decreasing API requests by 42.9% (567 → 324 requests for 81 stocks)
+- [Perf] **Optimized TWSE Provider**: Reduced historical data lookback from 180 days to 60 days when using TWSE provider, decreasing API requests by 57.1% (567 → 243 requests for 81 stocks)
 - [Perf] **Rate Limiting**: Added 0.1 second delay between TWSE API requests to avoid rate limiting
-- [Feat] **Smart Data Range**: Dynamically adjust historical data range based on provider type (90 days for TWSE, 180 days for FinMind)
+- [Feat] **Smart Data Range**: Dynamically adjust historical data range based on provider type (60 days for TWSE, 180 days for FinMind)
 
 ### Technical Details
-- TWSE API requires monthly requests (4 months instead of 7)
-- Estimated scan time reduced from ~5 minutes to ~3 minutes
+- TWSE API requires monthly requests (3 months instead of 7)
+- Estimated scan time reduced from ~5 minutes to ~2 minutes
 - Maintains data quality while improving performance
 
 ## [2026-02-11]
