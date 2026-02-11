@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-11] - Restore MA60 Calculation
+
+### Changed
+- [Fix] **Restore MA60 Calculation**: Increased TWSE lookback days from 30 to 110 days (approx 3.6 months)
+  - Ensure sufficient trading days (>=60) to calculate MA60 (quarterly line)
+  - MA60 is a critical trend indicator for filtering
+  - Performance: ~110 days is still faster than original 180 days, but ensures data completeness
+
 ## [2026-02-11] - Further Performance Optimization (30 days)
 
 ### Changed
