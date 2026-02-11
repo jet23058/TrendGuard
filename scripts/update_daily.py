@@ -15,6 +15,9 @@ import threading
 from datetime import datetime
 from pathlib import Path
 
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import pandas as pd
 
 # Stock Data Provider (選擇使用 TWSE 或 FinMind)
