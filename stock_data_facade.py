@@ -18,6 +18,7 @@ Usage:
 
 import os
 import requests
+import time
 from datetime import datetime, timedelta
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional
@@ -105,6 +106,9 @@ class TWSEProvider(StockDataProvider):
     def _fetch_monthly_data(self, stock_id: str, year: int, month: int) -> List[Dict]:
         """Fetch stock data for a specific month from TWSE"""
         try:
+            # Small delay to avoid rate limiting (TWSE recommends not too frequent)
+            time.sleep(0.1)
+            
             # TWSE API endpoint for daily stock data
             url = f"{self.base_url}/exchangeReport/STOCK_DAY"
             params = {
