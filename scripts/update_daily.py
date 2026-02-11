@@ -17,22 +17,40 @@ from pathlib import Path
 
 import pandas as pd
 
-# FinMind API for Taiwan stock data (more reliable than yfinance)
-from FinMind.data import DataLoader
+# Stock Data Provider (選擇使用 TWSE 或 FinMind)
+USE_FACADE = os.environ.get('USE_STOCK_FACADE', 'true').lower() == 'true'
 
-# Initialize FinMind DataLoader (singleton)
-_finmind_loader = None
-
-def get_finmind_loader():
-    """Get or create FinMind DataLoader singleton"""
-    global _finmind_loader
-    if _finmind_loader is None:
-        _finmind_loader = DataLoader()
-        token = os.environ.get("FINMIND_API_TOKEN")
-        if token:
-            _finmind_loader.login_by_token(api_token=token)
-            print("✅ FinMind logged in with token")
-    return _finmind_loader
+if USE_FACADE:
+    # Use new Facade pattern for flexible data source
+    from stock_facade_adapter import FacadeDataLoader as DataLoader, get_stock_facade
+    _finmind_loader = None
+    
+    def get_finmind_loader():
+        """Get or create Stock Data Facade singleton"""
+        global _finmind_loader
+        if _finmind_loader is None:
+            _finmind_loader = DataLoader()
+            token = os.environ.get("FINMIND_API_TOKEN")
+            if token:
+                _finmind_loader.login_by_token(api_token=token)
+        return _finmind_loader
+else:
+    # Traditional FinMind API for Taiwan stock data
+    from FinMind.data import DataLoader
+    
+    # Initialize FinMind DataLoader (singleton)
+    _finmind_loader = None
+    
+    def get_finmind_loader():
+        """Get or create FinMind DataLoader singleton"""
+        global _finmind_loader
+        if _finmind_loader is None:
+            _finmind_loader = DataLoader()
+            token = os.environ.get("FINMIND_API_TOKEN")
+            if token:
+                _finmind_loader.login_by_token(api_token=token)
+                print("✅ FinMind logged in with token")
+        return _finmind_loader
 
 try:
     import twstock

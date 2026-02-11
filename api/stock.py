@@ -2,39 +2,52 @@ from http.server import BaseHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 import json
 import os
+import sys
 from datetime import datetime, timedelta
 import requests
 
-# Helper to fetch data from FinMind using Requests (No Pandas/FinMind SDK)
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Import Stock Data Facade
+from stock_data_facade import StockDataFacade
+
+# Initialize facade (uses STOCK_DATA_PROVIDER env or defaults to 'twse')
+_stock_facade = StockDataFacade()
+
+# Backward compatible helper functions
 def fetch_finmind_data(dataset, data_id, start_date):
-    url = "https://api.finmindtrade.com/api/v4/data"
-    params = {
-        "dataset": dataset,
-        "data_id": data_id,
-        "start_date": start_date
-    }
-    token = os.environ.get("FINMIND_API_TOKEN")
-    if token:
-        params["token"] = token
+    """
+    Legacy function for backward compatibility
+    Now uses StockDataFacade internally
+    """
+    if dataset == "TaiwanStockPrice":
+        end_date = datetime.now().strftime('%Y-%m-%d')
+        data = _stock_facade.get_stock_price(data_id, start_date, end_date)
         
-    try:
-        r = requests.get(url, params=params, timeout=10)
-        if r.status_code == 200:
-            res = r.json()
-            if res.get("msg") == "success":
-                return res.get("data", [])
-        return []
-    except Exception as e:
-        print(f"FinMind API Error: {e}")
+        # Convert to FinMind format for compatibility
+        result = []
+        for item in data:
+            result.append({
+                "date": item["date"],
+                "open": item["open"],
+                "max": item["high"],
+                "min": item["low"],
+                "close": item["close"],
+                "Trading_Volume": item["volume"]
+            })
+        return result
+    elif dataset == "TaiwanStockInfo":
+        info = _stock_facade.get_stock_info(data_id)
+        return [info] if info else []
+    else:
         return []
 
 def get_stock_name(ticker_code):
-    """Get Chinese name using FinMind (Pure Requests)"""
+    """Get Chinese name using Stock Data Facade"""
     try:
-        data = fetch_finmind_data("TaiwanStockInfo", ticker_code, "")
-        if data:
-            return data[0].get("stock_name", ticker_code)
-        return ticker_code
+        info = _stock_facade.get_stock_info(ticker_code)
+        return info.get("stock_name", ticker_code)
     except:
         return ticker_code
 

@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-11]
+
+### Added
+- [Feat] **Stock Data Facade Pattern**: Implemented Facade Design Pattern to abstract stock data sources, allowing flexible switching between TWSE API and FinMind API (`stock_data_facade.py`)
+- [Feat] **TWSE API Provider**: Added native TWSE (Taiwan Stock Exchange) API support as alternative data source with no rate limits (`stock_data_facade.py:TWSEProvider`)
+- [Feat] **Provider Adapter Layer**: Created adapter module to seamlessly integrate facade with existing FinMind-based code (`stock_facade_adapter.py`)
+- [Test] **Comprehensive Test Suite**: Added 10 unit tests covering facade initialization, provider switching, data fetching, and error handling (`tests/test_stock_data_facade.py`)
+
+### Changed
+- [Refactor] **Environment Configuration**: Added `STOCK_DATA_PROVIDER` environment variable to select data source (default: 'twse') (`.env.example`)
+- [Refactor] **Backward Compatibility**: Updated `api/stock.py` and `scripts/update_daily.py` to use facade while maintaining backward compatibility with existing code
+- [Security] **No Hardcoded Secrets**: All API tokens are loaded from environment variables following security best practices
+
+### Technical Details
+- Provider Pattern: Abstract base class `StockDataProvider` with concrete implementations for TWSE and FinMind
+- Default Provider: TWSE (no API limits, suitable for production)
+- Fallback Provider: FinMind (feature-rich, requires token for higher limits)
+- Data Format: Unified output format across both providers for consistency
+
 ## [2026-02-06]
 
 ### Added
