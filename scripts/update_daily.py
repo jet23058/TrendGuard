@@ -20,8 +20,15 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import pandas as pd
 
-# Stock Data Provider (選擇使用 TWSE 或 FinMind)
-USE_FACADE = os.environ.get('USE_STOCK_FACADE', 'true').lower() == 'true'
+# Stock Data Provider (選擇使用 TWSE, FinMind 或 Yahoo)
+# 支援的值: 'true', 'yahoo', 'twse', 'finmind' (啟用 Facade)
+# 停用 Facade: 'false', '0', 'no', 'off'
+_env_facade = os.environ.get('USE_STOCK_FACADE', 'true').lower()
+USE_FACADE = _env_facade not in ('false', '0', 'no', 'off')
+
+# 如果傳入的是 provider 名稱，設定 STOCK_DATA_PROVIDER
+if _env_facade in ('yahoo', 'twse', 'finmind'):
+    os.environ['STOCK_DATA_PROVIDER'] = _env_facade
 
 if USE_FACADE:
     # Use new Facade pattern for flexible data source
