@@ -446,8 +446,9 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             # 使用 Facade 時，查詢 provider 類型
             facade = get_stock_facade()
             if facade.get_provider_name() == 'twse':
-                # TWSE: 只抓 60 天（約 3 個月），減少 API 請求
-                lookback_days = 60
+                # TWSE: 只抓 30 天（約 2 個月），大幅減少 API 請求
+                # 30 天足夠計算 MA20, KD, 及 20 日突破判斷
+                lookback_days = 30
             else:
                 # FinMind: 抓 180 天（約 6 個月）
                 lookback_days = 180

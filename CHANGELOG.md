@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-11] - Further Performance Optimization (30 days)
+
+### Changed
+- [Perf] **Further Optimized TWSE Provider**: Reduced historical data lookback from 60 days to 30 days, decreasing API requests by additional 33.3% (243 → 162 requests for 81 stocks)
+- [Perf] **Total Improvement**: 71.4% reduction from original 180 days (567 → 162 requests)
+- [Feat] **Sufficient Data**: 30 days is adequate for MA20, KD indicators, and 20-day breakout analysis
+
+### Technical Details
+- TWSE API requires only 2 months of data instead of 3
+- Estimated scan time reduced from ~2 minutes to ~1.4 minutes
+- Total improvement from original: ~5 minutes → ~1.4 minutes (72% faster)
+
 ## [2026-02-11] - Performance Optimization
 
 ### Changed
