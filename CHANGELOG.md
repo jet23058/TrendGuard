@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-02-11] - Performance Optimization
+
+### Changed
+- [Perf] **Optimized TWSE Provider**: Reduced historical data lookback from 180 days to 60 days when using TWSE provider, decreasing API requests by 57.1% (567 → 243 requests for 81 stocks)
+- [Perf] **Rate Limiting**: Added 0.1 second delay between TWSE API requests to avoid rate limiting
+- [Feat] **Smart Data Range**: Dynamically adjust historical data range based on provider type (60 days for TWSE, 180 days for FinMind)
+
+### Technical Details
+- TWSE API requires monthly requests (3 months instead of 7)
+- Estimated scan time reduced from ~5 minutes to ~2 minutes
+- Maintains data quality while improving performance
+
 ## [2026-02-11]
 
 ### Added
@@ -14,6 +26,9 @@ All notable changes to this project will be documented in this file.
 - [Refactor] **Environment Configuration**: Added `STOCK_DATA_PROVIDER` environment variable to select data source (default: 'twse') (`.env.example`)
 - [Refactor] **Backward Compatibility**: Updated `api/stock.py` and `scripts/update_daily.py` to use facade while maintaining backward compatibility with existing code
 - [Security] **No Hardcoded Secrets**: All API tokens are loaded from environment variables following security best practices
+
+### Fixed
+- [Fix] **Import Path**: Fixed ModuleNotFoundError in GitHub Actions by adding parent directory to sys.path in `scripts/update_daily.py`
 
 ### Technical Details
 - Provider Pattern: Abstract base class `StockDataProvider` with concrete implementations for TWSE and FinMind
