@@ -35,14 +35,48 @@
 
 ## 🚀 快速開始
 
-### 1. 安裝依賴
+### 1. 環境變數設定
+
+複製 `.env.example` 並編輯為 `.env`：
+
+```bash
+cp .env.example .env
+```
+
+**重要環境變數：**
+
+- `STOCK_DATA_PROVIDER`: 股價資料來源選擇
+  - `twse` (預設): 台灣證券交易所 API - **無 API 上限**，適合生產環境
+  - `finmind`: FinMind API - 功能豐富，但有速率限制
+  
+- `FINMIND_API_TOKEN`: FinMind API Token (僅在使用 finmind provider 時需要)
+  - 申請網址: https://finmind.github.io/
+  - 未登入每小時限制 600 次請求
+  - 登入後提升至每小時 1200 次
+
+- `GEMINI_KEY`: Google Gemini API Key (用於 AI 文章生成)
+  - 申請網址: https://makersuite.google.com/app/apikey
+
+**範例 `.env` 檔案：**
+```env
+# 使用 TWSE API (無限制，推薦)
+STOCK_DATA_PROVIDER=twse
+
+# 或使用 FinMind (需 Token)
+# STOCK_DATA_PROVIDER=finmind
+# FINMIND_API_TOKEN=your_token_here
+
+GEMINI_KEY=your_gemini_key_here
+```
+
+### 2. 安裝依賴
 ```bash
 # 前端
 cd frontend
 npm install
 
 # 後端 (Python API)
-pip install flask flask-cors FinMind pandas numpy google-generativeai python-dotenv
+pip install flask flask-cors FinMind pandas numpy google-generativeai python-dotenv requests
 ```
 
 ### 2. 啟動開發環境
@@ -87,8 +121,36 @@ python scripts/update_daily.py
 
 ## 🏗️ 技術架構
 
+### 資料來源彈性架構 (Facade Pattern)
+
+系統採用 **Facade Design Pattern** 來抽象化股價資料來源，提供以下優勢：
+
+- **無 API 限制方案**: 預設使用 TWSE 官方 API，無需 Token 即可無限制存取
+- **彈性切換**: 可透過環境變數輕鬆切換至 FinMind API (功能更豐富)
+- **向後相容**: 既有程式碼無需修改，透過 Adapter 層無縫整合
+
+```
+Stock Data Facade
+├── TWSEProvider (預設)
+│   └── 台灣證券交易所官方 API
+│       ✅ 無速率限制
+│       ✅ 無需 Token
+│       ⚠️ 功能較基本
+│
+└── FinMindProvider (選用)
+    └── FinMind 第三方 API
+        ✅ 功能豐富 (基本面、籌碼面)
+        ⚠️ 免費版 600 req/hr
+        ⚠️ 需申請 Token
+```
+
+**檔案結構：**
 ```
 TrendGuard/
+├── stock_data_facade.py       # Facade 主體 (Provider 模式)
+├── stock_facade_adapter.py    # 向後相容 Adapter
+├── tests/
+│   └── test_stock_data_facade.py  # 完整測試套件
 ├── frontend/                 # React + Vite 前端
 │   ├── src/
 │   │   ├── pages/           # 頁面組件 (DailyReport, ArticleList)
