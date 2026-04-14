@@ -166,6 +166,44 @@ const stripMarkdown = (md) => {
     .trim();
 };
 
+export const normalizeSyncedStockData = (apiData, portfolioStock) => {
+  const ticker = portfolioStock?.ticker || apiData?.ticker || '';
+  const apiName = typeof apiData?.name === 'string' ? apiData.name.trim() : '';
+  const portfolioName = typeof portfolioStock?.name === 'string' ? portfolioStock.name.trim() : '';
+  const name = apiName && apiName !== ticker ? apiName : (portfolioName || ticker);
+
+  return {
+    ...apiData,
+    ticker,
+    name
+  };
+};
+
+const DASHBOARD_CACHE_KEY = 'trendguard_dashboard_cache_v2';
+const CACHE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+const readLocalCache = (key, maxAge = CACHE_MAX_AGE_MS) => {
+  try {
+    const cached = JSON.parse(localStorage.getItem(key) || 'null');
+    if (!cached || !cached.savedAt) return null;
+    if (Date.now() - cached.savedAt > maxAge) return null;
+    return cached.value;
+  } catch (e) {
+    return null;
+  }
+};
+
+const writeLocalCache = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify({
+      savedAt: Date.now(),
+      value
+    }));
+  } catch (e) {
+    console.warn(`Unable to write cache: ${key}`);
+  }
+};
+
 
 
 // --- 3. 匯入庫存 Modal ---
@@ -804,11 +842,12 @@ const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user, stockHis
             }
           }
           const apiData = JSON.parse(text);
+          const normalizedData = normalizeSyncedStockData(apiData, stock);
 
           // 寫入 Firestore
           await setDoc(doc(db, "users", user.uid, "portfolioAnalysis", stock.ticker), {
             ticker: stock.ticker,
-            data: apiData,
+            data: normalizedData,
             lastUpdated: new Date().toISOString()
           });
 
@@ -895,8 +934,7 @@ const UnlistedPortfolioSection = ({ portfolio, scanResultTickers, user, stockHis
 
               // 構造相容的物件
               const fullData = {
-                ...apiData,
-                ticker: stock.ticker,
+                ...normalizeSyncedStockData(apiData, stock),
                 analysis_result: {
                   text: analysisText,
                   type: analysisType
@@ -1024,7 +1062,6 @@ export default function App() {
   const [article, setArticle] = useState(null); // 新增文章狀態
   // Removed selectedArticle state
   // 用於控制 Modal 顯示
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -1143,11 +1180,21 @@ export default function App() {
   };
 
   const fetchData = async () => {
-    setLoading(true);
+    setError(null);
+    let hasDashboardCache = false;
     try {
       const DATA_BASE_URL = import.meta.env.DEV
         ? '/data'
         : 'https://raw.githubusercontent.com/jet23058/TrendGuard/data';
+
+      const cachedDashboard = readLocalCache(DASHBOARD_CACHE_KEY);
+      if (cachedDashboard) {
+        hasDashboardCache = true;
+        setData(cachedDashboard.data || null);
+        setMarketRanks(cachedDashboard.marketRanks || {});
+        setArticle(cachedDashboard.article || null);
+        setStockHistoryMap(cachedDashboard.stockHistoryMap || {});
+      }
 
       // Cache-busting: 使用 5 分鐘區間的時間戳，避免 GitHub Raw CDN 快取問題
       const cacheBuster = Math.floor(Date.now() / (5 * 60 * 1000));
@@ -1158,93 +1205,45 @@ export default function App() {
       setData(result);
 
       // [NEW] Fetch Market Ranks
+      let nextMarketRanks = cachedDashboard?.marketRanks || {};
       try {
         const rankRes = await fetch(`${DATA_BASE_URL}/market_cap_rank.json?v=${cacheBuster}`);
         if (rankRes.ok) {
           const rankData = await rankRes.json();
-          setMarketRanks(rankData.ranks || {});
+          nextMarketRanks = rankData.ranks || {};
+          setMarketRanks(nextMarketRanks);
         }
       } catch (err) {
         console.warn("Failed to load market ranks");
       }
 
       // Fetch Article if date exists
+      let nextArticle = cachedDashboard?.data?.date === result.date ? (cachedDashboard?.article || null) : null;
       if (result.date) {
         try {
           const articleRes = await fetch(`${DATA_BASE_URL}/articles/${result.date}.json?v=${cacheBuster}`);
           if (articleRes.ok) {
-            setArticle(await articleRes.json());
+            nextArticle = await articleRes.json();
+            setArticle(nextArticle);
           }
         } catch (err) {
           console.warn("No article found for today");
         }
       }
 
-      // Fetch stock history with LocalStorage Caching
-      try {
-        const indexRes = await fetch(`${DATA_BASE_URL}/articles_index.json?v=${cacheBuster}`);
-        if (indexRes.ok) {
-          const indexData = await indexRes.json();
-          const last30Days = indexData.slice(0, 30); // Limit to last 30 days
-
-          // 1. 讀取快取
-          const CACHE_KEY = 'trendguard_history_cache_v1';
-          let cache = {};
-          try {
-            cache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}');
-          } catch (e) {
-            console.warn('Cache parse error, resetting');
-          }
-
-          // 2. 找出哪些日期需要下載 (快取中沒有的)
-          const datesToFetch = last30Days.filter(article => !cache[article.date]);
-
-          // 3. 平行下載缺失的日期
-          if (datesToFetch.length > 0) {
-            // console.log(`Fetching ${datesToFetch.length} new history files...`);
-            await Promise.all(
-              datesToFetch.map(async (article) => {
-                try {
-                  const histRes = await fetch(`${DATA_BASE_URL}/history/${article.date}.json`);
-                  if (histRes.ok) {
-                    const histData = await histRes.json();
-                    // 只儲存 tickers 陣列以節省空間
-                    cache[article.date] = (histData.stocks || []).map(s => s.ticker);
-                  }
-                } catch (e) {
-                  console.warn(`Failed to fetch history for ${article.date}`);
-                }
-              })
-            );
-
-            // 4. 更新快取回 LocalStorage (清理舊資料，只留最近 60 天以防無限膨脹)
-            const sortedDates = Object.keys(cache).sort().reverse().slice(0, 60);
-            const newCache = {};
-            sortedDates.forEach(d => newCache[d] = cache[d]);
-            localStorage.setItem(CACHE_KEY, JSON.stringify(newCache));
-          }
-
-          // 5. 構建 stockHistoryMap (Ticker -> List of Dates)
-          const historyMap = {};
-          last30Days.forEach(article => {
-            const tickers = cache[article.date] || [];
-            tickers.forEach(ticker => {
-              if (!historyMap[ticker]) {
-                historyMap[ticker] = [];
-              }
-              historyMap[ticker].push(article.date);
-            });
-          });
-
-          setStockHistoryMap(historyMap);
-        }
-      } catch (err) {
-        console.warn("Could not load stock history:", err);
-      }
+      const latestDashboard = {
+        data: result,
+        marketRanks: nextMarketRanks,
+        article: nextArticle,
+        stockHistoryMap: cachedDashboard?.stockHistoryMap || {}
+      };
+      writeLocalCache(DASHBOARD_CACHE_KEY, latestDashboard);
     } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
+      if (!hasDashboardCache) {
+        setError(e.message);
+      } else {
+        console.warn("Could not refresh dashboard data:", e);
+      }
     }
   };
 
@@ -1391,17 +1390,6 @@ export default function App() {
       alert: fmt(data.alertUpdateTime || data.updatedAt)
     });
   }, [data]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">載入每日掃描結果中...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

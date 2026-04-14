@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-04-14] - Dashboard Cache and Sync Stability
+
+### Added
+- [Perf] **Dashboard Local Cache**: Cache the latest dashboard payload in `localStorage` so repeat visits render immediately while the app refreshes data in the background (`frontend/src/App.jsx`).
+- [Test] **Frontend Cache Coverage**: Added Vitest coverage for dashboard cache hydration, no full-page loading state, and removal of per-day history fetches (`frontend/src/App.test.jsx`).
+
+### Changed
+- [Perf] **Remove Blocking History Fetches**: Removed the home-page startup fetch for `articles_index.json` and per-day `history/*.json` files, preventing daily history downloads from delaying the dashboard (`frontend/src/App.jsx`).
+- [UX] **Remove Full-Page Loading Screen**: The dashboard now renders immediately instead of showing "載入每日掃描結果中..." during data refresh (`frontend/src/App.jsx`).
+
+### Fixed
+- [Fix] **Synced Portfolio Stock Names**: When `/api/stock` falls back to returning the ticker as `name`, synced portfolio cards now reuse the user's stored Chinese stock name instead of displaying the stock number (`frontend/src/App.jsx`).
+- [Test] **Python Test Isolation**: Updated legacy flat-line tests to mock the current FinMind/facade loader and removed global dependency mocks that polluted later tests (`tests/test_flat_line_filter.py`, `tests/test_daily_diff.py`).
+
 ## [2026-02-11] - Restore MA60 Calculation
 
 ### Changed

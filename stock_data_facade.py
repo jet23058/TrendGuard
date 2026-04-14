@@ -57,10 +57,11 @@ class StockDataProvider(ABC):
 
 
 class TWSEProvider(StockDataProvider):
-    """Taiwan Stock Exchange data provider"""
+    """Taiwan Stock Exchange + TPEX (OTC) data provider"""
     
     def __init__(self):
         self.base_url = "https://www.twse.com.tw"
+        self.tpex_base_url = "https://www.tpex.org.tw"
         
     def fetch_stock_price(self, stock_id: str, start_date: str, end_date: str) -> List[Dict]:
         """
@@ -104,7 +105,17 @@ class TWSEProvider(StockDataProvider):
             return []
     
     def _fetch_monthly_data(self, stock_id: str, year: int, month: int) -> List[Dict]:
-        """Fetch stock data for a specific month from TWSE"""
+        """Fetch stock data for a specific month from TWSE, fallback to TPEX for OTC stocks"""
+        # Try TWSE first
+        results = self._fetch_twse_monthly_data(stock_id, year, month)
+        if results:
+            return results
+        
+        # Fallback to TPEX for OTC stocks
+        return self._fetch_tpex_monthly_data(stock_id, year, month)
+    
+    def _fetch_twse_monthly_data(self, stock_id: str, year: int, month: int) -> List[Dict]:
+        """Fetch stock data for a specific month from TWSE (上市)"""
         try:
             # Small delay to avoid rate limiting (TWSE recommends not too frequent)
             time.sleep(0.1)
@@ -180,18 +191,86 @@ class TWSEProvider(StockDataProvider):
             return results
             
         except Exception as e:
-            print(f"Error fetching monthly data for {stock_id} ({year}-{month:02d}): {e}")
+            print(f"Error fetching TWSE monthly data for {stock_id} ({year}-{month:02d}): {e}")
+            return []
+    
+    def _fetch_tpex_monthly_data(self, stock_id: str, year: int, month: int) -> List[Dict]:
+        """Fetch stock data for a specific month from TPEX (上櫃/OTC)"""
+        try:
+            time.sleep(0.1)
+            
+            # TPEX uses ROC year format
+            roc_year = year - 1911
+            date_str = f"{roc_year}/{month:02d}/01"
+            
+            url = f"{self.tpex_base_url}/web/stock/aftertrading/daily_trading_info/st43_result.php"
+            params = {
+                'l': 'zh-tw',
+                'o': 'json',
+                'd': date_str,
+                'stkno': stock_id
+            }
+            
+            response = requests.get(url, params=params, timeout=10)
+            
+            if response.status_code != 200:
+                return []
+            
+            data = response.json()
+            
+            # TPEX returns {'aaData': [...], ...}
+            raw_data = data.get('aaData', [])
+            if not raw_data:
+                return []
+            
+            results = []
+            # TPEX fields: [日期, 成交仟股, 成交仟元, 開盤, 最高, 最低, 收盤, 漲跌, 本益比]
+            # Index:        0     1          2         3     4     5     6     7     8
+            for row in raw_data:
+                try:
+                    # Parse ROC date (e.g., "115/03/01")
+                    date_str = str(row[0]).strip()
+                    date_parts = date_str.split('/')
+                    if len(date_parts) == 3:
+                        roc_y = int(date_parts[0])
+                        ad_year = roc_y + 1911
+                        formatted_date = f"{ad_year}-{date_parts[1]}-{date_parts[2]}"
+                    else:
+                        continue
+                    
+                    # Parse price data (remove commas)
+                    open_price = float(str(row[3]).replace(',', ''))
+                    high_price = float(str(row[4]).replace(',', ''))
+                    low_price = float(str(row[5]).replace(',', ''))
+                    close_price = float(str(row[6]).replace(',', ''))
+                    
+                    # TPEX volume is in 仟股 (thousands of shares), convert to lots (張)
+                    volume = int(str(row[1]).replace(',', ''))
+                    
+                    results.append({
+                        'date': formatted_date,
+                        'open': open_price,
+                        'high': high_price,
+                        'low': low_price,
+                        'close': close_price,
+                        'volume': volume
+                    })
+                    
+                except (ValueError, IndexError) as e:
+                    continue
+            
+            return results
+            
+        except Exception as e:
+            print(f"Error fetching TPEX monthly data for {stock_id} ({year}-{month:02d}): {e}")
             return []
     
     def fetch_stock_info(self, stock_id: str) -> Dict:
         """
-        Fetch stock information from TWSE
-        
-        Note: TWSE doesn't provide a simple stock info API,
-        so we'll try to get it from the stock list or use a fallback.
+        Fetch stock information from TWSE, fallback to TPEX for OTC stocks.
         """
+        # 1. Try TWSE (上市)
         try:
-            # Try to get from stock list
             url = f"{self.base_url}/exchangeReport/MI_INDEX"
             params = {
                 'response': 'json',
@@ -204,7 +283,7 @@ class TWSEProvider(StockDataProvider):
             if response.status_code == 200:
                 data = response.json()
                 
-                # Search for stock in the data
+                # Search for stock in TWSE data
                 if 'data9' in data:
                     for item in data['data9']:
                         if item[0] == stock_id:
@@ -212,19 +291,30 @@ class TWSEProvider(StockDataProvider):
                                 'stock_id': stock_id,
                                 'stock_name': item[1]
                             }
-            
-            # Fallback: return stock_id as name
-            return {
-                'stock_id': stock_id,
-                'stock_name': stock_id
-            }
-            
         except Exception as e:
-            print(f"Error fetching stock info for {stock_id}: {e}")
-            return {
-                'stock_id': stock_id,
-                'stock_name': stock_id
-            }
+            print(f"Error fetching TWSE stock info for {stock_id}: {e}")
+        
+        # 2. Try TPEX (上櫃/OTC)
+        try:
+            url = f"{self.tpex_base_url}/openapi/v1/tpex_mainboard_daily_close_quotes"
+            response = requests.get(url, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                for item in data:
+                    if item.get('SecuritiesCompanyCode') == stock_id:
+                        return {
+                            'stock_id': stock_id,
+                            'stock_name': item.get('CompanyName', stock_id).strip()
+                        }
+        except Exception as e:
+            print(f"Error fetching TPEX stock info for {stock_id}: {e}")
+        
+        # 3. Fallback: return stock_id as name
+        return {
+            'stock_id': stock_id,
+            'stock_name': stock_id
+        }
 
 
 class FinMindProvider(StockDataProvider):
