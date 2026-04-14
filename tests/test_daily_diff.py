@@ -1,14 +1,4 @@
-import sys
-from unittest.mock import MagicMock
-
-# Mock external dependencies to allow import without installation
-sys.modules['yfinance'] = MagicMock()
-sys.modules['twstock'] = MagicMock()
-sys.modules['pandas'] = MagicMock()
-
 import unittest
-import json
-from pathlib import Path
 from scripts import update_daily
 
 class TestDailyDiff(unittest.TestCase):

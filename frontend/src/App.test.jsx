@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import App from './App';
+import App, { normalizeSyncedStockData } from './App';
 import { BrowserRouter } from 'react-router-dom';
 
 // --- Mocks ---
@@ -71,14 +71,56 @@ const MOCK_DATA = {
   changes: { new: [], continued: [], removed: [] }
 };
 
+const MOCK_RANKS = {
+  ranks: {
+    "1101": 100,
+    "2330": 1,
+    "2603": 200,
+    "9999": 300
+  }
+};
+
+describe('Synced stock data normalization', () => {
+  it('uses the portfolio stock name when the API falls back to ticker as name', () => {
+    const result = normalizeSyncedStockData(
+      { ticker: '2330', name: '2330', currentPrice: 600 },
+      { ticker: '2330', name: '台積電' }
+    );
+
+    expect(result.name).toBe('台積電');
+  });
+
+  it('keeps the API stock name when it returns a real name', () => {
+    const result = normalizeSyncedStockData(
+      { ticker: '3289', name: '宜特', currentPrice: 120 },
+      { ticker: '3289', name: '舊名稱' }
+    );
+
+    expect(result.name).toBe('宜特');
+  });
+});
+
 describe('App Filter Logic Tests', () => {
   // Setup fetch mock
   beforeEach(() => {
+    localStorage.clear();
     global.fetch = vi.fn((url) => {
       if (url && url.includes('daily_scan_results.json')) {
         return Promise.resolve({
           ok: true,
           json: () => Promise.resolve(MOCK_DATA),
+        });
+      }
+      if (url && url.includes('market_cap_rank.json')) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(MOCK_RANKS),
+        });
+      }
+      if (url && url.includes(`/articles/${MOCK_DATA.date}.json`)) {
+        return Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ date: MOCK_DATA.date, title: '測試文章' }),
         });
       }
       // Mock other fetches to avoid errors
@@ -91,6 +133,7 @@ describe('App Filter Logic Tests', () => {
 
   afterEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
   // Helper to render App with Router
@@ -115,6 +158,43 @@ describe('App Filter Logic Tests', () => {
     expect(screen.getByText('台積電')).toBeInTheDocument();
     expect(screen.getByText('長榮')).toBeInTheDocument();
     expect(screen.getByText('飆股')).toBeInTheDocument();
+  });
+
+  it('does not show the full-page daily loading screen while fetching data', () => {
+    global.fetch = vi.fn(() => new Promise(() => {}));
+
+    renderApp();
+
+    expect(screen.queryByText('載入每日掃描結果中...')).not.toBeInTheDocument();
+    expect(screen.getByText('符合條件')).toBeInTheDocument();
+  });
+
+  it('hydrates from dashboard cache before the network refresh completes', async () => {
+    localStorage.setItem('trendguard_dashboard_cache_v2', JSON.stringify({
+      savedAt: Date.now(),
+      value: {
+        data: MOCK_DATA,
+        marketRanks: MOCK_RANKS.ranks,
+        article: { date: MOCK_DATA.date, title: '快取文章' },
+        stockHistoryMap: {}
+      }
+    }));
+    global.fetch = vi.fn(() => new Promise(() => {}));
+
+    renderApp();
+
+    expect(await screen.findByText('台泥')).toBeInTheDocument();
+    expect(screen.queryByText('載入每日掃描結果中...')).not.toBeInTheDocument();
+  });
+
+  it('does not fetch the daily history index or per-day history files on entry', async () => {
+    renderApp();
+
+    await waitFor(() => expect(screen.getByText('台泥')).toBeInTheDocument());
+
+    const fetchedUrls = global.fetch.mock.calls.map(([url]) => String(url));
+    expect(fetchedUrls.some(url => url.includes('articles_index.json'))).toBe(false);
+    expect(fetchedUrls.some(url => url.includes('/history/'))).toBe(false);
   });
 
   it('filters by Red K days (>= 3)', async () => {

@@ -16,35 +16,42 @@ def create_mock_df(last_days_data, total_days=70):
     history_len = total_days - len(last_days_data)
     
     data = {
-        'Open': [base_price] * history_len,
-        'High': [base_price] * history_len,
-        'Low': [base_price] * history_len,
-        'Close': [base_price] * history_len,
-        'Volume': [200000] * history_len # High volume to prevent history being filtered out
+        'open': [base_price] * history_len,
+        'max': [base_price] * history_len,
+        'min': [base_price] * history_len,
+        'close': [base_price] * history_len,
+        'Trading_Volume': [200] * history_len # High volume to prevent history being filtered out
     }
     
     df_hist = pd.DataFrame(data)
-    df_new = pd.DataFrame(last_days_data)
+    df_new = pd.DataFrame(last_days_data).rename(columns={
+        'Open': 'open',
+        'High': 'max',
+        'Low': 'min',
+        'Close': 'close',
+        'Volume': 'Trading_Volume'
+    })
     
     df = pd.concat([df_hist, df_new], ignore_index=True)
     
     # Generate dates
     dates = pd.date_range(end=pd.Timestamp.now(), periods=len(df))
-    df.index = dates
+    df['date'] = dates.strftime('%Y-%m-%d')
+    df['stock_id'] = '2330'
     return df
 
 @patch('scripts.update_daily.get_stock_name')
-@patch('scripts.update_daily.yf.download')
-def test_flat_line_low_volume_exclusion(mock_download, mock_get_name):
+@patch('scripts.update_daily.get_finmind_loader')
+def test_flat_line_low_volume_exclusion(mock_get_loader, mock_get_name):
     """
     Case 1: 昨日是一字線且量縮 (<100張)，今日大漲。
     預期結果: 連紅天數為 1 (昨日被視為斷點)，因不滿 2 天連紅而被剔除 (Result None)。
     """
-    mock_get_name.return_value = ("Test Stock", "Test Sector")
+    mock_get_name.return_value = ("Test Stock", "Test Sector", "上市")
     
     # 最後兩天資料
-    # Day -2 (Yesterday): 10.0, Vol 500 (Low Vol) -> Flat Line
-    # Day -1 (Today): 13.0, Vol 200000 -> Red K
+    # Day -2 (Yesterday): 10.0, Vol 50 (Low Vol) -> Flat Line
+    # Day -1 (Today): 13.0, Vol 200 -> Red K
     last_days = {
         'Open':   [10.0, 13.0],
         'High':   [10.0, 13.5],
@@ -52,14 +59,14 @@ def test_flat_line_low_volume_exclusion(mock_download, mock_get_name):
         'Close':  [10.0, 13.0], # Day -1 Close > Open? No, 13=13 is Flat? 
                                 # Wait, I want today to be Red K.
                                 # Let's make today strong: Open 12, Close 13
-        'Volume': [500, 200000]
+        'Volume': [50, 200]
     }
     
     # Correcting Today's data to be a clear Red K
     last_days['Open'][1] = 12.0
     
     df = create_mock_df(last_days, total_days=80)
-    mock_download.return_value = df
+    mock_get_loader.return_value.taiwan_stock_daily.return_value = df
     
     # Run
     # 假裝在當沖白名單內
@@ -76,26 +83,26 @@ def test_flat_line_low_volume_exclusion(mock_download, mock_get_name):
     assert pct is not None
 
 @patch('scripts.update_daily.get_stock_name')
-@patch('scripts.update_daily.yf.download')
-def test_flat_line_high_volume_inclusion(mock_download, mock_get_name):
+@patch('scripts.update_daily.get_finmind_loader')
+def test_flat_line_high_volume_inclusion(mock_get_loader, mock_get_name):
     """
     Case 2: 昨日是一字線但量大 (>100張)，今日大漲。
     預期結果: 連紅天數為 2 (昨日視為強勢紅K)，符合條件。
     """
-    mock_get_name.return_value = ("Test Stock", "Test Sector")
+    mock_get_name.return_value = ("Test Stock", "Test Sector", "上市")
     
-    # Day -2 (Yesterday): 10.0, Vol 150000 (High Vol) -> Flat Line but Valid
+    # Day -2 (Yesterday): 10.0, Vol 150 (High Vol) -> Flat Line but Valid
     # Day -1 (Today): 12.0 -> 13.0 -> Red K
     last_days = {
         'Open':   [10.0, 12.0],
         'High':   [10.0, 13.5],
         'Low':    [10.0, 12.0],
         'Close':  [10.0, 13.0],
-        'Volume': [150000, 200000] # 150,000 > 100,000
+        'Volume': [150, 200] # 150 > 100
     }
     
     df = create_mock_df(last_days, total_days=80)
-    mock_download.return_value = df
+    mock_get_loader.return_value.taiwan_stock_daily.return_value = df
     
     # Run
     result, pct = check_livermore_criteria('2330', {}, {'2330'})
@@ -108,34 +115,34 @@ def test_flat_line_high_volume_inclusion(mock_download, mock_get_name):
     assert result['ticker'] == '2330'
 
 @patch('scripts.update_daily.get_stock_name')
-@patch('scripts.update_daily.yf.download')
-def test_flat_line_boundary_condition(mock_download, mock_get_name):
+@patch('scripts.update_daily.get_finmind_loader')
+def test_flat_line_boundary_condition(mock_get_loader, mock_get_name):
     """
-    Case 3: 邊界測試，剛好 99,999 vs 100,000
+    Case 3: 邊界測試，剛好 99 vs 100
     """
-    mock_get_name.return_value = ("Test Stock", "Test Sector")
+    mock_get_name.return_value = ("Test Stock", "Test Sector", "上市")
     
     # Day -3: Normal Red
-    # Day -2: Flat, Vol 99,999 -> Invalid
+    # Day -2: Flat, Vol 99 -> Invalid
     # Day -1: Red
     last_days = {
         'Open':   [10.0, 10.0, 12.0],
         'High':   [10.5, 10.0, 13.5],
         'Low':    [9.5,  10.0, 12.0],
         'Close':  [10.5, 10.0, 13.0],
-        'Volume': [200000, 99999, 200000]
+        'Volume': [200, 99, 200]
     }
     
     df = create_mock_df(last_days, total_days=80)
-    mock_download.return_value = df
+    mock_get_loader.return_value.taiwan_stock_daily.return_value = df
     
     result, _ = check_livermore_criteria('2330', {}, {'2330'})
     assert result is None # Broken by 99999
     
-    # Now try 100,000
-    last_days['Volume'][1] = 100000
+    # Now try 100
+    last_days['Volume'][1] = 100
     df2 = create_mock_df(last_days, total_days=80)
-    mock_download.return_value = df2
+    mock_get_loader.return_value.taiwan_stock_daily.return_value = df2
     
     result2, _ = check_livermore_criteria('2330', {}, {'2330'})
     assert result2 is not None
