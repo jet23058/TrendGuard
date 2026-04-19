@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-04-19] - Daily Signals, Multi-Select Search, and Faster Startup
+
+### Added
+- [Feat] **Daily RSI Signals**: Daily scans now calculate RSI 14 and expose `RSI > 80` / `RSI < 20` alert fields and tags for search and card display (`scripts/update_daily.py`).
+- [Feat] **30-Day Reference Price**: Daily scans now include the closest available trading price at or before the scan date minus 30 calendar days, plus the current change from that reference price (`scripts/update_daily.py`).
+- [Feat] **Capital Display**: Daily scans fetch TWSE/TPEx paid-in capital data once per run and expose formatted capital text for dashboard cards (`scripts/update_daily.py`).
+- [Feat] **Volume Anomaly Signals**: Daily scans compare today's volume with the previous 30 trading days and mark high/low volume anomalies (`scripts/update_daily.py`).
+- [Feat] **Dashboard Signal Search**: Dashboard search now covers ticker, name, sector, RSI, volume anomaly, capital, tags, and 30-day signal text (`frontend/src/App.jsx`).
+- [Feat] **Multi-Select Common Filters**: Common filters can now be combined with AND logic, including `RSI > 80`, `RSI < 20`, `量能異常`, `30日回拉`, `超買放量`, and `超跌回拉` (`frontend/src/App.jsx`).
+- [Test] **Signal and Filter Coverage**: Added Python tests for RSI, 30-day reference price, volume anomaly, and capital formatting, plus Vitest coverage for new card fields and multi-select filters (`tests/test_update_daily.py`, `frontend/src/App.test.jsx`).
+
+### Changed
+- [UX] **Richer Stock Cards**: Stock cards now show RSI, 30-day reference price movement, paid-in capital, and today's volume versus 30-day average (`frontend/src/components/StockCardMini.jsx`).
+- [Perf] **Remove Initial Splash Loader**: Removed the static `Loading TrendGuard...` fallback from `index.html` so first paint is not blocked by a branded loading screen (`frontend/index.html`).
+- [Perf] **Route and Chart Chunk Splitting**: Lazy-load routes and heavy stock-card chart sections so the dashboard shell can become interactive before Recharts-heavy chunks finish loading (`frontend/src/main.jsx`, `frontend/src/App.jsx`, `frontend/src/pages/DailyReport.jsx`).
+- [Docs] **README Update**: Documented advanced daily signals, multi-select filters, faster startup behavior, and the current Vite dev port (`README.md`).
+
 ## [2026-04-14] - Dashboard Cache and Sync Stability
 
 ### Added

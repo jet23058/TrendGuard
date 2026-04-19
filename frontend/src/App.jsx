@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   TrendingUp,
@@ -31,22 +31,12 @@ import {
 
 import StockCardMini from './components/StockCardMini';
 import SimpleMarkdown from './components/SimpleMarkdown';
-import IndustryGroup from './components/IndustryGroup';
 import Header from './components/Header';
 import { auth, db, googleProvider } from './firebase';
 import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, onSnapshot } from 'firebase/firestore';
-import {
-  ComposedChart,
-  Line,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  ReferenceLine
-} from 'recharts';
+
+const IndustryGroup = lazy(() => import('./components/IndustryGroup'));
 
 // --- 台股代碼表 (擴大範圍) ---
 const TAIWAN_STOCKS = [
@@ -1055,6 +1045,39 @@ const ArticleBanner = ({ article }) => {
 
 
 
+const QUICK_FILTERS = [
+  { id: 'all', label: '全部', match: () => true },
+  { id: 'rsi-overbought', label: 'RSI > 80', match: (stock) => Number(stock.rsi) > 80 || stock.rsiStatus === 'overbought' },
+  { id: 'rsi-oversold', label: 'RSI < 20', match: (stock) => Number(stock.rsi) < 20 || stock.rsiStatus === 'oversold' },
+  { id: 'volume-anomaly', label: '量能異常', match: (stock) => Boolean(stock.volumeAnomaly) },
+  { id: 'rebound-30d', label: '30日回拉', match: (stock) => Number(stock.changeFrom30dPct) > 0 },
+  { id: 'combo-hot-volume', label: '超買放量', match: (stock) => (Number(stock.rsi) > 80 || stock.rsiStatus === 'overbought') && stock.volumeStatus === 'high' },
+  { id: 'combo-cold-rebound', label: '超跌回拉', match: (stock) => (Number(stock.rsi) < 20 || stock.rsiStatus === 'oversold') && Number(stock.changeFrom30dPct) > 0 },
+];
+
+const buildStockSearchText = (stock) => {
+  const rsi = Number(stock.rsi);
+  const rsiToken = Number.isFinite(rsi)
+    ? `${rsi > 80 ? 'RSI>80 超買' : ''} ${rsi < 20 ? 'RSI<20 超跌' : ''} RSI ${rsi}`
+    : '';
+  const volumeToken = stock.volumeAnomaly
+    ? `量能異常 ${stock.volumeStatus === 'high' ? '放量異常' : '量縮異常'}`
+    : '量能正常';
+
+  return [
+    stock.ticker,
+    stock.name,
+    stock.sector,
+    stock.market,
+    ...(stock.tags || []),
+    rsiToken,
+    volumeToken,
+    stock.capitalText,
+    stock.price30dDate,
+    stock.changeFrom30dPct != null ? `30日 ${stock.changeFrom30dPct}% 30日回拉` : '',
+  ].filter(Boolean).join(' ').toLowerCase();
+};
+
 // --- 7. 主程式 ---
 export default function App() {
   const [data, setData] = useState(null);
@@ -1073,6 +1096,21 @@ export default function App() {
   const [isExactMatch, setIsExactMatch] = useState(false); // New state for exact match toggle
   const [minChangePct, setMinChangePct] = useState(0); // 強勢股過濾 (>= 5%)
   const [maxMarketRank, setMaxMarketRank] = useState(500); // 市值/成交量排行過濾 (Top N)
+  const [dashboardSearch, setDashboardSearch] = useState('');
+  const [quickFilterIds, setQuickFilterIds] = useState([]);
+
+  const toggleQuickFilter = (filterId) => {
+    if (filterId === 'all') {
+      setQuickFilterIds([]);
+      return;
+    }
+
+    setQuickFilterIds(current => (
+      current.includes(filterId)
+        ? current.filter(id => id !== filterId)
+        : [...current, filterId]
+    ));
+  };
 
   // [NEW] Processed Stocks with Rank injected
   const processedStocks = useMemo(() => {
@@ -1322,7 +1360,10 @@ export default function App() {
   const groupedByIndustry = useMemo(() => {
     if (processedStocks.length === 0) return {};
 
-    // 先根據 minRedK 和 minChangePct 篩選
+    const activeQuickFilters = QUICK_FILTERS.filter(filter => quickFilterIds.includes(filter.id));
+    const searchTerms = dashboardSearch.trim().toLowerCase().split(/\s+/).filter(Boolean);
+
+    // 先根據 minRedK、minChangePct、搜尋與常用組合篩選
     const filteredStocks = processedStocks.filter(stock => {
       const days = stock.consecutiveRed || 0;
       // 確保 pct 為數值
@@ -1340,8 +1381,11 @@ export default function App() {
       // 策略：若無 rank，且 maxMarketRank < 2000，則剔除。
       const rank = stock.marketRank || 9999;
       const rankMatch = rank <= maxMarketRank;
+      const quickMatch = activeQuickFilters.length === 0 || activeQuickFilters.every(filter => filter.match(stock));
+      const searchText = searchTerms.length > 0 ? buildStockSearchText(stock) : '';
+      const searchMatch = searchTerms.length === 0 || searchTerms.every(term => searchText.includes(term));
 
-      return redKMatch && changeMatch && rankMatch;
+      return redKMatch && changeMatch && rankMatch && quickMatch && searchMatch;
     });
 
     const groups = {};
@@ -1362,7 +1406,7 @@ export default function App() {
     });
 
     return entries.reduce((acc, [k, v]) => { acc[k] = v; return acc; }, {});
-  }, [processedStocks, portfolioTickers, minRedK, minChangePct, isExactMatch, maxMarketRank]);
+  }, [processedStocks, portfolioTickers, minRedK, minChangePct, isExactMatch, maxMarketRank, dashboardSearch, quickFilterIds]);
 
   const stats = useMemo(() => ({
     total: processedStocks.length || 0,
@@ -1544,14 +1588,50 @@ export default function App() {
                 </button>
               </div>
 
-              {(minRedK > 2 || minChangePct > 0 || maxMarketRank !== 500) && (
+              {(minRedK > 2 || minChangePct > 0 || maxMarketRank !== 500 || dashboardSearch || quickFilterIds.length > 0) && (
                 <button
-                  onClick={() => { setMinRedK(2); setMinChangePct(0); setMaxMarketRank(500); }}
+                  onClick={() => { setMinRedK(2); setMinChangePct(0); setMaxMarketRank(500); setDashboardSearch(''); setQuickFilterIds([]); }}
                   className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 px-3 py-1.5 rounded-lg border border-gray-600 transition-colors flex items-center gap-1"
                 >
                   <RefreshCw size={12} /> 重置
                 </button>
               )}
+            </div>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-[minmax(220px,1fr)_auto] md:items-start">
+            <div className="relative">
+              <input
+                type="search"
+                value={dashboardSearch}
+                onChange={(e) => setDashboardSearch(e.target.value)}
+                placeholder="搜尋代碼、股名、產業、RSI、量能、股本、30日"
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg pl-9 pr-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-blue-500"
+                aria-label="搜尋每日掃描結果"
+              />
+              <Search className="absolute left-3 top-2.5 text-gray-500 w-4 h-4" />
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {QUICK_FILTERS.map(filter => (
+                <button
+                  key={filter.id}
+                  onClick={() => toggleQuickFilter(filter.id)}
+                  aria-pressed={filter.id === 'all' ? quickFilterIds.length === 0 : quickFilterIds.includes(filter.id)}
+                  className={`px-3 py-2 rounded-lg text-xs font-medium border transition-colors ${
+                    (filter.id === 'all' ? quickFilterIds.length === 0 : quickFilterIds.includes(filter.id))
+                      ? 'bg-blue-600/20 border-blue-500 text-blue-200'
+                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-600'
+                  }`}
+                >
+                  {filter.id !== 'all' && quickFilterIds.includes(filter.id) ? '✓ ' : ''}{filter.label}
+                </button>
+              ))}
+            </div>
+            <div className="md:col-start-2 text-[11px] text-gray-500">
+              {quickFilterIds.length > 0
+                ? `已選 ${quickFilterIds.length} 個常用條件，需同時符合`
+                : '常用條件可複選'}
             </div>
           </div>
 
@@ -1604,16 +1684,18 @@ export default function App() {
         <div className="border-t border-gray-800 my-4"></div>
 
         {/* 產業分組 */}
-        {Object.entries(groupedByIndustry).map(([sector, stocks]) => (
-          <IndustryGroup
-            key={sector}
-            sector={sector}
-            stocks={stocks}
-            portfolioTickers={portfolioTickers}
-            portfolio={portfolio}
-            stockHistoryMap={stockHistoryMap}
-          />
-        ))}
+        <Suspense fallback={null}>
+          {Object.entries(groupedByIndustry).map(([sector, stocks]) => (
+            <IndustryGroup
+              key={sector}
+              sector={sector}
+              stocks={stocks}
+              portfolioTickers={portfolioTickers}
+              portfolio={portfolio}
+              stockHistoryMap={stockHistoryMap}
+            />
+          ))}
+        </Suspense>
       </main>
 
       <section className="bg-gray-900 border border-gray-800 rounded-xl p-8 mt-12 mb-12">

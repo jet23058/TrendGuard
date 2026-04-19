@@ -13,6 +13,7 @@ import concurrent.futures
 import time
 import threading
 from datetime import datetime
+from functools import lru_cache
 from pathlib import Path
 
 # Add parent directory to path for imports
@@ -382,6 +383,147 @@ TEST_STOCKS = [
 
 from typing import Optional
 
+
+def calculate_rsi(close_series: pd.Series, period: int = 14) -> pd.Series:
+    """Calculate RSI with a simple rolling average window."""
+    delta = close_series.diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    avg_gain = gain.rolling(window=period, min_periods=period).mean()
+    avg_loss = loss.rolling(window=period, min_periods=period).mean()
+    rs = avg_gain / avg_loss.where(avg_loss != 0)
+    rsi = 100 - (100 / (1 + rs))
+    rsi = rsi.mask(avg_loss == 0, 100)
+    return rsi.fillna(50)
+
+
+def get_rsi_status(rsi_value: Optional[float]) -> str:
+    if rsi_value is None or pd.isna(rsi_value):
+        return "neutral"
+    if rsi_value > 80:
+        return "overbought"
+    if rsi_value < 20:
+        return "oversold"
+    return "neutral"
+
+
+def get_reference_price_snapshot(df: pd.DataFrame, days_back: int = 30, as_of: Optional[datetime] = None) -> Optional[dict]:
+    """Return the closest available trading price at or before as_of - days_back."""
+    if df.empty or "Close" not in df.columns:
+        return None
+
+    anchor = as_of or datetime.now()
+    target_date = pd.Timestamp(anchor - timedelta(days=days_back)).normalize()
+    reference_rows = df[df.index <= target_date]
+    if reference_rows.empty:
+        return None
+
+    ref_date = reference_rows.index[-1]
+    ref_close = float(reference_rows.iloc[-1]["Close"])
+    current_close = float(df.iloc[-1]["Close"])
+    if ref_close == 0:
+        change_pct = None
+    else:
+        change_pct = ((current_close - ref_close) / ref_close) * 100
+
+    return {
+        "date": ref_date.strftime("%Y-%m-%d"),
+        "price": round(ref_close, 2),
+        "changePct": round(change_pct, 2) if change_pct is not None else None,
+    }
+
+
+def calculate_volume_profile(df: pd.DataFrame, lookback: int = 30) -> dict:
+    """Compare today's volume with the previous lookback trading days."""
+    today_volume = int(df.iloc[-1]["Volume"])
+    history = df["Volume"].iloc[-(lookback + 1):-1]
+    avg_volume = float(history.mean()) if len(history) > 0 else 0
+    ratio = (today_volume / avg_volume) if avg_volume > 0 else None
+
+    status = "normal"
+    if ratio is not None:
+        if ratio >= 2:
+            status = "high"
+        elif ratio <= 0.5:
+            status = "low"
+
+    return {
+        "today": today_volume,
+        "avg30d": int(round(avg_volume)) if avg_volume else 0,
+        "ratio30d": round(ratio, 2) if ratio is not None else None,
+        "status": status,
+        "isAnomaly": status != "normal",
+    }
+
+
+def parse_capital_value(value) -> Optional[int]:
+    if value is None:
+        return None
+    text = str(value).strip()
+    if not text or text in ("-", "--", "nan", "None"):
+        return None
+    text = re.sub(r"[,\s元]", "", text)
+    try:
+        return int(float(text))
+    except ValueError:
+        return None
+
+
+def format_capital_tw(capital: Optional[int]) -> Optional[str]:
+    if not capital:
+        return None
+    yi = capital / 100_000_000
+    if yi >= 1:
+        return f"{yi:.1f}億"
+    wan = capital / 10_000
+    return f"{wan:.0f}萬"
+
+
+def _extract_capital_record(item: dict) -> Optional[tuple[str, int]]:
+    code_keys = ("公司代號", "SecuritiesCompanyCode", "Code", "stock_id")
+    capital_keys = ("實收資本額", "實收資本額(元)", "Paid-in Capital", "Capital")
+    code = next((str(item.get(key)).strip() for key in code_keys if item.get(key)), None)
+    capital = None
+    for key in capital_keys:
+        parsed = parse_capital_value(item.get(key))
+        if parsed is not None:
+            capital = parsed
+            break
+    if not code or capital is None:
+        return None
+    return code, capital
+
+
+@lru_cache(maxsize=1)
+def fetch_capital_map() -> dict:
+    """Fetch paid-in capital from TWSE/TPEx open data. Fail closed to keep scans running."""
+    endpoints = (
+        "https://openapi.twse.com.tw/v1/opendata/t187ap03_L",
+        "https://www.tpex.org.tw/openapi/v1/mopsfin_t187ap03_O",
+    )
+    capital_map = {}
+    for url in endpoints:
+        try:
+            response = requests.get(url, timeout=10)
+            if response.status_code != 200:
+                continue
+            for item in response.json():
+                record = _extract_capital_record(item)
+                if record:
+                    code, capital = record
+                    capital_map[code] = capital
+        except Exception as e:
+            print(f"Error fetching capital data from {url}: {e}")
+    return capital_map
+
+
+def get_capital_info(code: str) -> dict:
+    capital = fetch_capital_map().get(code)
+    return {
+        "capital": capital,
+        "capitalText": format_capital_tw(capital),
+    }
+
 def get_stock_name(code: str) -> tuple:
     """取得股票中文名稱、產業別與市場別"""
     market = "上市" # Default
@@ -568,6 +710,12 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         
         # 計算 5 日均量
         df['vol_ma5'] = df['Volume'].rolling(window=5).mean()
+        df['RSI14'] = calculate_rsi(df['Close'])
+        latest_rsi = round(float(df['RSI14'].iloc[-1]), 1) if not pd.isna(df['RSI14'].iloc[-1]) else None
+        rsi_status = get_rsi_status(latest_rsi)
+        reference_30d = get_reference_price_snapshot(df, days_back=30)
+        volume_profile = calculate_volume_profile(df, lookback=30)
+        capital_info = get_capital_info(code)
         
         # 取得 K 線數據 (最近 30 天)
         ohlc_data = []
@@ -582,6 +730,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
                 "volMa5": int(row['vol_ma5']) if not pd.isna(row['vol_ma5']) else int(row['Volume']),
                 "k": round(float(row['K']), 1) if not pd.isna(row['K']) else 50,
                 "d": round(float(row['D']), 1) if not pd.isna(row['D']) else 50,
+                "rsi": round(float(row['RSI14']), 1) if not pd.isna(row['RSI14']) else None,
                 "ma5": round(float(row['MA5']), 2) if not pd.isna(row['MA5']) else None,
                 "ma10": round(float(row['MA10']), 2) if not pd.isna(row['MA10']) else None,
                 "ma20": round(float(row['MA20']), 2) if not pd.isna(row['MA20']) else None
@@ -607,6 +756,19 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             tags.append("盤整突破")
             signal_text = f"🚀 突破箱型整理 (低波動) + 創高"
             priority_score += 5
+
+        if rsi_status == "overbought":
+            tags.append("RSI>80")
+            priority_score += 3
+        elif rsi_status == "oversold":
+            tags.append("RSI<20")
+            priority_score += 3
+
+        if volume_profile["status"] == "high":
+            tags.append("放量異常")
+            priority_score += 4
+        elif volume_profile["status"] == "low":
+            tags.append("量縮異常")
             
         signal_text += f"，均線多頭"
         
@@ -640,7 +802,19 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             "stopLoss": round(stop_loss, 2),
             "k": latest_k,
             "d": latest_d,
-            "volume": int(today['Volume']),
+            "rsi": latest_rsi,
+            "rsiStatus": rsi_status,
+            "rsiAlert": rsi_status if rsi_status in ("overbought", "oversold") else None,
+            "volume": volume_profile["today"],
+            "avgVolume30d": volume_profile["avg30d"],
+            "volumeRatio30d": volume_profile["ratio30d"],
+            "volumeStatus": volume_profile["status"],
+            "volumeAnomaly": volume_profile["isAnomaly"],
+            "price30dAgo": reference_30d["price"] if reference_30d else None,
+            "price30dDate": reference_30d["date"] if reference_30d else None,
+            "changeFrom30dPct": reference_30d["changePct"] if reference_30d else None,
+            "capital": capital_info["capital"],
+            "capitalText": capital_info["capitalText"],
             "signal": {
                 "type": "breakout", # 統一為 breakout，因為現在都必須符合技術條件
                 "text": f"{signal_text}。技術支撐位 {round(stop_loss, 1)}",
