@@ -9,8 +9,14 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, '.')
 from scripts.update_daily import (
+    calculate_rsi,
+    calculate_volume_profile,
+    format_capital_tw,
+    get_reference_price_snapshot,
+    get_rsi_status,
     get_stock_name,
     get_all_tw_targets,
+    parse_capital_value,
     TEST_STOCKS,
     LOOKBACK_DAYS
 )
@@ -62,6 +68,44 @@ class TestConstants:
     def test_test_stocks_contains_tsmc(self):
         """Test stocks should contain TSMC"""
         assert '2330' in TEST_STOCKS
+
+
+class TestDailySearchSignals:
+    """Tests for extra daily scan search fields"""
+
+    def test_rsi_status_flags_extremes(self):
+        assert get_rsi_status(81) == "overbought"
+        assert get_rsi_status(19.9) == "oversold"
+        assert get_rsi_status(50) == "neutral"
+
+    def test_calculate_rsi_reaches_overbought_on_steady_gains(self):
+        closes = pd.Series(range(1, 31), dtype="float")
+        rsi = calculate_rsi(closes)
+        assert rsi.iloc[-1] == 100
+
+    def test_reference_price_uses_latest_trading_day_before_30_calendar_days(self):
+        dates = pd.date_range("2026-03-01", "2026-04-19").difference(pd.DatetimeIndex(["2026-03-20"]))
+        df = pd.DataFrame({"Close": range(100, 100 + len(dates)), "Volume": range(1000, 1000 + len(dates))}, index=dates)
+
+        snapshot = get_reference_price_snapshot(df, days_back=30, as_of=datetime(2026, 4, 19))
+
+        assert snapshot["date"] == "2026-03-19"
+        assert snapshot["price"] == 118
+        assert snapshot["changePct"] == 25.42
+
+    def test_volume_profile_flags_high_and_low_anomalies(self):
+        dates = pd.bdate_range("2026-01-01", periods=31)
+        high_df = pd.DataFrame({"Volume": [1000] * 30 + [2500]}, index=dates)
+        low_df = pd.DataFrame({"Volume": [1000] * 30 + [400]}, index=dates)
+
+        assert calculate_volume_profile(high_df)["status"] == "high"
+        assert calculate_volume_profile(high_df)["ratio30d"] == 2.5
+        assert calculate_volume_profile(low_df)["status"] == "low"
+        assert calculate_volume_profile(low_df)["isAnomaly"] is True
+
+    def test_capital_parsing_and_formatting(self):
+        assert parse_capital_value("36,920,000,000元") == 36920000000
+        assert format_capital_tw(36920000000) == "369.2億"
 
 
 class TestLivermoreCriteria:

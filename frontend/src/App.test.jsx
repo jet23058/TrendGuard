@@ -53,19 +53,35 @@ const MOCK_DATA = {
   stocks: [
     { 
       ticker: "1101", name: "台泥", sector: "水泥工業", 
-      consecutiveRed: 2, changePct: 1.5, currentPrice: 30 
+      consecutiveRed: 2, changePct: 1.5, currentPrice: 30,
+      rsi: 85.2, rsiStatus: "overbought",
+      volume: 2500, avgVolume30d: 1000, volumeRatio30d: 2.5, volumeStatus: "high", volumeAnomaly: true,
+      price30dAgo: 24, price30dDate: "2025-12-22", changeFrom30dPct: 25,
+      capitalText: "369.2億"
     },
     { 
       ticker: "2330", name: "台積電", sector: "半導體業", 
-      consecutiveRed: 3, changePct: 6.5, currentPrice: 600 
+      consecutiveRed: 3, changePct: 6.5, currentPrice: 600,
+      rsi: 55.1, rsiStatus: "neutral",
+      volume: 1800, avgVolume30d: 1600, volumeRatio30d: 1.13, volumeStatus: "normal", volumeAnomaly: false,
+      price30dAgo: 550, price30dDate: "2025-12-22", changeFrom30dPct: 9.09,
+      capitalText: "2,593.0億"
     },
     { 
       ticker: "2603", name: "長榮", sector: "航運業", 
-      consecutiveRed: 3, changePct: 2.0, currentPrice: 150 
+      consecutiveRed: 3, changePct: 2.0, currentPrice: 150,
+      rsi: 18.4, rsiStatus: "oversold",
+      volume: 450, avgVolume30d: 1000, volumeRatio30d: 0.45, volumeStatus: "low", volumeAnomaly: true,
+      price30dAgo: 140, price30dDate: "2025-12-22", changeFrom30dPct: 7.14,
+      capitalText: "529.0億"
     },
     { 
       ticker: "9999", name: "飆股", sector: "其他", 
-      consecutiveRed: 5, changePct: 9.9, currentPrice: 100 
+      consecutiveRed: 5, changePct: 9.9, currentPrice: 100,
+      rsi: 82.0, rsiStatus: "overbought",
+      volume: 5000, avgVolume30d: 2000, volumeRatio30d: 2.5, volumeStatus: "high", volumeAnomaly: true,
+      price30dAgo: 80, price30dDate: "2025-12-22", changeFrom30dPct: 25,
+      capitalText: "50.0億"
     }
   ],
   changes: { new: [], continued: [], removed: [] }
@@ -154,10 +170,74 @@ describe('App Filter Logic Tests', () => {
     });
 
     // Check if stocks are in the document
-    expect(screen.getByText('台泥')).toBeInTheDocument();
+    expect(await screen.findByText('台泥')).toBeInTheDocument();
     expect(screen.getByText('台積電')).toBeInTheDocument();
     expect(screen.getByText('長榮')).toBeInTheDocument();
     expect(screen.getByText('飆股')).toBeInTheDocument();
+  });
+
+  it('renders the added daily scan fields on stock cards', async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText('台泥')).toBeInTheDocument());
+
+    expect(screen.getAllByText('RSI 14').length).toBeGreaterThan(0);
+    expect(screen.getByText('369.2億')).toBeInTheDocument();
+    expect(screen.getAllByText('量 / 30日均量').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('2.50x 異常').length).toBeGreaterThan(0);
+  });
+
+  it('filters by RSI overbought quick filter', async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText('長榮')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: 'RSI > 80' }));
+
+    expect(screen.getByText('台泥')).toBeInTheDocument();
+    expect(screen.getByText('飆股')).toBeInTheDocument();
+    expect(screen.queryByText('台積電')).not.toBeInTheDocument();
+    expect(screen.queryByText('長榮')).not.toBeInTheDocument();
+  });
+
+  it('filters by the new dashboard search text', async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText('台積電')).toBeInTheDocument());
+
+    fireEvent.change(screen.getByLabelText('搜尋每日掃描結果'), { target: { value: 'RSI>80' } });
+
+    expect(screen.getByText('台泥')).toBeInTheDocument();
+    expect(screen.getByText('飆股')).toBeInTheDocument();
+    expect(screen.queryByText('台積電')).not.toBeInTheDocument();
+    expect(screen.queryByText('長榮')).not.toBeInTheDocument();
+  });
+
+  it('filters by common combo for oversold rebound', async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText('台泥')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: '超跌回拉' }));
+
+    expect(screen.getByText('長榮')).toBeInTheDocument();
+    expect(screen.queryByText('台泥')).not.toBeInTheDocument();
+    expect(screen.queryByText('台積電')).not.toBeInTheDocument();
+    expect(screen.queryByText('飆股')).not.toBeInTheDocument();
+  });
+
+  it('allows selecting multiple quick filters at the same time', async () => {
+    renderApp();
+    await waitFor(() => expect(screen.getByText('台積電')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByRole('button', { name: 'RSI > 80' }));
+    fireEvent.click(screen.getByRole('button', { name: '量能異常' }));
+
+    expect(screen.getByText('台泥')).toBeInTheDocument();
+    expect(screen.getByText('飆股')).toBeInTheDocument();
+    expect(screen.queryByText('台積電')).not.toBeInTheDocument();
+    expect(screen.queryByText('長榮')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getAllByRole('button', { name: '全部' }).find(button => button.getAttribute('aria-pressed') === 'false'));
+
+    expect(screen.getByText('台積電')).toBeInTheDocument();
+    expect(screen.getByText('長榮')).toBeInTheDocument();
   });
 
   it('does not show the full-page daily loading screen while fetching data', () => {

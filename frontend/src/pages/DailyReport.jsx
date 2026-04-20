@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Calendar, TrendingUp, Activity, AlertTriangle, ChevronRight, Share2, Loader2, Factory } from 'lucide-react';
-import StockCardMini from '../components/StockCardMini';
 import SimpleMarkdown from '../components/SimpleMarkdown';
-import IndustryGroup from '../components/IndustryGroup';
+
+const IndustryGroup = lazy(() => import('../components/IndustryGroup'));
 
 const DailyReport = () => {
     const { date } = useParams();
@@ -151,18 +151,20 @@ ${newCount > 0 ? `值得注意的是，今日有 **${newCount}** 檔個股新進
                         <h3 className="text-2xl font-bold text-white">今日突破型態個股 ({data.stocks.length}檔)</h3>
                     </div>
 
-                    <div className="space-y-2">
-                        {sortedIndustries.map(([sector, stocks]) => (
-                            <IndustryGroup
-                                key={sector}
-                                sector={sector}
-                                stocks={stocks}
-                                portfolioTickers={[]}
-                                portfolio={[]}
-                                stockHistoryMap={{}}
-                            />
-                        ))}
-                    </div>
+                    <Suspense fallback={null}>
+                        <div className="space-y-2">
+                            {sortedIndustries.map(([sector, stocks]) => (
+                                <IndustryGroup
+                                    key={sector}
+                                    sector={sector}
+                                    stocks={stocks}
+                                    portfolioTickers={[]}
+                                    portfolio={[]}
+                                    stockHistoryMap={{}}
+                                />
+                            ))}
+                        </div>
+                    </Suspense>
                 </section>
 
             </main>

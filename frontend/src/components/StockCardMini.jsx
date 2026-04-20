@@ -175,6 +175,19 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
     const yahooUrl = `https://tw.stock.yahoo.com/quote/${ticker}.TW/technical-analysis`;
     const [chartMode, setChartMode] = useState('ma'); // 'ma' or 'kd'
     const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+    const rsiValue = Number.isFinite(Number(stock.rsi)) ? Number(stock.rsi).toFixed(1) : '--';
+    const rsiClass = stock.rsiStatus === 'overbought'
+        ? 'text-red-300'
+        : stock.rsiStatus === 'oversold'
+            ? 'text-emerald-300'
+            : 'text-white';
+    const volumeRatioText = Number.isFinite(Number(stock.volumeRatio30d)) ? `${Number(stock.volumeRatio30d).toFixed(2)}x` : '--';
+    const volumeClass = stock.volumeStatus === 'high'
+        ? 'text-red-300'
+        : stock.volumeStatus === 'low'
+            ? 'text-emerald-300'
+            : 'text-white';
+    const formatVolume = (value) => Number.isFinite(Number(value)) ? Math.round(Number(value)).toLocaleString() : '--';
     
     // Lazy Load Chart: 提早 200px 載入，只觸發一次
     const [chartRef, chartInView] = useInView({ triggerOnce: true, rootMargin: '200px' });
@@ -209,7 +222,7 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
     }, [currentPrice, portfolioItem]);
 
     return (
-        <div className={`bg-gray-800 rounded-xl border shadow-lg flex-shrink-0 w-72 h-[460px] flex flex-col relative ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
+        <div className={`bg-gray-800 rounded-xl border shadow-lg flex-shrink-0 w-72 h-[560px] flex flex-col relative ${isInPortfolio ? 'border-yellow-500/50 ring-1 ring-yellow-500/30' : 'border-gray-700'}`}>
             <div className="p-3 border-b border-gray-700 bg-gray-900/50 rounded-t-xl">
                 <div className="flex justify-between items-start gap-2">
                     <div className="flex flex-col gap-1 min-w-0">
@@ -334,6 +347,43 @@ const StockCardMini = ({ stock, isInPortfolio, portfolioItem, historyDates = [] 
                 <div className="bg-gray-700/30 rounded p-2">
                     <div className="text-xs text-gray-400">支撐</div>
                     <div className="font-mono text-sm font-bold text-white">{stopLoss?.toFixed(1)}</div>
+                </div>
+            </div>
+
+            <div className="px-3 pb-3">
+                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                    <div className="bg-gray-900/60 border border-gray-700/60 rounded p-2">
+                        <div className="text-gray-400">RSI 14</div>
+                        <div className={`font-mono font-bold ${rsiClass}`}>
+                            {rsiValue}
+                            {stock.rsiStatus === 'overbought' && <span className="ml-1 text-[10px]">過熱</span>}
+                            {stock.rsiStatus === 'oversold' && <span className="ml-1 text-[10px]">超跌</span>}
+                        </div>
+                    </div>
+                    <div className="bg-gray-900/60 border border-gray-700/60 rounded p-2">
+                        <div className="text-gray-400">30日前</div>
+                        <div className="font-mono font-bold text-white">
+                            {stock.price30dAgo != null ? Number(stock.price30dAgo).toFixed(1) : '--'}
+                            {stock.changeFrom30dPct != null && (
+                                <span className={Number(stock.changeFrom30dPct) >= 0 ? 'ml-1 text-red-300' : 'ml-1 text-emerald-300'}>
+                                    {Number(stock.changeFrom30dPct) > 0 ? '+' : ''}{Number(stock.changeFrom30dPct).toFixed(1)}%
+                                </span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="bg-gray-900/60 border border-gray-700/60 rounded p-2">
+                        <div className="text-gray-400">股本</div>
+                        <div className="font-mono font-bold text-white">{stock.capitalText || '--'}</div>
+                    </div>
+                    <div className="bg-gray-900/60 border border-gray-700/60 rounded p-2">
+                        <div className="text-gray-400">量 / 30日均量</div>
+                        <div className={`font-mono font-bold ${volumeClass}`}>
+                            {formatVolume(stock.volume)} / {formatVolume(stock.avgVolume30d)}
+                        </div>
+                        <div className="text-[10px] text-gray-500">
+                            {volumeRatioText}{stock.volumeAnomaly ? ' 異常' : ' 正常'}
+                        </div>
+                    </div>
                 </div>
             </div>
 
