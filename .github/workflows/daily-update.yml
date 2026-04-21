@@ -2,8 +2,8 @@ name: Daily Stock Update
 
 on:
   schedule:
-    # 1. 每日台灣時間 14:00 (UTC 06:00) 執行: 完整掃描 (Full Scan)
-    - cron: '0 6 * * 1-5'
+    # 1. 每日台灣時間 17:00 (UTC 09:00) 執行: 完整掃描 (Full Scan)
+    - cron: '0 9 * * 1-5'
     # 2. 每日台灣時間 18:30 (UTC 10:30) 執行: 更新警示 (Alert Update Only)
     # - cron: '30 10 * * 1-5'
   workflow_dispatch:  # 允許手動觸發
@@ -63,6 +63,9 @@ jobs:
         env:
           TEST_MODE: 'false'  # 啟用完整掃描
           TASK_TYPE: ${{ github.event.inputs.task_type || 'auto' }}
+          USE_STOCK_FACADE: 'twse'
+          MAX_WORKERS: '12'
+          MIN_VALID_PRICE_CHANGES: '100'
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
           FINMIND_API_TOKEN: ${{ secrets.FINMIND_API_TOKEN }}

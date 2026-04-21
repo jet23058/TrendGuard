@@ -127,10 +127,12 @@ python scripts/update_daily.py
 - 今日成交量、過去 30 日均量與異常倍率
 - 執行日往前 30 天的參考價格與相對漲跌幅
 - 股本資訊與前端卡片顯示用格式
+- 全市場漲跌家數；若有效樣本數異常偏低，流程會停止，避免空資料覆蓋 data branch
 
 ### 自動排程
 - 已設定 GitHub Actions workflow
-- 每個交易日 (週一至週五) 自動執行
+- 每個交易日 (週一至週五) 台灣時間 17:00 自動執行完整掃描
+- GitHub Actions 使用 TWSE provider 與 12 個 worker，並排除債券、槓反、期貨等不適合 Livermore K 線掃描的 ETF 類型以縮短掃描時間
 - 更新結果存放於 `frontend/public/data/daily_scan_results.json`
 
 ## 📖 使用方式
