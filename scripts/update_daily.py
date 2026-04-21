@@ -357,6 +357,11 @@ LOOKBACK_DAYS = 20  # 突破幾日新高
 TEST_MODE = os.environ.get('TEST_MODE', 'true').lower() == 'true'  # GitHub Actions 設為 false
 OUTPUT_DIR = Path("frontend/public/data")
 MAX_WORKERS = int(os.environ.get('MAX_WORKERS', 5)) # Parallel workers
+MIN_VALID_PRICE_CHANGES = int(os.environ.get('MIN_VALID_PRICE_CHANGES', 1 if TEST_MODE else 100))
+SCAN_DIAGNOSTIC_SAMPLE_LIMIT = 8
+SCAN_DIAGNOSTIC_COUNTS = {}
+SCAN_DIAGNOSTIC_SAMPLES = {}
+SCAN_DIAGNOSTIC_LOCK = threading.Lock()
 
 # 測試用股票清單 (擴大範圍)
 TEST_STOCKS = [
@@ -382,6 +387,31 @@ TEST_STOCKS = [
 ]
 
 from typing import Optional
+
+
+def reset_scan_diagnostics():
+    with SCAN_DIAGNOSTIC_LOCK:
+        SCAN_DIAGNOSTIC_COUNTS.clear()
+        SCAN_DIAGNOSTIC_SAMPLES.clear()
+
+
+def record_scan_issue(reason: str, code: str, detail: str = ""):
+    """Record bounded scan diagnostics so CI can explain broad failures."""
+    with SCAN_DIAGNOSTIC_LOCK:
+        SCAN_DIAGNOSTIC_COUNTS[reason] = SCAN_DIAGNOSTIC_COUNTS.get(reason, 0) + 1
+        samples = SCAN_DIAGNOSTIC_SAMPLES.setdefault(reason, [])
+        if len(samples) < SCAN_DIAGNOSTIC_SAMPLE_LIMIT:
+            sample = code if not detail else f"{code}: {detail}"
+            samples.append(sample)
+
+
+def print_scan_diagnostics():
+    if not SCAN_DIAGNOSTIC_COUNTS:
+        return
+    print("\n掃描診斷:")
+    for reason, count in sorted(SCAN_DIAGNOSTIC_COUNTS.items()):
+        samples = ", ".join(SCAN_DIAGNOSTIC_SAMPLES.get(reason, []))
+        print(f"  - {reason}: {count} 檔" + (f" (例: {samples})" if samples else ""))
 
 
 def calculate_rsi(close_series: pd.Series, period: int = 14) -> pd.Series:
@@ -524,6 +554,37 @@ def get_capital_info(code: str) -> dict:
         "capitalText": format_capital_tw(capital),
     }
 
+
+def normalize_price_frame(raw_df: pd.DataFrame) -> pd.DataFrame:
+    df = raw_df.copy()
+    df = df.rename(columns={
+        'open': 'Open',
+        'max': 'High',
+        'min': 'Low',
+        'close': 'Close',
+        'Trading_Volume': 'Volume'
+    })
+    required_columns = {"date", "Open", "High", "Low", "Close", "Volume"}
+    missing = required_columns - set(df.columns)
+    if missing:
+        raise ValueError(f"missing columns: {', '.join(sorted(missing))}")
+    df['date'] = pd.to_datetime(df['date'])
+    return df.set_index('date').sort_index()
+
+
+def calculate_latest_change_pct(raw_df: pd.DataFrame) -> Optional[float]:
+    """Calculate market breadth from any frame that has at least two closes."""
+    if raw_df is None or len(raw_df) < 2:
+        return None
+    df = normalize_price_frame(raw_df)
+    if len(df) < 2:
+        return None
+    current_price = float(df.iloc[-1]['Close'])
+    prev_close = float(df.iloc[-2]['Close'])
+    if prev_close == 0:
+        return None
+    return ((current_price - prev_close) / prev_close) * 100
+
 def get_stock_name(code: str) -> tuple:
     """取得股票中文名稱、產業別與市場別"""
     market = "上市" # Default
@@ -547,6 +608,22 @@ def get_stock_name(code: str) -> tuple:
     return code, "其他", market
 
 
+def is_supported_scan_target(code: str, info) -> bool:
+    """Keep daily scans focused on common stocks and plain equity ETFs."""
+    if info.market not in ["上市", "上櫃"] or not code.isdigit():
+        return False
+
+    if info.type == "股票":
+        return True
+
+    if info.type == "ETF":
+        name = getattr(info, "name", "") or ""
+        excluded_keywords = ("債", "期貨", "槓桿", "反向", "反1", "原油", "黃金", "白銀", "ETN")
+        return not any(keyword in name for keyword in excluded_keywords)
+
+    return False
+
+
 def get_all_tw_targets() -> list:
     """取得要掃描的股票清單"""
     if TEST_MODE:
@@ -561,11 +638,10 @@ def get_all_tw_targets() -> list:
         return TEST_STOCKS
     
     targets = []
-    print("正在整理台股清單 (含股票與商品型 ETF)...")
+    print("正在整理台股清單 (股票與一般股票型 ETF)...")
     for code, info in twstock.codes.items():
-        if info.market in ["上市", "上櫃"]:
-            if info.type == "股票" or info.type == "ETF":
-                targets.append(code)
+        if is_supported_scan_target(code, info):
+            targets.append(code)
     
     print(f"共 {len(targets)} 檔標的待掃描")
     return targets
@@ -613,21 +689,23 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
             end_date=end_date
         )
         
-        if raw_df is None or len(raw_df) < LOOKBACK_DAYS + 2:
+        if raw_df is None or len(raw_df) == 0:
+            record_scan_issue("no_data", code)
             return None, None
+
+        try:
+            change_pct = calculate_latest_change_pct(raw_df)
+        except Exception as e:
+            record_scan_issue("change_pct_error", code, str(e)[:80])
+            return None, None
+
+        if len(raw_df) < LOOKBACK_DAYS + 2:
+            record_scan_issue("short_data", code, f"{len(raw_df)} rows")
+            return None, change_pct
         
         # FinMind 返回的欄位名稱與 yfinance 不同，需要轉換
         # FinMind: date, stock_id, Trading_Volume, Trading_money, open, max, min, close, spread, Trading_turnover
-        df = raw_df.copy()
-        df = df.rename(columns={
-            'open': 'Open',
-            'max': 'High',
-            'min': 'Low',
-            'close': 'Close',
-            'Trading_Volume': 'Volume'
-        })
-        df['date'] = pd.to_datetime(df['date'])
-        df = df.set_index('date').sort_index()
+        df = normalize_price_frame(raw_df)
         
         # 計算均線
         df['MA5'] = df['Close'].rolling(window=5).mean()
@@ -643,9 +721,6 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
 
         # [DEBUG] 新增：印出每檔股票的掃描狀態，便於除錯
         print(f"[DEBUG] {code} Date:{df.index[-1].strftime('%Y-%m-%d')} Close:{current_price} Open:{today['Open']} Vol:{today['Volume']}")
-        
-        # 漲跌幅 (即便不符合條件也要回傳，用於市場統計)
-        change_pct = ((current_price - prev_close) / prev_close) * 100
         
         open_price = float(today['Open'])
         
@@ -827,7 +902,7 @@ def check_livermore_criteria(code: str, market_alerts: Optional[dict] = None, al
         return full_data, change_pct
         
     except Exception as e:
-        # 靜默忽略錯誤
+        record_scan_issue("error", code, str(e)[:80])
         return None, None
 
 
@@ -1040,6 +1115,7 @@ def main():
     # 取得股票清單
     target_list = get_all_tw_targets()
     total = len(target_list)
+    reset_scan_diagnostics()
     
     # 警告：無 Token 時掃描大量股票風險
     token = os.environ.get("FINMIND_API_TOKEN")
@@ -1124,8 +1200,14 @@ def main():
     print(f"\n\n掃描完成！耗時: {elapsed:.2f} 秒")
     print(f"市場統計: 上漲 {market_stats['up']} / 下跌 {market_stats['down']} / 平盤 {market_stats['flat']}")
     print(f"符合條件: {len(results)} 檔\n")
-    
+    print_scan_diagnostics()
 
+    if market_stats["total_scanned"] < MIN_VALID_PRICE_CHANGES:
+        raise RuntimeError(
+            "有效漲跌家數過低 "
+            f"({market_stats['total_scanned']} < {MIN_VALID_PRICE_CHANGES})，"
+            "停止輸出以避免覆蓋 data branch 的正常資料。"
+        )
     
     # Restore sort by priority (Signal Strength)
     results.sort(key=lambda x: x['signal']['priority'], reverse=True)

@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-04-21] - Daily Scan Guardrails and Runtime Tuning
+
+### Changed
+- [Perf] **Focused Scan Universe**: Daily scans now exclude bond, leverage/inverse, futures, commodity, and ETN-style ETF targets from the Livermore full scan, reducing unsupported monthly API calls (`scripts/update_daily.py`).
+- [Perf] **GitHub Actions Throughput**: Daily workflow now runs the TWSE provider explicitly with 12 workers and schedules the full scan at Taiwan 17:00 for more reliable closing-price availability (`.github/workflows/daily-update.yml`).
+
+### Fixed
+- [Fix] **Market Breadth Guardrail**: Daily scans now calculate market breadth from the latest two closes even when a stock lacks enough history for Livermore criteria, and abort output when valid breadth samples are suspiciously low so bad empty data is not deployed (`scripts/update_daily.py`).
+- [Debug] **Scan Diagnostics**: CI logs now include bounded diagnostic counts and sample tickers for no-data, short-data, and normalization errors instead of silently returning empty results (`scripts/update_daily.py`).
+
+### Tests
+- [Test] Added coverage for short-history market breadth calculation and scan target filtering (`tests/test_update_daily.py`).
+
 ## [2026-04-19] - Daily Signals, Multi-Select Search, and Faster Startup
 
 ### Added

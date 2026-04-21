@@ -9,6 +9,7 @@ from unittest.mock import patch, MagicMock
 import sys
 sys.path.insert(0, '.')
 from scripts.update_daily import (
+    calculate_latest_change_pct,
     calculate_rsi,
     calculate_volume_profile,
     format_capital_tw,
@@ -16,6 +17,7 @@ from scripts.update_daily import (
     get_rsi_status,
     get_stock_name,
     get_all_tw_targets,
+    is_supported_scan_target,
     parse_capital_value,
     TEST_STOCKS,
     LOOKBACK_DAYS
@@ -106,6 +108,30 @@ class TestDailySearchSignals:
     def test_capital_parsing_and_formatting(self):
         assert parse_capital_value("36,920,000,000元") == 36920000000
         assert format_capital_tw(36920000000) == "369.2億"
+
+    def test_latest_change_pct_works_without_full_lookback(self):
+        raw_df = pd.DataFrame({
+            "date": ["2026-04-20", "2026-04-21"],
+            "open": [100, 104],
+            "max": [102, 106],
+            "min": [99, 103],
+            "close": [100, 105],
+            "Trading_Volume": [1000, 1200],
+        })
+
+        assert calculate_latest_change_pct(raw_df) == 5
+
+    def test_scan_target_filter_keeps_stocks_and_plain_etfs(self):
+        class Info:
+            def __init__(self, market, type_, name):
+                self.market = market
+                self.type = type_
+                self.name = name
+
+        assert is_supported_scan_target("2330", Info("上市", "股票", "台積電")) is True
+        assert is_supported_scan_target("0050", Info("上市", "ETF", "元大台灣50")) is True
+        assert is_supported_scan_target("00687B", Info("上市", "ETF", "國泰20年美債")) is False
+        assert is_supported_scan_target("TXF", Info("上市", "期貨", "臺股期貨")) is False
 
 
 class TestLivermoreCriteria:
