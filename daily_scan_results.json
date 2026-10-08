@@ -1,8 +1,8 @@
 {
   "date": "2026-10-02",
-  "updatedAt": "2026-10-07T12:32:06.922577",
+  "updatedAt": "2026-10-08T12:41:43.912032",
   "quoteTime": "2026-10-02T12:11:19.094678",
-  "alertUpdateTime": "2026-10-07T12:32:06.922564",
+  "alertUpdateTime": "2026-10-08T12:41:43.912027",
   "scanType": "livermore_breakout",
   "criteria": {
     "lookbackDays": 20,
@@ -3926,7 +3926,14 @@
           "ma20": 42.41
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "disposition",
+        "badge": "處置",
+        "color": "red",
+        "info": "二分盤 (至 115/10/15)",
+        "detail": "期間: 115/10/08～115/10/15\n措施: 第一次處置",
+        "is_disposed": true
+      }
     },
     {
       "ticker": "4919",
@@ -24942,7 +24949,14 @@
           "ma20": 41.0
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "disposition",
+        "badge": "處置",
+        "color": "red",
+        "info": "二分盤 (至 115/10/15)",
+        "detail": "期間: 115/10/08～115/10/15\n措施: 第一次處置",
+        "is_disposed": true
+      }
     },
     {
       "ticker": "2466",
@@ -25428,7 +25442,14 @@
           "ma20": 109.28
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "disposition",
+        "badge": "處置",
+        "color": "red",
+        "info": "二分盤 (至 115/10/15)",
+        "detail": "期間: 115/10/08～115/10/15\n措施: 第一次處置",
+        "is_disposed": true
+      }
     },
     {
       "ticker": "6196",
@@ -26886,7 +26907,14 @@
           "ma20": 548.8
         }
       ],
-      "alert": null
+      "alert": {
+        "type": "disposition",
+        "badge": "處置",
+        "color": "red",
+        "info": "二分盤 (至 115/10/19)",
+        "detail": "期間: 115/10/08～115/10/19\n措施: 第一次處置",
+        "is_disposed": true
+      }
     }
   ],
   "marketStats": {
