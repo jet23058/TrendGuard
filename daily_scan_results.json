@@ -1,8 +1,8 @@
 {
   "date": "2026-10-28",
-  "updatedAt": "2026-11-09T14:58:46.612852",
+  "updatedAt": "2026-11-10T14:12:02.610089",
   "quoteTime": "2026-10-28T12:23:19.318936",
-  "alertUpdateTime": "2026-11-09T14:58:46.612839",
+  "alertUpdateTime": "2026-11-10T14:12:02.610076",
   "scanType": "livermore_breakout",
   "criteria": {
     "lookbackDays": 20,
@@ -2452,14 +2452,7 @@
           "ma20": 35.56
         }
       ],
-      "alert": {
-        "type": "disposition",
-        "badge": "處置",
-        "color": "red",
-        "info": "二分盤 (至 115/11/09)",
-        "detail": "期間: 115/10/30～115/11/09\n措施: 第一次處置",
-        "is_disposed": true
-      }
+      "alert": null
     },
     {
       "ticker": "4540",
