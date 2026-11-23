@@ -1,8 +1,8 @@
 {
   "date": "2026-11-23",
-  "updatedAt": "2026-11-23T14:09:05.610980",
+  "updatedAt": "2026-11-23T17:12:11.647749",
   "quoteTime": "2026-11-23T14:09:05.610980",
-  "alertUpdateTime": "2026-11-23T14:09:05.610980",
+  "alertUpdateTime": "2026-11-23T17:12:11.647737",
   "scanType": "livermore_breakout",
   "criteria": {
     "lookbackDays": 20,
